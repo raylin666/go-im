@@ -24,11 +24,16 @@ func NewHandler(logger *logger.Logger, dataRepo repositories.DataRepo) *Handler 
 		dbRepo:    dataRepo.DbRepo(),
 		redisRepo: dataRepo.RedisRepo(),
 		logger:    logger,
-		Prefix:    "/",
+		Prefix:    "/api/",
 	}
 }
 
 func (h *Handler) Router() *mux.Router {
+	// HTTP
 	h.r.HandleFunc(h.Prefix+"account", h.Account).Methods("GET")
+
+	// WebSocket
+	h.r.HandleFunc("/ws", h.WebSocket)
+
 	return h.r
 }
