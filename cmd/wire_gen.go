@@ -9,6 +9,7 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"mt/config"
+	"mt/internal/api"
 	"mt/internal/biz"
 	"mt/internal/data"
 	"mt/internal/server"
@@ -34,7 +35,8 @@ func wireApp(configServer *config.Server, configData *config.Data, loggerLogger 
 	heartbeatUsecase := biz.NewHeartbeatUsecase(heartbeatRepo, loggerLogger)
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, loggerLogger)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, loggerLogger)
+	handler := api.NewHandler(loggerLogger, dataRepo)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, handler, loggerLogger)
 	app := newApp(loggerLogger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

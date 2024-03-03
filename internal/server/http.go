@@ -5,6 +5,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"mt/api/v1"
 	"mt/config"
+	"mt/internal/api"
 	"mt/internal/middleware/auth"
 	"mt/internal/middleware/encode"
 	logging "mt/internal/middleware/logger"
@@ -13,10 +14,15 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
+	netHttp "net/http"
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *config.Server, heartbeat *service.HeartbeatService, logger *logger.Logger) *http.Server {
+func NewHTTPServer(
+	c *config.Server,
+	heartbeat *service.HeartbeatService,
+	apiHandler *api.Handler,
+	logger *logger.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -37,6 +43,10 @@ func NewHTTPServer(c *config.Server, heartbeat *service.HeartbeatService, logger
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
+
+	// HTTP API 路由处理器
+	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))
+	// HTTP 服务路由处理器
 	v1.RegisterHeartbeatHTTPServer(srv, heartbeat)
 	return srv
 }
