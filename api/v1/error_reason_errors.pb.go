@@ -220,3 +220,17 @@ func IsNotVisitAuth(err error) bool {
 func ErrorNotVisitAuth(format string, args ...interface{}) *errors.Error {
 	return errors.New(401, ErrorReason_NOT_VISIT_AUTH.String(), fmt.Sprintf(format, args...))
 }
+
+// WebSocket 协议升级失败
+func IsWebsocketUpgraderError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_WEBSOCKET_UPGRADER_ERROR.String() && e.Code == 500
+}
+
+// WebSocket 协议升级失败
+func ErrorWebsocketUpgraderError(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_WEBSOCKET_UPGRADER_ERROR.String(), fmt.Sprintf(format, args...))
+}

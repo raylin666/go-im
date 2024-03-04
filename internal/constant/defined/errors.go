@@ -18,5 +18,6 @@ var (
 	ErrorIdInvalidValueError    = api.ErrorIdInvalidValueError("无效ID值")
 	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行指令")
 	ErrorNotLoginError          = api.ErrorNotLoginError("请先登录后再操作")
-	ErrorNotVisitAuth		    = api.ErrorNotVisitAuth("没有访问权限")
+	ErrorNotVisitAuth           = api.ErrorNotVisitAuth("没有访问权限")
+	ErrorWebsocketUpgraderError = api.ErrorWebsocketUpgraderError("WebSocket 协议升级失败")
 )

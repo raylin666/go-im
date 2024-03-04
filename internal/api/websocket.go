@@ -1,15 +1,23 @@
 package api
 
 import (
+	"context"
+	"go.uber.org/zap"
 	"log"
-	ws "mt/pkg/websocket"
+	"mt/internal/constant/defined"
+	"mt/pkg/websocket"
 	"net/http"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
-	c, err := ws.NewUpgrader(w, r)
+	var ctx = context.Background()
+	c, err := websocket.NewUpgrader(w, r)
 	if err != nil {
-		log.Print("upgrade:", err)
+		var e = defined.ErrorWebsocketUpgraderError
+		w.Write([]byte(e.GetReason()))
+		w.WriteHeader(int(e.GetCode()))
+
+		h.logger.UseApp(ctx).Error("WebSocket 连接失败", zap.Error(e))
 		return
 	}
 	defer c.Close()
