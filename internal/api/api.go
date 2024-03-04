@@ -24,16 +24,29 @@ func NewHandler(logger *logger.Logger, dataRepo repositories.DataRepo) *Handler 
 		dbRepo:    dataRepo.DbRepo(),
 		redisRepo: dataRepo.RedisRepo(),
 		logger:    logger,
-		Prefix:    "/api/",
+		Prefix:    "/",
 	}
 }
 
 func (h *Handler) Router() *mux.Router {
-	// HTTP
-	h.r.HandleFunc(h.Prefix+"account", h.Account).Methods("GET")
-
 	// WebSocket
-	h.r.HandleFunc("/ws", h.WebSocket)
+	var ws = h.r.PathPrefix(h.Prefix + "ws").Subrouter()
+	h.routerWS(ws)
+
+	// HTTP
+	var api = h.r.PathPrefix(h.Prefix + "api").Subrouter()
+	h.routerHTTP(api)
 
 	return h.r
+}
+
+func (h *Handler) routerWS(r *mux.Router) {
+	r.HandleFunc("", h.WebSocket)
+}
+
+func (h *Handler) routerHTTP(r *mux.Router) {
+	var apiAccount = r.PathPrefix("/account").Subrouter()
+	{
+		apiAccount.HandleFunc("", h.Account).Methods("GET")
+	}
 }

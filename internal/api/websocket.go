@@ -9,6 +9,11 @@ import (
 var upgrader = websocket.Upgrader{} // use default options
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
+	// 解决跨域问题
+	upgrader.CheckOrigin = func(r *http.Request) bool {
+		return true
+	}
+
 	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
