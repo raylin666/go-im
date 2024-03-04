@@ -1,20 +1,13 @@
 package api
 
 import (
-	"github.com/gorilla/websocket"
 	"log"
+	ws "mt/pkg/websocket"
 	"net/http"
 )
 
-var upgrader = websocket.Upgrader{} // use default options
-
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
-	// 解决跨域问题
-	upgrader.CheckOrigin = func(r *http.Request) bool {
-		return true
-	}
-
-	c, err := upgrader.Upgrade(w, r, nil)
+	c, err := ws.NewUpgrader(w, r)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
