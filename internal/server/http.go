@@ -6,11 +6,13 @@ import (
 	"mt/api/v1"
 	"mt/config"
 	"mt/internal/api"
+	"mt/internal/app"
 	"mt/internal/middleware/auth"
 	"mt/internal/middleware/encode"
 	logging "mt/internal/middleware/logger"
 	"mt/internal/service"
 	"mt/pkg/logger"
+	"mt/pkg/websocket"
 
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -43,6 +45,9 @@ func NewHTTPServer(
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
+
+	// 初始化客户端连接管理器
+	app.ClientManager = websocket.NewClientManager()
 
 	// HTTP API 路由处理器
 	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))

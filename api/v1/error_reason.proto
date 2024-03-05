@@ -46,5 +46,5 @@ enum ErrorReason {
   NOT_VISIT_AUTH = 203002 [(errors.code) = 401];
 
   // WebSocket 协议升级失败
-  WEBSOCKET_UPGRADER_ERROR = 204001 [(errors.code) = 500];
+  WEBSOCKET_UPGRADER_ERROR = 204001 [(errors.code) = 400];
 }

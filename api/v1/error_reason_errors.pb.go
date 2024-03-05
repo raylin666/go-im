@@ -227,10 +227,10 @@ func IsWebsocketUpgraderError(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_WEBSOCKET_UPGRADER_ERROR.String() && e.Code == 500
+	return e.Reason == ErrorReason_WEBSOCKET_UPGRADER_ERROR.String() && e.Code == 400
 }
 
 // WebSocket 协议升级失败
 func ErrorWebsocketUpgraderError(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, ErrorReason_WEBSOCKET_UPGRADER_ERROR.String(), fmt.Sprintf(format, args...))
+	return errors.New(400, ErrorReason_WEBSOCKET_UPGRADER_ERROR.String(), fmt.Sprintf(format, args...))
 }

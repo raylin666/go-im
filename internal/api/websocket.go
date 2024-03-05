@@ -2,16 +2,18 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/zap"
-	"log"
+	"mt/internal/app"
 	"mt/internal/constant/defined"
 	"mt/pkg/websocket"
 	"net/http"
+	"time"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var ctx = context.Background()
-	c, err := websocket.NewUpgrader(w, r)
+	conn, err := websocket.NewUpgrader(w, r)
 	if err != nil {
 		var e = defined.ErrorWebsocketUpgraderError
 		w.Write([]byte(e.GetReason()))
@@ -20,18 +22,15 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		h.logger.UseApp(ctx).Error("WebSocket 连接失败", zap.Error(e))
 		return
 	}
-	defer c.Close()
-	for {
-		mt, message, err := c.ReadMessage()
-		if err != nil {
-			log.Println("read:", err)
-			break
-		}
-		log.Printf("recv: %s", message)
-		err = c.WriteMessage(mt, message)
-		if err != nil {
-			log.Println("write:", err)
-			break
-		}
-	}
+
+	h.logger.UseApp(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()))
+
+	currentTime := uint64(time.Now().Unix())
+	client := websocket.NewClient(conn.RemoteAddr().String(), conn, currentTime)
+
+	go client.Read()
+	go client.Write()
+
+	// 用户连接事件
+	app.ClientManager.Register <- client
 }
