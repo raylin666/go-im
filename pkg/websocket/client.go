@@ -1,9 +1,10 @@
 package websocket
 
 import (
-	"fmt"
+	"context"
 	"github.com/gorilla/websocket"
-	"mt/internal/app"
+	"go.uber.org/zap"
+	"mt/pkg/logger"
 	"runtime/debug"
 )
 
@@ -14,6 +15,9 @@ const (
 
 // Client 用户连接
 type Client struct {
+	ctx    context.Context
+	logger *logger.Logger
+
 	Addr          string          // 客户端地址
 	Socket        *websocket.Conn // 用户连接
 	Send          chan []byte     // 待发送的数据
@@ -24,71 +28,82 @@ type Client struct {
 	LoginTime     uint64          // 登录时间 (用户登录以后才有)
 }
 
-func NewClient(addr string, socket *websocket.Conn, firstTime uint64) *Client {
-	return &Client{
+func NewClient(
+	ctx context.Context,
+	logger *logger.Logger,
+	addr string,
+	socket *websocket.Conn,
+	firstTime uint64,
+) (client *Client) {
+	client = &Client{
+		ctx:    ctx,
+		logger: logger,
+
 		Addr:          addr,
 		Socket:        socket,
 		Send:          make(chan []byte, 100), // 默认预创建容量为100的消息数据包
 		FirstTime:     firstTime,
 		HeartbeatTime: firstTime,
 	}
+
+	return
 }
 
-// 读取客户端数据
+// GetKey 读取客户端数据
 func (c *Client) GetKey() (key string) {
 	key = GetUserKey(c.AppId, c.UserId)
 
 	return
 }
 
-// 读取客户端数据
+// Read 读取客户端消息
 func (c *Client) Read() {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("write stop", string(debug.Stack()), r)
+			c.logger.UseApp(c.ctx).Error("读取客户端消息 Recover 失败", zap.Stack(string(debug.Stack())), zap.Any("recover", r))
 		}
 	}()
 
 	defer func() {
-		fmt.Println("读取客户端数据 关闭send", c)
+		c.logger.UseApp(c.ctx).Info("读取客户端消息并关闭待发送消息区")
 		close(c.Send)
 	}()
 
 	for {
 		_, message, err := c.Socket.ReadMessage()
 		if err != nil {
-			fmt.Println("读取客户端数据 错误", c.Addr, err)
+			c.logger.UseApp(c.ctx).Error("读取客户端消息错误", zap.String("address", c.Addr), zap.Error(err))
 
 			return
 		}
 
-		// 处理程序
-		fmt.Println("读取客户端数据 处理:", string(message))
-		ProcessData(c, message)
+		// 处理消息
+		c.logger.UseApp(c.ctx).Info("读取客户端消息并处理", zap.String("message", string(message)))
+
+		NewProcess(c.ctx, c.logger).HandlerMessage(c, message)
 	}
 }
 
-// 向客户端写数据
+// Write 写入客户端消息
 func (c *Client) Write() {
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("write stop", string(debug.Stack()), r)
-
+			c.logger.UseApp(c.ctx).Error("写入客户端消息 Recover 失败", zap.Stack(string(debug.Stack())), zap.Any("recover", r))
 		}
 	}()
 
 	defer func() {
-		app.ClientManager.Unregister <- c
+		ClientManagerInstance.Unregister <- c
 		c.Socket.Close()
-		fmt.Println("Client发送数据 defer", c)
+		c.logger.UseApp(c.ctx).Info("写入客户端消息 (关闭句柄)")
 	}()
 
 	for {
 		select {
 		case message, ok := <-c.Send:
 			if !ok {
-				// 发送数据错误 关闭连接
-				fmt.Println("Client发送数据 关闭连接", c.Addr, "ok", ok)
+				// 发送消息错误并关闭连接
+				c.logger.UseApp(c.ctx).Error("写入客户端消息错误并关闭连接", zap.String("address", c.Addr))
 
 				return
 			}
@@ -96,64 +111,4 @@ func (c *Client) Write() {
 			c.Socket.WriteMessage(websocket.TextMessage, message)
 		}
 	}
-}
-
-// 读取客户端数据
-func (c *Client) SendMsg(msg []byte) {
-
-	if c == nil {
-
-		return
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("SendMsg stop:", r, string(debug.Stack()))
-		}
-	}()
-
-	c.Send <- msg
-}
-
-// 读取客户端数据
-func (c *Client) close() {
-	close(c.Send)
-}
-
-// 用户登录
-func (c *Client) Login(appId uint32, userId string, loginTime uint64) {
-	c.AppId = appId
-	c.UserId = userId
-	c.LoginTime = loginTime
-	// 登录成功=心跳一次
-	c.Heartbeat(loginTime)
-}
-
-// 用户心跳
-func (c *Client) Heartbeat(currentTime uint64) {
-	c.HeartbeatTime = currentTime
-
-	return
-}
-
-// 心跳超时
-func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
-	if c.HeartbeatTime+heartbeatExpirationTime <= currentTime {
-		timeout = true
-	}
-
-	return
-}
-
-// 是否登录了
-func (c *Client) IsLogin() (isLogin bool) {
-
-	// 用户登录了
-	if c.UserId != "" {
-		isLogin = true
-
-		return
-	}
-
-	return
 }

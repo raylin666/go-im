@@ -23,6 +23,7 @@ var upgrader = websocket.Upgrader{
 
 func NewUpgrader(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	var header = make(http.Header)
-	header.Add("X-Name", "goim")
+	header.Add("X-IM-SERVER-NAME", "goim")
+	header.Add("X-IM-SERVER-VERSION", "v1")
 	return upgrader.Upgrade(w, r, header)
 }

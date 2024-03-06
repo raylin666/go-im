@@ -6,11 +6,10 @@ import (
 	"github.com/raylin666/go-utils/auth"
 	ut_logger "github.com/raylin666/go-utils/logger"
 	"github.com/raylin666/go-utils/server/system"
+	"mt/config"
 	"mt/internal/app"
 	pkg_logger "mt/pkg/logger"
 	"mt/pkg/utils"
-
-	"mt/config"
 
 	"github.com/go-kratos/kratos/v2"
 	kratos_config "github.com/go-kratos/kratos/v2/config"
