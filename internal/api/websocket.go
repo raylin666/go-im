@@ -7,7 +7,6 @@ import (
 	"mt/internal/constant/defined"
 	"mt/pkg/websocket"
 	"net/http"
-	"time"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
@@ -22,12 +21,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	currentTime := uint64(time.Now().Unix())
-	connRemoteAddr := conn.RemoteAddr().String()
+	h.logger.UseApp(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()))
 
-	h.logger.UseApp(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", connRemoteAddr))
-
-	client := websocket.NewClient(ctx, h.logger, connRemoteAddr, conn, currentTime)
+	client := websocket.NewClient(ctx, h.logger, conn)
 
 	go client.Read()
 	go client.Write()

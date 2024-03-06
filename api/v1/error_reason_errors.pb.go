@@ -165,6 +165,20 @@ func ErrorDataUpdateFieldError(format string, args ...interface{}) *errors.Error
 	return errors.New(400, ErrorReason_DATA_UPDATE_FIELD_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
+// 数据处理失败
+func IsDataHandlerError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DATA_HANDLER_ERROR.String() && e.Code == 422
+}
+
+// 数据处理失败
+func ErrorDataHandlerError(format string, args ...interface{}) *errors.Error {
+	return errors.New(422, ErrorReason_DATA_HANDLER_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
 // 无效ID值
 func IsIdInvalidValueError(err error) bool {
 	if err == nil {

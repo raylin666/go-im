@@ -15,9 +15,9 @@ type ClientManager struct {
 	ClientsLock sync.RWMutex       // 读写锁
 	Users       map[string]*Client // 登录的用户 APPID+UUID
 	UserLock    sync.RWMutex       // 读写锁
-	Register    chan *Client       // 连接连接处理
+	Register    chan *Client       // 连接处理
 	// Login       chan *login        // 用户登录处理
-	Unregister chan *Client // 断开连接处理程序
+	Unregister chan *Client // 断开连接处理
 	Broadcast  chan []byte  // 广播消息-向全部成员发送数据
 }
 

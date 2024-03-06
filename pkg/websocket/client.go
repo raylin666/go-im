@@ -6,6 +6,7 @@ import (
 	"go.uber.org/zap"
 	"mt/pkg/logger"
 	"runtime/debug"
+	"time"
 )
 
 const (
@@ -19,7 +20,7 @@ type Client struct {
 	logger *logger.Logger
 
 	Addr          string          // 客户端地址
-	Socket        *websocket.Conn // 用户连接
+	Conn          *websocket.Conn // 用户连接
 	Send          chan []byte     // 待发送的数据
 	AppId         uint32          // 登录的平台Id app/web/ios
 	UserId        string          // 用户Id (用户登录以后才有)
@@ -28,22 +29,17 @@ type Client struct {
 	LoginTime     uint64          // 登录时间 (用户登录以后才有)
 }
 
-func NewClient(
-	ctx context.Context,
-	logger *logger.Logger,
-	addr string,
-	socket *websocket.Conn,
-	firstTime uint64,
-) (client *Client) {
+func NewClient(ctx context.Context, logger *logger.Logger, conn *websocket.Conn) (client *Client) {
+	var currentTime = uint64(time.Now().Unix())
 	client = &Client{
 		ctx:    ctx,
 		logger: logger,
 
-		Addr:          addr,
-		Socket:        socket,
+		Addr:          conn.RemoteAddr().String(),
+		Conn:          conn,
 		Send:          make(chan []byte, 100), // 默认预创建容量为100的消息数据包
-		FirstTime:     firstTime,
-		HeartbeatTime: firstTime,
+		FirstTime:     currentTime,
+		HeartbeatTime: currentTime,
 	}
 
 	return
@@ -70,7 +66,7 @@ func (c *Client) Read() {
 	}()
 
 	for {
-		_, message, err := c.Socket.ReadMessage()
+		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			c.logger.UseApp(c.ctx).Error("读取客户端消息错误", zap.String("address", c.Addr), zap.Error(err))
 
@@ -94,7 +90,7 @@ func (c *Client) Write() {
 
 	defer func() {
 		ClientManagerInstance.Unregister <- c
-		c.Socket.Close()
+		c.Conn.Close()
 		c.logger.UseApp(c.ctx).Info("写入客户端消息 (关闭句柄)")
 	}()
 
@@ -108,7 +104,22 @@ func (c *Client) Write() {
 				return
 			}
 
-			c.Socket.WriteMessage(websocket.TextMessage, message)
+			c.Conn.WriteMessage(websocket.TextMessage, message)
 		}
 	}
+}
+
+// SendMessage 发送客户端消息
+func (c *Client) SendMessage(message []byte) {
+	if c == nil {
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			c.logger.UseApp(c.ctx).Error("发送客户端消息 Recover 失败", zap.Stack(string(debug.Stack())), zap.Any("recover", r))
+		}
+	}()
+
+	c.Send <- message
 }

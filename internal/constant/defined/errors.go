@@ -15,6 +15,7 @@ var (
 	ErrorDataDeleteError        = api.ErrorDataDeleteError("数据删除失败")
 	ErrorDataResourceNotFound   = api.ErrorDataResourceNotFound("数据资源不存在")
 	ErrorDataUpdateFieldError   = api.ErrorDataUpdateFieldError("数据属性更新失败")
+	ErrorDataHandlerError       = api.ErrorDataHandlerError("数据处理失败")
 	ErrorIdInvalidValueError    = api.ErrorIdInvalidValueError("无效ID值")
 	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行指令")
 	ErrorNotLoginError          = api.ErrorNotLoginError("请先登录后再操作")
