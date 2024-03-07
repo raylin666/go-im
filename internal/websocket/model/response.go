@@ -5,7 +5,7 @@ import "encoding/json"
 type Head struct {
 	Seq      string    `json:"seq"`      // 消息ID
 	Event    string    `json:"event"`    // 消息事件
-	Response *Response `json:"response"` // 消息体
+	Response *Response `json:"response"` // 消息内容
 }
 
 type Response struct {

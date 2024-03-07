@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"mt/internal/constant/defined"
+	model2 "mt/internal/websocket/model"
 	"mt/pkg/logger"
-	"mt/pkg/websocket/model"
 	"runtime/debug"
 	"sync"
 )
@@ -61,7 +61,7 @@ func (p *Process) HandlerMessage(client *Client, message []byte) {
 		}
 	}()
 
-	request := &model.Request{}
+	request := &model2.Request{}
 
 	err := json.Unmarshal(message, request)
 	if err != nil {
@@ -96,7 +96,7 @@ func (p *Process) HandlerMessage(client *Client, message []byte) {
 
 	msg = "我这块代码需要重新修改"
 
-	responseHead := model.NewResponseHead(seq, event, code, msg, data)
+	responseHead := model2.NewResponseHead(seq, event, code, msg, data)
 
 	headByte, err := json.Marshal(responseHead)
 	if err != nil {

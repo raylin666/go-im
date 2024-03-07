@@ -6,7 +6,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-kratos/kratos/v2 v2.4.1
 	github.com/google/wire v0.6.0
-	github.com/raylin666/go-utils v1.4.4
+	github.com/raylin666/go-utils v1.4.5
 	go.uber.org/automaxprocs v1.5.1
 	go.uber.org/zap v1.21.0
 	google.golang.org/genproto v0.0.0-20220524023933-508584e28198
@@ -37,6 +37,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/mod v0.14.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	golang.org/x/sync v0.6.0 // indirect

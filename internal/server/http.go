@@ -12,8 +12,8 @@ import (
 	"mt/internal/middleware/encode"
 	logging "mt/internal/middleware/logger"
 	"mt/internal/service"
+	"mt/internal/websocket"
 	"mt/pkg/logger"
-	"mt/pkg/websocket"
 	netHttp "net/http"
 )
 

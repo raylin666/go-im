@@ -6,8 +6,17 @@ import (
 )
 
 var (
-	ClientManagerInstance *ClientManager
+	// IM 客户端连接对象实例
+	clientManagerInstance *ClientManager
 )
+
+func SetClientManager(clientManager *ClientManager) {
+	clientManagerInstance = clientManager
+}
+
+func GetClientManager() *ClientManager {
+	return clientManagerInstance
+}
 
 // ClientManager 连接管理
 type ClientManager struct {
@@ -16,18 +25,16 @@ type ClientManager struct {
 	Users       map[string]*Client // 登录的用户 APPID+UUID
 	UserLock    sync.RWMutex       // 读写锁
 	Register    chan *Client       // 连接处理
-	// Login       chan *login        // 用户登录处理
-	Unregister chan *Client // 断开连接处理
-	Broadcast  chan []byte  // 广播消息-向全部成员发送数据
+	Unregister  chan *Client       // 断开连接处理
+	Broadcast   chan []byte        // 广播消息-向全部成员发送数据
 }
 
 // NewClientManager 初始化连接管理
 func NewClientManager() (clientManager *ClientManager) {
 	clientManager = &ClientManager{
-		Clients:  make(map[*Client]bool),
-		Users:    make(map[string]*Client),
-		Register: make(chan *Client, 1000),
-		// Login:      make(chan *login, 1000),
+		Clients:    make(map[*Client]bool),
+		Users:      make(map[string]*Client),
+		Register:   make(chan *Client, 1000),
 		Unregister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
 	}
