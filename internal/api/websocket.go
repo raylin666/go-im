@@ -11,6 +11,7 @@ import (
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var ctx = context.Background()
+
 	conn, err := websocket2.NewUpgrader(w, r)
 	if err != nil {
 		var e = defined.ErrorWebsocketUpgraderError

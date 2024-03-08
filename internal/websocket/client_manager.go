@@ -1,22 +1,8 @@
 package websocket
 
 import (
-	"fmt"
 	"sync"
 )
-
-var (
-	// IM 客户端连接对象实例
-	clientManagerInstance *ClientManager
-)
-
-func SetClientManager(clientManager *ClientManager) {
-	clientManagerInstance = clientManager
-}
-
-func GetClientManager() *ClientManager {
-	return clientManagerInstance
-}
 
 // ClientManager 连接管理
 type ClientManager struct {
@@ -39,11 +25,5 @@ func NewClientManager() (clientManager *ClientManager) {
 		Broadcast:  make(chan []byte, 1000),
 	}
 
-	return
-}
-
-// GetUserKey 获取用户KEY
-func GetUserKey(appId uint32, userId string) (key string) {
-	key = fmt.Sprintf("%d_%s", appId, userId)
 	return
 }
