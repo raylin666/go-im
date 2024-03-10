@@ -11,7 +11,7 @@ type ClientManager struct {
 	Users       map[string]*Client // 登录的用户 APPID+UUID
 	UserLock    sync.RWMutex       // 读写锁
 	Register    chan *Client       // 连接处理
-	Unregister  chan *Client       // 断开连接处理
+	UnRegister  chan *Client       // 断开连接处理
 	Broadcast   chan []byte        // 广播消息-向全部成员发送数据
 }
 
@@ -21,7 +21,7 @@ func NewClientManager() (clientManager *ClientManager) {
 		Clients:    make(map[*Client]bool),
 		Users:      make(map[string]*Client),
 		Register:   make(chan *Client, 1000),
-		Unregister: make(chan *Client, 1000),
+		UnRegister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
 	}
 

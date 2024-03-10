@@ -1,11 +1,24 @@
 package websocket
 
 import (
-	"fmt"
 	"github.com/gorilla/websocket"
 	"net/http"
 	"time"
 )
+
+const (
+	// 默认握手超时
+	defaultHandshakeTimeout = 5 * time.Second
+	// 默认读缓冲大小
+	defaultReadBufferSize = 2048
+	// 默认写缓冲大小
+	defaultWriteBufferSize = 2048
+)
+
+type UpgraderResponseHeader struct {
+	Name    string
+	Version string
+}
 
 type UpgraderOption func(opt *upgraderOption)
 
@@ -19,32 +32,66 @@ type upgraderOption struct {
 	Error func(w http.ResponseWriter, r *http.Request, status int, reason error)
 }
 
-func WithDsn(dsn string) UpgraderOption {
+func WithUpgraderHandshakeTimeout(t time.Duration) UpgraderOption {
 	return func(opt *upgraderOption) {
-		opt.Dsn = dsn
+		opt.HandshakeTimeout = t
 	}
 }
 
-func NewUpgrader(w http.ResponseWriter, r *http.Request, opts ...UpgraderOption) (*websocket.Conn, error) {
+func WithUpgraderReadBufferSize(size int) UpgraderOption {
+	return func(opt *upgraderOption) {
+		opt.ReadBufferSize = size
+	}
+}
+
+func WithUpgraderWriteBufferSize(size int) UpgraderOption {
+	return func(opt *upgraderOption) {
+		opt.WriteBufferSize = size
+	}
+}
+
+func WithUpgraderCheckOrigin(f func(r *http.Request) bool) UpgraderOption {
+	return func(opt *upgraderOption) {
+		opt.CheckOrigin = func(r *http.Request) bool {
+			return f(r)
+		}
+	}
+}
+
+func WithUpgraderError(f func(w http.ResponseWriter, r *http.Request, status int, reason error)) UpgraderOption {
+	return func(opt *upgraderOption) {
+		opt.Error = func(w http.ResponseWriter, r *http.Request, status int, reason error) {
+			f(w, r, status, reason)
+		}
+	}
+}
+
+func NewUpgrader(w http.ResponseWriter, r *http.Request, upHeader *UpgraderResponseHeader, upOpts ...UpgraderOption) (*websocket.Conn, error) {
 	var header = make(http.Header)
-	header.Add("X-IM-SERVER-NAME", "goim")
-	header.Add("X-IM-SERVER-VERSION", "1.0")
+	if upHeader != nil {
+		if upHeader.Name != "" {
+			header.Add("X-IM-SERVER-NAME", upHeader.Name)
+		}
+		if upHeader.Version != "" {
+			header.Add("X-IM-SERVER-VERSION", upHeader.Version)
+		}
+	}
 
 	var o = new(upgraderOption)
-	for _, opt := range opts {
+	for _, opt := range upOpts {
 		opt(o)
 	}
 
 	if o.HandshakeTimeout == 0 {
-		o.HandshakeTimeout = 5 * time.Second
+		o.HandshakeTimeout = defaultHandshakeTimeout
 	}
 
 	if o.ReadBufferSize == 0 {
-		o.ReadBufferSize = 2048
+		o.ReadBufferSize = defaultReadBufferSize
 	}
 
 	if o.WriteBufferSize == 0 {
-		o.WriteBufferSize = 2048
+		o.WriteBufferSize = defaultWriteBufferSize
 	}
 
 	// HTTP 升级 WebSocket 协议的配置
@@ -53,12 +100,9 @@ func NewUpgrader(w http.ResponseWriter, r *http.Request, opts ...UpgraderOption)
 		ReadBufferSize:   o.ReadBufferSize,
 		WriteBufferSize:  o.WriteBufferSize,
 		// 解决跨域问题
-		CheckOrigin: func(r *http.Request) bool {
-			return true
-		},
-		Error: func(w http.ResponseWriter, r *http.Request, status int, reason error) {
-			fmt.Println(status, reason)
-		},
+		CheckOrigin: o.CheckOrigin,
+		// 错误处理
+		Error: o.Error,
 	}
 
 	return upgrader.Upgrade(w, r, header)

@@ -12,6 +12,7 @@ import (
 	"mt/internal/data"
 	"mt/internal/server"
 	"mt/internal/service"
+	"mt/internal/websocket"
 	"mt/pkg/logger"
 
 	"github.com/go-kratos/kratos/v2"
@@ -20,5 +21,5 @@ import (
 
 // wireApp init kratos application.
 func wireApp(*config.Server, *config.Data, *logger.Logger) (*kratos.App, func(), error) {
-	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, api.ProviderSet, service.ProviderSet, newApp))
+	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, api.ProviderSet, service.ProviderSet, websocket.ProviderSet, newApp))
 }

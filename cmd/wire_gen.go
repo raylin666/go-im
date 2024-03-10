@@ -14,6 +14,7 @@ import (
 	"mt/internal/data"
 	"mt/internal/server"
 	"mt/internal/service"
+	"mt/internal/websocket"
 	"mt/pkg/logger"
 	"mt/pkg/repositories"
 )
@@ -36,7 +37,8 @@ func wireApp(configServer *config.Server, configData *config.Data, loggerLogger 
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, loggerLogger)
 	handler := api.NewHandler(loggerLogger, dataRepo)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, handler, loggerLogger)
+	manager := websocket.NewManager(loggerLogger, dataData)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, handler, manager, loggerLogger)
 	app := newApp(loggerLogger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

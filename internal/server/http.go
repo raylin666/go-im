@@ -22,6 +22,7 @@ func NewHTTPServer(
 	c *config.Server,
 	heartbeat *service.HeartbeatService,
 	apiHandler *api.Handler,
+	wsManager *websocket.Manager,
 	logger *logger.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -44,8 +45,8 @@ func NewHTTPServer(
 	}
 	srv := http.NewServer(opts...)
 
-	// 实例化 IM 客户端连接管理器
-	websocket.ClientManagerInstance = websocket.NewClientManager()
+	// 注册 WebSocket 管理器
+	websocket.RegisterManager(wsManager)
 
 	// HTTP API 路由处理器
 	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))

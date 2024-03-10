@@ -1,7 +1,10 @@
 package websocket
 
 import (
+	"context"
+	"fmt"
 	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 	"time"
 )
 
@@ -31,11 +34,21 @@ func NewClient(conn *websocket.Conn) (client *Client) {
 }
 
 // Read 读取客户端消息
-func (c *Client) Read() {
+func (c *Client) Read(ctx context.Context) {
+	for {
+		_, message, err := c.Conn.ReadMessage()
+		if err != nil {
+			ManagerInstance().Logger().UseApp(ctx).Error("读取客户端消息失败", zap.String("address", c.Addr), zap.Error(err))
 
+			return
+		}
+
+		// 处理程序
+		fmt.Println("读取客户端数据 处理:", string(message))
+	}
 }
 
 // Write 写入客户端消息
-func (c *Client) Write() {
+func (c *Client) Write(ctx context.Context) {
 
 }
