@@ -199,12 +199,12 @@ func IsCommandInvalidNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_COMMAND_INVALID_NOT_FOUND.String() && e.Code == 400
+	return e.Reason == ErrorReason_COMMAND_INVALID_NOT_FOUND.String() && e.Code == 404
 }
 
 // 无效的执行指令
 func ErrorCommandInvalidNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_COMMAND_INVALID_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_COMMAND_INVALID_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // 请先登录后再操作

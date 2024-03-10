@@ -3,7 +3,6 @@ package defined
 import api "mt/api/v1"
 
 var (
-	/* 系统相关 */
 	ErrorUnknownError           = api.ErrorUnknownError("未知错误")
 	ErrorServerError            = api.ErrorServerError("服务异常")
 	ErrorDataValidateError      = api.ErrorDataValidateError("数据校验失败")

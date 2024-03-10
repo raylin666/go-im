@@ -70,10 +70,10 @@ func NewUpgrader(w http.ResponseWriter, r *http.Request, upHeader *UpgraderRespo
 	var header = make(http.Header)
 	if upHeader != nil {
 		if upHeader.Name != "" {
-			header.Add("X-IM-SERVER-NAME", upHeader.Name)
+			header.Add("X-SERVER-NAME", upHeader.Name)
 		}
 		if upHeader.Version != "" {
-			header.Add("X-IM-SERVER-VERSION", upHeader.Version)
+			header.Add("X-SERVER-VERSION", upHeader.Version)
 		}
 	}
 

@@ -2,9 +2,9 @@ package websocket
 
 import (
 	"context"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
+	"runtime/debug"
 	"time"
 )
 
@@ -35,20 +35,79 @@ func NewClient(conn *websocket.Conn) (client *Client) {
 
 // Read 读取客户端消息
 func (c *Client) Read(ctx context.Context) {
+	var logAddr = zap.String("address", c.Addr)
+
+	defer func() {
+		if r := recover(); r != nil {
+			ManagerInstance().Logger().UseWebSocket(ctx).Error("读取客户端消息异常", logAddr, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+		}
+	}()
+
+	defer func() {
+		ManagerInstance().Logger().UseWebSocket(ctx).Debug("读取客户端消息结束, 关闭待发送的数据包", logAddr)
+		close(c.Send)
+	}()
+
+	process := NewProcess(c)
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
-			ManagerInstance().Logger().UseApp(ctx).Error("读取客户端消息失败", zap.String("address", c.Addr), zap.Error(err))
+			ManagerInstance().Logger().UseWebSocket(ctx).Error("读取客户端消息失败", logAddr, zap.Error(err))
 
 			return
 		}
 
-		// 处理程序
-		fmt.Println("读取客户端数据 处理:", string(message))
+		// 消息处理
+		ManagerInstance().Logger().UseWebSocket(ctx).Info("读取客户端消息并开始处理", logAddr, zap.String("message", string(message)))
+
+		process.HandlerMessage(ctx, message)
 	}
 }
 
 // Write 写入客户端消息
 func (c *Client) Write(ctx context.Context) {
+	var logAddr = zap.String("address", c.Addr)
 
+	defer func() {
+		if r := recover(); r != nil {
+			ManagerInstance().Logger().UseWebSocket(ctx).Error("写入客户端消息异常", logAddr, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+		}
+	}()
+
+	defer func() {
+		ManagerInstance().ClientManager().UnRegister <- c
+		c.Conn.Close()
+		ManagerInstance().Logger().UseWebSocket(ctx).Debug("写入客户端消息结束, 关闭客户端连接", logAddr)
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.Send:
+			if !ok {
+				// 写入待发送客户端消息错误并关闭连接
+				ManagerInstance().Logger().UseWebSocket(ctx).Error("写入待发送客户端消息错误并关闭连接", logAddr)
+
+				return
+			}
+
+			c.Conn.WriteMessage(websocket.TextMessage, message)
+		}
+	}
+}
+
+// SendMessage 发送消息
+func (c *Client) SendMessage(ctx context.Context, message []byte) bool {
+	if c == nil {
+		return false
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			ManagerInstance().Logger().UseWebSocket(ctx).Error("发送消息异常", zap.String("address", c.Addr), zap.String("message", string(message)), zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+		}
+	}()
+
+	c.Send <- message
+
+	return true
 }
