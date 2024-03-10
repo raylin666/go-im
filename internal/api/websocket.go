@@ -7,6 +7,7 @@ import (
 	"mt/internal/constant/defined"
 	"mt/internal/websocket"
 	"net/http"
+	"time"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
@@ -16,6 +17,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	upgraderResponseHeader.Name = "goim"
 	upgraderResponseHeader.Version = "1.0"
 	conn, err := websocket.NewUpgrader(w, r, upgraderResponseHeader,
+		websocket.WithUpgraderHandshakeTimeout(5*time.Second),
+		websocket.WithUpgraderReadBufferSize(2048),
+		websocket.WithUpgraderWriteBufferSize(2048),
 		websocket.WithUpgraderCheckOrigin(func(r *http.Request) bool {
 			return true
 		}),
