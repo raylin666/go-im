@@ -33,20 +33,9 @@ func (h *Handler) Router() *mux.Router {
 	var ws = h.r.PathPrefix(h.Prefix + "ws").Subrouter()
 	h.routerWS(ws)
 
-	// HTTP
-	var api = h.r.PathPrefix(h.Prefix + "api").Subrouter()
-	h.routerHTTP(api)
-
 	return h.r
 }
 
 func (h *Handler) routerWS(r *mux.Router) {
 	r.HandleFunc("", h.WebSocket)
-}
-
-func (h *Handler) routerHTTP(r *mux.Router) {
-	var apiAccount = r.PathPrefix("/account").Subrouter()
-	{
-		apiAccount.HandleFunc("", h.Account).Methods("GET")
-	}
 }

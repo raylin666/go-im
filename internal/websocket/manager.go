@@ -28,14 +28,8 @@ func NewManager(logger *logger.Logger, data *data.Data) *Manager {
 	}
 }
 
-func (m *Manager) Logger() *logger.Logger {
-	return m.logger
-}
+func (m *Manager) Logger() *logger.Logger { return m.logger }
 
-func (m *Manager) Resource() *data.Data {
-	return m.resource
-}
+func (m *Manager) Resource() *data.Data { return m.resource }
 
-func (m *Manager) ClientManager() *ClientManager {
-	return m.clientManager
-}
+func (m *Manager) ClientManager() *ClientManager { return m.clientManager }

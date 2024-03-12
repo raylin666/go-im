@@ -43,6 +43,7 @@ func NewHTTPServer(
 	if c.Http.Timeout != nil {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
+
 	srv := http.NewServer(opts...)
 
 	// 注册 WebSocket 管理器
@@ -50,7 +51,9 @@ func NewHTTPServer(
 
 	// HTTP API 路由处理器
 	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))
+
 	// HTTP 服务路由处理器
 	v1.RegisterHeartbeatHTTPServer(srv, heartbeat)
+
 	return srv
 }

@@ -23,11 +23,11 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 		logMessage = zap.String("message", string(message))
 	)
 
-	ManagerInstance().Logger().UseWebSocket(ctx).Info("进入消息处理", logAddr, logMessage)
+	Logger(ctx).Info("进入消息处理", logAddr, logMessage)
 
 	defer func() {
 		if r := recover(); r != nil {
-			ManagerInstance().Logger().UseWebSocket(ctx).Error("消息处理异常", logAddr, logMessage, zap.Any("recover", r))
+			Logger(ctx).Error("消息处理异常", logAddr, logMessage, zap.Any("recover", r))
 		}
 	}()
 
@@ -35,7 +35,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 	request := &model.Request{}
 	err := json.Unmarshal(message, request)
 	if err != nil {
-		ManagerInstance().Logger().UseWebSocket(ctx).Error("数据包合法性校验失败 json.Unmarshal", logAddr, logMessage, zap.Error(err))
+		Logger(ctx).Error("数据包合法性校验失败 json.Unmarshal", logAddr, logMessage, zap.Error(err))
 
 		// 返回错误给客户端
 
@@ -44,7 +44,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 
 	requestData, err := json.Marshal(request.Data)
 	if err != nil {
-		ManagerInstance().Logger().UseWebSocket(ctx).Error("解析消息数据包错误 json.Marshal", logAddr, logMessage, zap.Error(err))
+		Logger(ctx).Error("解析消息数据包错误 json.Marshal", logAddr, logMessage, zap.Error(err))
 
 		// 返回错误给客户端
 
@@ -65,7 +65,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 		logData  = zap.String("data", string(requestData))
 	)
 
-	ManagerInstance().Logger().UseWebSocket(ctx).Info("解析消息数据包完成", logAddr, logSeq, logEvent, logData)
+	Logger(ctx).Info("解析消息数据包完成", logAddr, logSeq, logEvent, logData)
 
 	// 采用 MAP 处理事件
 	if value, ok := getHandlerEvent(event); ok {
@@ -74,14 +74,14 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 		e := defined.ErrorCommandInvalidNotFound
 		responseCode = uint32(e.GetCode())
 		responseMessage = e.GetMessage()
-		ManagerInstance().Logger().UseWebSocket(ctx).Warn(fmt.Sprintf("处理事件 %s 不存在!", event), logAddr, logSeq, logEvent, logData)
+		Logger(ctx).Warn(fmt.Sprintf("处理事件 %s 不存在!", event), logAddr, logSeq, logEvent, logData)
 	}
 
 	responseHead := model.NewResponseHead(seq, event, responseCode, responseMessage, responseData)
 
 	headByte, err := json.Marshal(responseHead)
 	if err != nil {
-		ManagerInstance().Logger().UseWebSocket(ctx).Error("处理响应数据错误 json.Marshal", logAddr, logSeq, logEvent, logData,
+		Logger(ctx).Error("处理响应数据错误 json.Marshal", logAddr, logSeq, logEvent, logData,
 			zap.Uint32("response_code", responseCode),
 			zap.String("response_message", responseMessage),
 			zap.Any("response_data", responseData),
@@ -98,9 +98,9 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 
 	ok := p.Client.SendMessage(ctx, headByte)
 	if ok {
-		ManagerInstance().Logger().UseWebSocket(ctx).Info("发送消息成功", logAddr, logAppId, logUserId, logResponseMessage)
+		Logger(ctx).Info("发送消息成功", logAddr, logAppId, logUserId, logResponseMessage)
 	} else {
-		ManagerInstance().Logger().UseWebSocket(ctx).Error("发送消息失败", logAddr, logAppId, logUserId, logResponseMessage)
+		Logger(ctx).Error("发送消息失败", logAddr, logAppId, logUserId, logResponseMessage)
 	}
 
 	return

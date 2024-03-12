@@ -39,12 +39,12 @@ func (c *Client) Read(ctx context.Context) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			ManagerInstance().Logger().UseWebSocket(ctx).Error("读取客户端消息异常", logAddr, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+			Logger(ctx).Error("读取客户端消息异常", logAddr, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
 		}
 	}()
 
 	defer func() {
-		ManagerInstance().Logger().UseWebSocket(ctx).Debug("读取客户端消息结束, 关闭待发送的数据包", logAddr)
+		Logger(ctx).Debug("读取客户端消息结束, 关闭待发送的数据包", logAddr)
 		close(c.Send)
 	}()
 
@@ -52,13 +52,13 @@ func (c *Client) Read(ctx context.Context) {
 	for {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
-			ManagerInstance().Logger().UseWebSocket(ctx).Error("读取客户端消息失败", logAddr, zap.Error(err))
+			Logger(ctx).Error("读取客户端消息失败", logAddr, zap.Error(err))
 
 			return
 		}
 
 		// 消息处理
-		ManagerInstance().Logger().UseWebSocket(ctx).Info("读取客户端消息并开始处理", logAddr, zap.String("message", string(message)))
+		Logger(ctx).Info("读取客户端消息并开始处理", logAddr, zap.String("message", string(message)))
 
 		process.HandlerMessage(ctx, message)
 	}
@@ -70,14 +70,14 @@ func (c *Client) Write(ctx context.Context) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			ManagerInstance().Logger().UseWebSocket(ctx).Error("写入客户端消息异常", logAddr, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+			Logger(ctx).Error("写入客户端消息异常", logAddr, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
 		}
 	}()
 
 	defer func() {
 		ManagerInstance().ClientManager().UnRegister <- c
 		c.Conn.Close()
-		ManagerInstance().Logger().UseWebSocket(ctx).Debug("写入客户端消息结束, 关闭客户端连接", logAddr)
+		Logger(ctx).Debug("写入客户端消息结束, 关闭客户端连接", logAddr)
 	}()
 
 	for {
@@ -85,7 +85,7 @@ func (c *Client) Write(ctx context.Context) {
 		case message, ok := <-c.Send:
 			if !ok {
 				// 写入待发送客户端消息错误并关闭连接
-				ManagerInstance().Logger().UseWebSocket(ctx).Error("写入待发送客户端消息错误并关闭连接", logAddr)
+				Logger(ctx).Error("写入待发送客户端消息错误并关闭连接", logAddr)
 
 				return
 			}
@@ -103,7 +103,7 @@ func (c *Client) SendMessage(ctx context.Context, message []byte) bool {
 
 	defer func() {
 		if r := recover(); r != nil {
-			ManagerInstance().Logger().UseWebSocket(ctx).Error("发送消息异常", zap.String("address", c.Addr), zap.String("message", string(message)), zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+			Logger(ctx).Error("发送消息异常", zap.String("address", c.Addr), zap.String("message", string(message)), zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
 		}
 	}()
 
