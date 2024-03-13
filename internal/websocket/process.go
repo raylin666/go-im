@@ -38,6 +38,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 		Logger(ctx).Error("数据包合法性校验失败 json.Unmarshal", logAddr, logMessage, zap.Error(err))
 
 		// 返回错误给客户端
+		p.Client.SendMessage(ctx, []byte("发送数据包协议格式错误"))
 
 		return
 	}
@@ -47,6 +48,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 		Logger(ctx).Error("解析消息数据包错误 json.Marshal", logAddr, logMessage, zap.Error(err))
 
 		// 返回错误给客户端
+		p.Client.SendMessage(ctx, []byte("消息协议格式错误"))
 
 		return
 	}
