@@ -16,7 +16,7 @@ var (
 	ErrorDataUpdateFieldError   = api.ErrorDataUpdateFieldError("数据属性更新失败")
 	ErrorDataHandlerError       = api.ErrorDataHandlerError("数据处理失败")
 	ErrorIdInvalidValueError    = api.ErrorIdInvalidValueError("无效ID值")
-	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行指令")
+	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行事件")
 	ErrorNotLoginError          = api.ErrorNotLoginError("请先登录后再操作")
 	ErrorNotVisitAuth           = api.ErrorNotVisitAuth("没有访问权限")
 	ErrorWebsocketUpgraderError = api.ErrorWebsocketUpgraderError("WebSocket 协议升级失败")
