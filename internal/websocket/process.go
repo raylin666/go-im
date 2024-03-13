@@ -68,7 +68,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 	Logger(ctx).Info("解析消息数据包完成", logAddr, logSeq, logEvent, logData)
 
 	// 采用 MAP 处理事件
-	if value, ok := getHandlerEvent(event); ok {
+	if value, ok := ManagerInstance().GetEventHandler(event); ok {
 		responseCode, responseMessage, responseData = value(ctx, p.Client, seq, requestData)
 	} else {
 		e := defined.ErrorCommandInvalidNotFound
