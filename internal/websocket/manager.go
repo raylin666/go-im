@@ -27,6 +27,7 @@ type Manager struct {
 func NewManager(logger *logger.Logger, data *data.Data) (manager *Manager) {
 	manager = &Manager{
 		clientManager: NewClientManager(),
+		events:        make(map[string]EventDisposeFunc),
 		logger:        logger,
 		resource:      data,
 	}
