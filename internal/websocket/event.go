@@ -21,5 +21,5 @@ func NewEvents() (events *Events) {
 }
 
 func (event *Events) Ping(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}) {
-	return 200, "PONG", "{}"
+	return CodeStatusOk, CodeMessageOk, "PONG"
 }

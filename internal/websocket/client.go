@@ -11,13 +11,13 @@ import (
 // Client 用户连接
 type Client struct {
 	Addr          string          // 客户端地址
-	Conn          *websocket.Conn // 用户连接
+	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
-	AppId         uint32          // 登录的平台Id app/web/ios
-	UserId        string          // 用户Id (用户登录以后才有)
-	FirstTime     uint64          // 首次连接事件
+	AppId         uint32          // 登录的平台ID app/web/ios
+	UserId        string          // 用户ID (用户登录以后才有)
+	FirstTime     uint64          // 首次连接时间
 	HeartbeatTime uint64          // 用户上次心跳时间
-	LoginTime     uint64          // 登录时间 (用户登录以后才有)
+	LoginTime     uint64          // 用户登录时间 (用户登录以后才有)
 }
 
 func NewClient(conn *websocket.Conn) (client *Client) {
@@ -45,11 +45,12 @@ func (c *Client) Read(ctx context.Context) {
 
 	defer func() {
 		Logger(ctx).Debug("读取客户端消息结束, 关闭待发送的数据包", logAddr)
-		close(c.Send)
+		c.SendClose()
 	}()
 
-	process := NewProcess(c)
+	var process = NewProcess(c)
 	for {
+		// c.Conn.ReadMessage 该方法会阻塞等待, 直到收到消息才能继续往下执行
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			Logger(ctx).Error("读取客户端消息失败", logAddr, zap.Error(err))
@@ -90,6 +91,7 @@ func (c *Client) Write(ctx context.Context) {
 				return
 			}
 
+			// 将消息推送至客户端
 			c.Conn.WriteMessage(websocket.TextMessage, message)
 		}
 	}
@@ -110,4 +112,9 @@ func (c *Client) SendMessage(ctx context.Context, message []byte) bool {
 	c.Send <- message
 
 	return true
+}
+
+// SendClose 关闭接收及待发送消息
+func (c *Client) SendClose() {
+	close(c.Send)
 }
