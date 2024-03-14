@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	CodeStatusOk  = 200
-	CodeMessageOk = "OK"
+	codeStatusOk  = 200
+	codeMessageOk = "OK"
 )
 
 func Logger(ctx context.Context) (logger *zap.Logger) {

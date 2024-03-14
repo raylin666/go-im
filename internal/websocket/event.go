@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"context"
+	"time"
 )
 
 type EventDisposeFunc func(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{})
@@ -20,6 +21,10 @@ func NewEvents() (events *Events) {
 	return
 }
 
+// Ping 心跳检测
 func (event *Events) Ping(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}) {
-	return CodeStatusOk, CodeMessageOk, "PONG"
+	var currentTime = uint64(time.Now().Unix())
+	client.Heartbeat(currentTime)
+
+	return codeStatusOk, codeMessageOk, "pong"
 }

@@ -8,16 +8,21 @@ import (
 	"time"
 )
 
+const (
+	// 用户连接超时时间
+	heartbeatExpirationTime = 60
+)
+
 // Client 用户连接
 type Client struct {
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
-	AppId         uint32          // 登录的平台ID app/web/ios
-	UserId        string          // 用户ID (用户登录以后才有)
+	AppId         uint32          // 登录的平台ID (App/Web/iOS)
+	UserId        string          // 用户ID
 	FirstTime     uint64          // 首次连接时间
-	HeartbeatTime uint64          // 用户上次心跳时间
-	LoginTime     uint64          // 用户登录时间 (用户登录以后才有)
+	HeartbeatTime uint64          // 上次心跳时间
+	LoginTime     uint64          // 用户登录时间
 }
 
 func NewClient(conn *websocket.Conn) (client *Client) {
@@ -117,4 +122,20 @@ func (c *Client) SendMessage(ctx context.Context, message []byte) bool {
 // SendClose 关闭接收及待发送消息
 func (c *Client) SendClose() {
 	close(c.Send)
+}
+
+// Heartbeat 更新连接心跳时间
+func (c *Client) Heartbeat(currentTime uint64) {
+	c.HeartbeatTime = currentTime
+
+	return
+}
+
+// IsHeartbeatTimeout 判断连接心跳是否超时
+func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
+	if c.HeartbeatTime+heartbeatExpirationTime <= currentTime {
+		timeout = true
+	}
+
+	return
 }
