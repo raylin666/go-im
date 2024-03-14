@@ -3,15 +3,15 @@ package model
 import "encoding/json"
 
 type Head struct {
-	Seq      string    `json:"seq"`      // 消息ID
+	Seq      string    `json:"seq"`      // 消息唯一ID
 	Event    string    `json:"event"`    // 消息事件
 	Response *Response `json:"response"` // 消息内容
 }
 
 type Response struct {
-	Code    uint32      `json:"code"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"` // JSON 数据包
+	Code    uint32      `json:"code"`    // 响应状态码
+	Message string      `json:"message"` // 响应描述
+	Data    interface{} `json:"data"`    // JSON 数据包
 }
 
 // NewResponseHead 创建返回消息
