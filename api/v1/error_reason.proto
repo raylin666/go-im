@@ -36,6 +36,12 @@ enum ErrorReason {
   DATA_UPDATE_FIELD_ERROR = 201009 [(errors.code) = 400];
   // 数据处理失败
   DATA_HANDLER_ERROR = 201010 [(errors.code) = 422];
+  // 数据表已存在
+  DATA_TABLE_ALREADY_EXISTS = 201011 [(errors.code) = 500];
+  // 创建数据表失败
+  DATA_TABLE_CREATE_ERROR = 201012 [(errors.code) = 500];
+  // 重命名数据表失败
+  DATA_TABLE_RENAME_ERROR = 201013 [(errors.code) = 500];
 
   // 无效ID值
   ID_INVALID_VALUE_ERROR = 202001 [(errors.code) = 400];

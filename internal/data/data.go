@@ -14,7 +14,8 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData,
 	repositories.NewDataRepo,
-	NewHeartbeatRepo)
+	NewHeartbeatRepo,
+	NewManagerRepo)
 
 // Data .
 type Data struct {

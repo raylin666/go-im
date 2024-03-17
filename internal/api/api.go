@@ -24,7 +24,7 @@ func NewHandler(logger *logger.Logger, dataRepo repositories.DataRepo) *Handler 
 		dbRepo:    dataRepo.DbRepo(),
 		redisRepo: dataRepo.RedisRepo(),
 		logger:    logger,
-		Prefix:    "/",
+		Prefix:    "/app/",
 	}
 }
 

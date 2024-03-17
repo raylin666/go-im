@@ -31,8 +31,9 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.CreatedAt = field.NewTime(tableName, "created_at")
 	_app.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_app.DeletedAt = field.NewField(tableName, "deleted_at")
+	_app.Ident = field.NewString(tableName, "ident")
 	_app.Name = field.NewString(tableName, "name")
-	_app.Key = field.NewInt(tableName, "key")
+	_app.Key = field.NewUint32(tableName, "key")
 	_app.Secret = field.NewString(tableName, "secret")
 	_app.Status = field.NewInt8(tableName, "status")
 	_app.ExpiredAt = field.NewTime(tableName, "expired_at")
@@ -50,8 +51,9 @@ type app struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	DeletedAt field.Field
+	Ident     field.String
 	Name      field.String
-	Key       field.Int
+	Key       field.Uint32
 	Secret    field.String
 	Status    field.Int8
 	ExpiredAt field.Time
@@ -75,8 +77,9 @@ func (a *app) updateTableName(table string) *app {
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.DeletedAt = field.NewField(table, "deleted_at")
+	a.Ident = field.NewString(table, "ident")
 	a.Name = field.NewString(table, "name")
-	a.Key = field.NewInt(table, "key")
+	a.Key = field.NewUint32(table, "key")
 	a.Secret = field.NewString(table, "secret")
 	a.Status = field.NewInt8(table, "status")
 	a.ExpiredAt = field.NewTime(table, "expired_at")
@@ -102,11 +105,12 @@ func (a *app) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *app) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 9)
+	a.fieldMap = make(map[string]field.Expr, 10)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
 	a.fieldMap["deleted_at"] = a.DeletedAt
+	a.fieldMap["ident"] = a.Ident
 	a.fieldMap["name"] = a.Name
 	a.fieldMap["key"] = a.Key
 	a.fieldMap["secret"] = a.Secret

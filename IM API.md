@@ -23,9 +23,10 @@ server {
         listen       80;
         server_name  im.docker;
 
-        location / {
+        # WebSocket 连接路由
+	    location / {
             proxy_set_header Host $host;
-            proxy_pass http://go-ws/ws;
+            proxy_pass http://go-ws/app/ws;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
@@ -35,8 +36,19 @@ server {
             client_max_body_size 10m;
         }
 
-        location /api
-        {
+        # HTTP Web API 路由
+        location /app {
+            proxy_set_header Host $host;
+            proxy_pass http://go-http/app/api;
+            proxy_http_version 1.1;
+            proxy_set_header Connection "";
+            proxy_redirect off;
+            proxy_intercept_errors on;
+            client_max_body_size 30m;
+        }
+
+        # HTTP RPC API 路由
+        location /api {
             proxy_set_header Host $host;
             proxy_pass http://go-http/api;
             proxy_http_version 1.1;
@@ -48,13 +60,61 @@ server {
 }
 ```
 
-### HTTP 接口文档
+### HTTP Web API 接口文档
 
-> HTTP 地址: `http://im.docker/api`
+<i> HTTP 地址: `http://im.docker/app` </i>
+
+### HTTP RPC API 服务接口文档
+
+<i> HTTP 地址: `http://im.docker/api` </i>
+
+##### 基础模块
+
+###### 项目心跳接口
+
+> 请求方式: `GET`
+>
+> 请求URL: `/api/heartbeat`
+
+响应内容
+
+| 名称      | 类型     | 是否必须 | 示例   | 描述                    |
+|---------|--------|------|------|-----------------------|
+| message | string | 是    | PONE | 固定 "PONG" 值, 表示项目正常运行 |
+
+##### 应用管理模块
+
+###### 创建应用接口
+
+> 请求方式: `POST`
+>
+> 请求URL: `/api/manager/create`
+
+请求参数
+
+| 名称         | 类型        | 是否必须 | 示例                   | 校验规则                      | 描述           |
+|------------|-----------|------|----------------------|---------------------------|--------------|
+| ident      | string    | 是    | raylin666            | 6-50字以内,必须是字母开头,由字母数字和.组成 | 唯一标识, 用来标识来源 |
+| name       | string    | 是    | 正式环境                 | 2-30字以内                   | 应用名称         |
+| expired_at | timestamp | 是    | 2099-12-31T23:59:59Z | 必须大于当前时间                  | 过期时间         |
+| status     | enum      | 否    | 1                    | 必须为 0,1,2 数字              | 应用状态         |
+
+响应内容
+
+| 名称         | 类型     | 是否必须 | 示例                               | 描述                              |
+|------------|--------|------|----------------------------------|---------------------------------|
+| id         | string | 是    | 1                                | 自增ID(无实质业务性质)                   |
+| ident      | string | 是    | raylin666                        | 唯一标识, 用来标识来源                    |
+| name       | string | 是    | 正式环境                             | 应用名称                            |
+| key        | string | 是    | 403227602                        | 应用KEY                           |
+| secret     | string | 是    | 1808c3d2a764499eb2924e70731f76d5 | 应用密钥                            |
+| status     | string | 是    | OPEN                             | 应用状态 CLOSE:停用 OPEN:启用 FREEZE:冻结 |
+| expired_at | string | 是    | 2099-12-11T23:59:59Z             | 过期时间                            |
+| created_at | string | 是    | 2024-03-17T13:27:02.384994424Z   | 创建时间                            |
 
 ### WebSocket 接口文档
 
-> WebSocket 地址: `ws://im.docker`
+<i> WebSocket 地址: `ws://im.docker` </i>
 
 ###### 请求消息协议
 
@@ -67,6 +127,7 @@ server {
 | data  | interface | 否    | JSON 数据包                                           |
 
 ###### 请求消息事件
+
 <a id="message_event_req"></a>
 
 | 事件名称 | 事件内容 | 事件描述                |
@@ -84,14 +145,15 @@ server {
 | response | [MessageResponse](#struct_MessageResponse) | 是    | 消息内容                                         |
 
 ###### 响应消息事件
+
 <a id="message_event_resp"></a>
 
 | 事件名称 | 事件内容         | 事件描述                |
 |------|--------------|---------------------|
 | ping | 固定字符串 "PONE" | 正常 Socket PING 心跳状态 |
 
-
 ###### 响应状态码
+
 <a id="message_responseCode"></a>
 
 | CODE | MESSAGE |
@@ -101,6 +163,7 @@ server {
 ### 数据结构
 
 ###### [WebSocket] 消息响应 MessageResponse
+
 <a id="struct_MessageResponse"></a>
 
 | 字段值     | 字段类型      | 是否必须 | 字段描述                                        |

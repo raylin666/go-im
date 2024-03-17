@@ -3,11 +3,10 @@
 
 openapi: 3.0.3
 info:
-    title: Heartbeat API
-    description: The Heartbeat service definition.
+    title: ""
     version: 0.0.1
 paths:
-    /heartbeat:
+    /api/heartbeat:
         get:
             tags:
                 - Heartbeat
@@ -20,8 +19,62 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.PONEResponse'
+    /api/manager/create:
+        post:
+            tags:
+                - Manager
+            description: Manager detection
+            operationId: Manager_Create
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.ManagerCreateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.ManagerCreateResponse'
 components:
     schemas:
+        v1.ManagerCreateRequest:
+            type: object
+            properties:
+                ident:
+                    type: string
+                name:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                expiredAt:
+                    type: string
+                    format: date-time
+        v1.ManagerCreateResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                ident:
+                    type: string
+                name:
+                    type: string
+                key:
+                    type: string
+                secret:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                expiredAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
         v1.PONEResponse:
             type: object
             properties:
@@ -29,3 +82,6 @@ components:
                     type: string
 tags:
     - name: Heartbeat
+      description: The Heartbeat service definition.
+    - name: Manager
+      description: The Manager service definition.

@@ -16,7 +16,7 @@
     "application/json"
   ],
   "paths": {
-    "/heartbeat": {
+    "/api/heartbeat": {
       "get": {
         "summary": "Heartbeat detection",
         "operationId": "Heartbeat_PONE",

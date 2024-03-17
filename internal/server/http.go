@@ -20,7 +20,8 @@ import (
 // NewHTTPServer new a HTTP server.
 func NewHTTPServer(
 	c *config.Server,
-	heartbeat *service.HeartbeatService,
+	apiHeartbeat *service.HeartbeatService,
+	apiManager *service.ManagerService,
 	apiHandler *api.Handler,
 	wsManager *websocket.Manager,
 	logger *logger.Logger) *http.Server {
@@ -53,7 +54,8 @@ func NewHTTPServer(
 	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))
 
 	// HTTP 服务路由处理器
-	v1.RegisterHeartbeatHTTPServer(srv, heartbeat)
+	v1.RegisterHeartbeatHTTPServer(srv, apiHeartbeat)
+	v1.RegisterManagerHTTPServer(srv, apiManager)
 
 	return srv
 }

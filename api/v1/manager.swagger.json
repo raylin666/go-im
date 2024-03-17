@@ -1,0 +1,143 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "v1/manager.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Manager"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/manager/create": {
+      "post": {
+        "summary": "Manager detection",
+        "operationId": "Manager_Create",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/v1ManagerCreateResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/v1ManagerCreateRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "v1ManagerCreateRequest": {
+      "type": "object",
+      "properties": {
+        "ident": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1ManagerStatus"
+        },
+        "expired_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1ManagerCreateResponse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "ident": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "secret": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1ManagerStatus"
+        },
+        "expired_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "v1ManagerStatus": {
+      "type": "string",
+      "enum": [
+        "CLOSE",
+        "OPEN",
+        "FREEZE"
+      ],
+      "default": "CLOSE"
+    }
+  }
+}

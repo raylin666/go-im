@@ -179,6 +179,48 @@ func ErrorDataHandlerError(format string, args ...interface{}) *errors.Error {
 	return errors.New(422, ErrorReason_DATA_HANDLER_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
+// 数据表已存在
+func IsDataTableAlreadyExists(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DATA_TABLE_ALREADY_EXISTS.String() && e.Code == 500
+}
+
+// 数据表已存在
+func ErrorDataTableAlreadyExists(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_TABLE_ALREADY_EXISTS.String(), fmt.Sprintf(format, args...))
+}
+
+// 创建数据表失败
+func IsDataTableCreateError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DATA_TABLE_CREATE_ERROR.String() && e.Code == 500
+}
+
+// 创建数据表失败
+func ErrorDataTableCreateError(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_TABLE_CREATE_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
+// 重命名数据表失败
+func IsDataTableRenameError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DATA_TABLE_RENAME_ERROR.String() && e.Code == 500
+}
+
+// 重命名数据表失败
+func ErrorDataTableRenameError(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_TABLE_RENAME_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
 // 无效ID值
 func IsIdInvalidValueError(err error) bool {
 	if err == nil {

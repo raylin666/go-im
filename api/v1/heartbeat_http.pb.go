@@ -29,7 +29,7 @@ type HeartbeatHTTPServer interface {
 
 func RegisterHeartbeatHTTPServer(s *http.Server, srv HeartbeatHTTPServer) {
 	r := s.Route("/")
-	r.GET("/heartbeat", _Heartbeat_PONE0_HTTP_Handler(srv))
+	r.GET("/api/heartbeat", _Heartbeat_PONE0_HTTP_Handler(srv))
 }
 
 func _Heartbeat_PONE0_HTTP_Handler(srv HeartbeatHTTPServer) func(ctx http.Context) error {
@@ -65,7 +65,7 @@ func NewHeartbeatHTTPClient(client *http.Client) HeartbeatHTTPClient {
 
 func (c *HeartbeatHTTPClientImpl) PONE(ctx context.Context, in *emptypb.Empty, opts ...http.CallOption) (*PONEResponse, error) {
 	var out PONEResponse
-	pattern := "/heartbeat"
+	pattern := "/api/heartbeat"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationHeartbeatPONE))
 	opts = append(opts, http.PathTemplate(pattern))
