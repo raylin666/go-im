@@ -19,12 +19,14 @@ type Client struct {
 	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
 	AppKey        uint64          // 应用KEY
-	AppId         uint32          // 登录的平台ID (App/Web/iOS)
-	UserId        string          // 用户ID
 	FirstTime     uint64          // 首次连接时间
 	HeartbeatTime uint64          // 上次心跳时间
-	LoginTime     uint64          // 用户登录时间
-	LoginIp       string          // 用户登录IP
+
+	// TODO 用户相关 (登录之后才有)
+	UserId        string // 用户ID
+	LoginPlatform uint32 // 登录的平台ID (App/Web/iOS)
+	LoginTime     uint64 // 用户登录时间
+	LoginIp       string // 用户登录IP
 }
 
 func NewClient(key uint64, conn *websocket.Conn) (client *Client) {

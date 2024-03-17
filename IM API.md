@@ -114,7 +114,7 @@ server {
 
 ### WebSocket 接口文档
 
-<i> WebSocket 地址: `ws://im.docker` </i>
+<i> WebSocket 地址 (key、secret 为应用授权值): `ws://im.docker?key=2465562260&secret=92f57e94c7af48b1af8980ef2b843b5b` </i>
 
 ###### 请求消息协议
 
