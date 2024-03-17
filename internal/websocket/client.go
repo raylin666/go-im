@@ -18,19 +18,22 @@ type Client struct {
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
+	AppKey        uint64          // 应用KEY
 	AppId         uint32          // 登录的平台ID (App/Web/iOS)
 	UserId        string          // 用户ID
 	FirstTime     uint64          // 首次连接时间
 	HeartbeatTime uint64          // 上次心跳时间
 	LoginTime     uint64          // 用户登录时间
+	LoginIp       string          // 用户登录IP
 }
 
-func NewClient(conn *websocket.Conn) (client *Client) {
+func NewClient(key uint64, conn *websocket.Conn) (client *Client) {
 	var currentTime = uint64(time.Now().Unix())
 	client = &Client{
 		Addr:          conn.RemoteAddr().String(),
 		Conn:          conn,
 		Send:          make(chan []byte, 100), // 默认预创建容量为100的消息数据包
+		AppKey:        key,
 		FirstTime:     currentTime,
 		HeartbeatTime: currentTime,
 	}

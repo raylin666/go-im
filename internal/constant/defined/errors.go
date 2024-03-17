@@ -22,6 +22,9 @@ var (
 	ErrorIdInvalidValueError    = api.ErrorIdInvalidValueError("无效ID值")
 	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行事件")
 	ErrorNotLoginError          = api.ErrorNotLoginError("请先登录后再操作")
-	ErrorNotVisitAuth           = api.ErrorNotVisitAuth("没有访问权限")
+	ErrorNotVisitAuth           = api.ErrorNotVisitAuth("没有访问权限, 请联系管理员")
+	ErrorAppAuthClose           = api.ErrorAppAuthClose("应用权限已被关闭, 请联系管理员")
+	ErrorAppAuthExpired         = api.ErrorAppAuthExpired("应用已过期, 请联系管理员")
+
 	ErrorWebsocketUpgraderError = api.ErrorWebsocketUpgraderError("WebSocket 协议升级失败")
 )

@@ -50,8 +50,12 @@ enum ErrorReason {
 
   // 请先登录后再操作
   NOT_LOGIN_ERROR = 203001 [(errors.code) = 401];
-  // 没有访问权限
+  // 没有访问权限, 请联系管理员
   NOT_VISIT_AUTH = 203002 [(errors.code) = 401];
+  // 应用权限已被关闭, 请联系管理员
+  APP_AUTH_CLOSE = 203003 [(errors.code) = 401];
+  // 应用已过期, 请联系管理员
+  APP_AUTH_EXPIRED = 203004 [(errors.code) = 401];
 
   // WebSocket 协议升级失败
   WEBSOCKET_UPGRADER_ERROR = 204001 [(errors.code) = 400];

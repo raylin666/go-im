@@ -32,7 +32,7 @@ func (uc *ManagerUsecase) Create(ctx context.Context, req *types.CreateRequest) 
 	var createData types.CreateData
 	createData.Ident = req.Ident
 	createData.Name = req.Name
-	createData.Key = uuidApp.ID()
+	createData.Key = uint64(uuidApp.ID())
 	createData.Secret = strings.ReplaceAll(uuidApp.String(), "-", "")
 	createData.Status = int8(req.Status)
 	createData.ExpiredAt = req.ExpiredAt

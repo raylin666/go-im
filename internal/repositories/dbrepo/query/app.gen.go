@@ -33,7 +33,7 @@ func newApp(db *gorm.DB, opts ...gen.DOOption) app {
 	_app.DeletedAt = field.NewField(tableName, "deleted_at")
 	_app.Ident = field.NewString(tableName, "ident")
 	_app.Name = field.NewString(tableName, "name")
-	_app.Key = field.NewUint32(tableName, "key")
+	_app.Key = field.NewUint64(tableName, "key")
 	_app.Secret = field.NewString(tableName, "secret")
 	_app.Status = field.NewInt8(tableName, "status")
 	_app.ExpiredAt = field.NewTime(tableName, "expired_at")
@@ -53,7 +53,7 @@ type app struct {
 	DeletedAt field.Field
 	Ident     field.String
 	Name      field.String
-	Key       field.Uint32
+	Key       field.Uint64
 	Secret    field.String
 	Status    field.Int8
 	ExpiredAt field.Time
@@ -79,7 +79,7 @@ func (a *app) updateTableName(table string) *app {
 	a.DeletedAt = field.NewField(table, "deleted_at")
 	a.Ident = field.NewString(table, "ident")
 	a.Name = field.NewString(table, "name")
-	a.Key = field.NewUint32(table, "key")
+	a.Key = field.NewUint64(table, "key")
 	a.Secret = field.NewString(table, "secret")
 	a.Status = field.NewInt8(table, "status")
 	a.ExpiredAt = field.NewTime(table, "expired_at")

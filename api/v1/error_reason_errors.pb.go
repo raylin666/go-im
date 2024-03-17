@@ -263,7 +263,7 @@ func ErrorNotLoginError(format string, args ...interface{}) *errors.Error {
 	return errors.New(401, ErrorReason_NOT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
-// 没有访问权限
+// 没有访问权限, 请联系管理员
 func IsNotVisitAuth(err error) bool {
 	if err == nil {
 		return false
@@ -272,9 +272,37 @@ func IsNotVisitAuth(err error) bool {
 	return e.Reason == ErrorReason_NOT_VISIT_AUTH.String() && e.Code == 401
 }
 
-// 没有访问权限
+// 没有访问权限, 请联系管理员
 func ErrorNotVisitAuth(format string, args ...interface{}) *errors.Error {
 	return errors.New(401, ErrorReason_NOT_VISIT_AUTH.String(), fmt.Sprintf(format, args...))
+}
+
+// 应用权限已被关闭, 请联系管理员
+func IsAppAuthClose(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_APP_AUTH_CLOSE.String() && e.Code == 401
+}
+
+// 应用权限已被关闭, 请联系管理员
+func ErrorAppAuthClose(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_APP_AUTH_CLOSE.String(), fmt.Sprintf(format, args...))
+}
+
+// 应用已过期, 请联系管理员
+func IsAppAuthExpired(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_APP_AUTH_EXPIRED.String() && e.Code == 401
+}
+
+// 应用已过期, 请联系管理员
+func ErrorAppAuthExpired(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_APP_AUTH_EXPIRED.String(), fmt.Sprintf(format, args...))
 }
 
 // WebSocket 协议升级失败

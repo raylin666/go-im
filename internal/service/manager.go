@@ -36,7 +36,7 @@ func (s *ManagerService) Create(ctx context.Context, req *v1.ManagerCreateReques
 		Id:        uint64(createResponse.Id),
 		Ident:     createResponse.Ident,
 		Name:      createResponse.Name,
-		Key:       uint64(createResponse.Key),
+		Key:       createResponse.Key,
 		Secret:    createResponse.Secret,
 		Status:    v1.ManagerStatus(createResponse.Status),
 		ExpiredAt: timestamppb.New(createResponse.ExpiredAt),
