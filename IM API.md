@@ -120,29 +120,30 @@ server {
 
 > 格式参考示例: `{"seq": "2938372621", "event": "ping", "data": {}}`
 
-| 字段值   | 字段类型      | 是否必须 | 字段描述                                               |
-|-------|-----------|------|----------------------------------------------------|
-| seq   | string    | 是    | 消息唯一ID                                             |
-| event | string    | 是    | 消息事件, 该值请参考 [请求消息事件](#message_event_req) , 否则为无效事件 |
-| data  | interface | 否    | JSON 数据包                                           |
+| 字段值   | 字段类型      | 是否必须 | 字段描述                                                              |
+|-------|-----------|------|-------------------------------------------------------------------|
+| seq   | string    | 是    | 消息唯一ID                                                            |
+| event | string    | 是    | 消息事件, 该值请参考 [请求消息事件](#message_event_req) , 否则为无效事件                |
+| data  | interface | 否    | JSON 数据包, 不同事件设定不同的数据包, 具体参考 [请求消息事件](#message_event_req) 的事件数据结构 |
 
 ###### 请求消息事件
 
 <a id="message_event_req"></a>
 
-| 事件名称 | 事件内容 | 事件描述                |
-|------|------|---------------------|
-| ping | 无    | 发送 Socket PING 心跳检测 |
+| 事件名称  | 事件数据结构                                                 | 事件描述                   |
+|-------|--------------------------------------------------------|------------------------|
+| ping  | 无                                                      | 发送 Socket PING 心跳检测    |
+| login | [WebSocketLoginRequest](#struct_WebSocketLoginRequest) | 账号登录 (必须登录完成后才能进行用户事件) |
 
 ###### 响应消息协议
 
 > 格式参考示例: `{"seq":"2938372621","event":"ping","response":{"code":200,"message":"OK","data":"PONG"}}`
 
-| 字段值      | 字段类型                                       | 是否必须 | 字段描述                                         |
-|----------|--------------------------------------------|------|----------------------------------------------|
-| seq      | string                                     | 是    | 消息唯一ID                                       |
-| event    | string                                     | 是    | 消息事件, 该值请参考 [响应消息事件](#message_event_resp) 解析 |
-| response | [MessageResponse](#struct_MessageResponse) | 是    | 消息内容                                         |
+| 字段值      | 字段类型                                                         | 是否必须 | 字段描述                                         |
+|----------|--------------------------------------------------------------|------|----------------------------------------------|
+| seq      | string                                                       | 是    | 消息唯一ID                                       |
+| event    | string                                                       | 是    | 消息事件, 该值请参考 [响应消息事件](#message_event_resp) 解析 |
+| response | [WebSocketMessageResponse](#struct_WebSocketMessageResponse) | 是    | 消息内容                                         |
 
 ###### 响应消息事件
 
@@ -154,7 +155,7 @@ server {
 
 ###### 响应状态码
 
-<a id="message_responseCode"></a>
+<a id="message_WebSocketResponseCode"></a>
 
 | CODE | MESSAGE |
 |------|---------|
@@ -162,14 +163,21 @@ server {
 
 ### 数据结构
 
-###### [WebSocket] 消息响应 MessageResponse
+###### [WebSocket] 消息响应 WebSocketMessageResponse
 
-<a id="struct_MessageResponse"></a>
+<a id="struct_WebSocketMessageResponse"></a>
 
-| 字段值     | 字段类型      | 是否必须 | 字段描述                                        |
-|---------|-----------|------|---------------------------------------------|
-| code    | uint32    | 是    | 响应状态码, 该值请参考 [响应状态码](#message_responseCode) |
-| message | string    | 是    | 响应描述                                        |
-| data    | interface | 是    | JSON 数据包                                    |
+| 字段值     | 字段类型      | 是否必须 | 字段描述                                                 |
+|---------|-----------|------|------------------------------------------------------|
+| code    | uint32    | 是    | 响应状态码, 该值请参考 [响应状态码](#message_WebSocketResponseCode) |
+| message | string    | 是    | 响应描述                                                 |
+| data    | interface | 是    | JSON 数据包                                             |
 
+###### [WebSocket] - [请求事件: login] 账号登录 WebSocketLoginRequest
+
+<a id="struct_WebSocketLoginRequest"></a>
+
+| 字段值      | 字段类型      | 是否必须 | 字段描述     |
+|----------|-----------|------|----------|
+| user_id  | string    | 是    | 用户ID     |
 

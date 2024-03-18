@@ -54,7 +54,7 @@ func (m *Manager) WithEventHandler(event string, fn EventDisposeFunc) {
 	m.events[event] = fn
 }
 
-// WithEventHandler 获取处理事件
+// GetEventHandler 获取处理事件
 func (m *Manager) GetEventHandler(event string) (value EventDisposeFunc, ok bool) {
 	m.eventRWMutex.RLock()
 	defer m.eventRWMutex.RUnlock()

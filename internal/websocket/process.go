@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"mt/internal/constant/defined"
-	"mt/internal/websocket/model"
+	"mt/internal/websocket/types"
 )
 
 type Process struct {
@@ -32,7 +32,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 	}()
 
 	// TODO 数据包合法性校验/解析消息数据包
-	request := &model.Request{}
+	request := &types.Request{}
 	err := json.Unmarshal(message, request)
 	if err != nil {
 		Logger(ctx).Error("数据包合法性校验失败 json.Unmarshal", logAddr, logMessage, zap.Error(err))
@@ -79,7 +79,7 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 		Logger(ctx).Warn(fmt.Sprintf("处理事件 %s 不存在!", event), logAddr, logSeq, logEvent, logData)
 	}
 
-	responseHead := model.NewResponseHead(seq, event, responseCode, responseMessage, responseData)
+	responseHead := types.NewResponseHead(seq, event, responseCode, responseMessage, responseData)
 
 	headByte, err := json.Marshal(responseHead)
 	if err != nil {
@@ -93,16 +93,16 @@ func (p *Process) HandlerMessage(ctx context.Context, message []byte) {
 	}
 
 	var (
-		logAppId           = zap.Uint32("app_id", p.Client.AppId)
+		logAppKey          = zap.Uint64("app_key", p.Client.AppKey)
 		logUserId          = zap.String("user_id", p.Client.UserId)
 		logResponseMessage = zap.String("message", string(headByte))
 	)
 
 	ok := p.Client.SendMessage(ctx, headByte)
 	if ok {
-		Logger(ctx).Info("发送消息成功", logAddr, logAppId, logUserId, logResponseMessage)
+		Logger(ctx).Info("发送消息成功", logAddr, logAppKey, logUserId, logResponseMessage)
 	} else {
-		Logger(ctx).Error("发送消息失败", logAddr, logAppId, logUserId, logResponseMessage)
+		Logger(ctx).Error("发送消息失败", logAddr, logAppKey, logUserId, logResponseMessage)
 	}
 
 	return

@@ -6,6 +6,7 @@ package query
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -129,6 +130,22 @@ func (a app) replaceDB(db *gorm.DB) app {
 }
 
 type appDo struct{ gen.DO }
+
+// FirstByKeyAndSecret where("`key`=@key and `secret`=@secret")
+func (a appDo) FirstByKeyAndSecret(key uint64, secret string) (result model.App, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, key)
+	params = append(params, secret)
+	generateSQL.WriteString("`key`=? and `secret`=? ")
+
+	var executeSQL *gorm.DB
+
+	executeSQL = a.UnderlyingDB().Where(generateSQL.String(), params...).Take(&result)
+	err = executeSQL.Error
+	return
+}
 
 func (a appDo) Debug() *appDo {
 	return a.withDO(a.DO.Debug())

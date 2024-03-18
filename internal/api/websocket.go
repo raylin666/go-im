@@ -32,7 +32,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := dbrepo.NewDefaultDbQuery(h.dbRepo).App
-	m, err := q.WithContext(ctx).Where(q.Key.Eq(uint64(appKey)), q.Secret.Eq(appSecret)).First()
+	m, err := q.WithContext(ctx).FirstByKeyAndSecret(uint64(appKey), appSecret)
 	if err != nil {
 		var e = defined.ErrorNotVisitAuth
 		_, _ = w.Write([]byte(e.GetReason()))

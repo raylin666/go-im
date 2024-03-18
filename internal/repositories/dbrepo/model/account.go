@@ -1,6 +1,9 @@
 package model
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 type Account struct {
 	BaseModel
@@ -13,4 +16,9 @@ type Account struct {
 	LastLoginIp    string     `gorm:"column:last_login_ip;type:string;size:16;comment:最后登录IP" json:"last_login_ip"`
 	FirstLoginTime *time.Time `gorm:"column:first_login_time;comment:首次登录时间" json:"first_login_time"`
 	LastLoginTime  *time.Time `gorm:"column:last_login_time;comment:最后登录时间" json:"last_login_time"`
+}
+
+func AccountTableName(key uint64) (tableName string) {
+	tableName = fmt.Sprintf("account_%d", key)
+	return
 }

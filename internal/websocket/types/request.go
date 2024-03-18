@@ -1,4 +1,4 @@
-package model
+package types
 
 // Request 请求数据格式
 type Request struct {
