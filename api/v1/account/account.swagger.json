@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "v1/manager.proto",
+    "title": "v1/account/account.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "Manager"
+      "name": "Account"
     }
   ],
   "consumes": [
@@ -16,21 +16,21 @@
     "application/json"
   ],
   "paths": {
-    "/api/manager/create": {
+    "/api/account/create": {
       "post": {
-        "summary": "Manager detection",
-        "operationId": "Manager_Create",
+        "summary": "Account detection",
+        "operationId": "Account_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1ManagerCreateResponse"
+              "$ref": "#/definitions/v1accountCreateResponse"
             }
           },
           "default": {
             "description": "An unexpected error response.",
             "schema": {
-              "$ref": "#/definitions/rpcStatus"
+              "$ref": "#/definitions/googlerpcStatus"
             }
           }
         },
@@ -40,27 +40,18 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1ManagerCreateRequest"
+              "$ref": "#/definitions/v1accountCreateRequest"
             }
           }
         ],
         "tags": [
-          "Manager"
+          "Account"
         ]
       }
     }
   },
   "definitions": {
-    "protobufAny": {
-      "type": "object",
-      "properties": {
-        "@type": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": {}
-    },
-    "rpcStatus": {
+    "googlerpcStatus": {
       "type": "object",
       "properties": {
         "code": {
@@ -79,37 +70,18 @@
         }
       }
     },
-    "v1ManagerCreateRequest": {
+    "protobufAny": {
       "type": "object",
       "properties": {
-        "ident": {
+        "@type": {
           "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
-        "status": {
-          "$ref": "#/definitions/v1ManagerStatus"
-        },
-        "expired_at": {
-          "type": "string",
-          "format": "date-time"
         }
-      }
+      },
+      "additionalProperties": {}
     },
-    "v1ManagerCreateResponse": {
+    "v1accountCreateRequest": {
       "type": "object",
       "properties": {
-        "id": {
-          "type": "string",
-          "format": "uint64"
-        },
-        "ident": {
-          "type": "string"
-        },
-        "name": {
-          "type": "string"
-        },
         "key": {
           "type": "string",
           "format": "uint64"
@@ -117,12 +89,43 @@
         "secret": {
           "type": "string"
         },
-        "status": {
-          "$ref": "#/definitions/v1ManagerStatus"
+        "usersig": {
+          "type": "string"
         },
-        "expired_at": {
-          "type": "string",
-          "format": "date-time"
+        "user_id": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1accountStatus"
+        },
+        "is_admin": {
+          "type": "boolean"
+        }
+      }
+    },
+    "v1accountCreateResponse": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/v1accountStatus"
+        },
+        "is_admin": {
+          "type": "boolean"
         },
         "created_at": {
           "type": "string",
@@ -130,12 +133,11 @@
         }
       }
     },
-    "v1ManagerStatus": {
+    "v1accountStatus": {
       "type": "string",
       "enum": [
         "CLOSE",
-        "OPEN",
-        "FREEZE"
+        "OPEN"
       ],
       "default": "CLOSE"
     }

@@ -6,6 +6,25 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/account/create:
+        post:
+            tags:
+                - Account
+            description: Account detection
+            operationId: Account_Create
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.CreateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.CreateResponse'
     /api/heartbeat:
         get:
             tags:
@@ -29,7 +48,7 @@ paths:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/v1.ManagerCreateRequest'
+                            $ref: '#/components/schemas/v1.manager.CreateRequest'
                 required: true
             responses:
                 "200":
@@ -37,10 +56,52 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/v1.ManagerCreateResponse'
+                                $ref: '#/components/schemas/v1.manager.CreateResponse'
 components:
     schemas:
-        v1.ManagerCreateRequest:
+        v1.PONEResponse:
+            type: object
+            properties:
+                message:
+                    type: string
+        v1.account.CreateRequest:
+            type: object
+            properties:
+                key:
+                    type: string
+                secret:
+                    type: string
+                usersig:
+                    type: string
+                userId:
+                    type: string
+                username:
+                    type: string
+                avatar:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                isAdmin:
+                    type: boolean
+        v1.account.CreateResponse:
+            type: object
+            properties:
+                userId:
+                    type: string
+                username:
+                    type: string
+                avatar:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                isAdmin:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+        v1.manager.CreateRequest:
             type: object
             properties:
                 ident:
@@ -53,7 +114,7 @@ components:
                 expiredAt:
                     type: string
                     format: date-time
-        v1.ManagerCreateResponse:
+        v1.manager.CreateResponse:
             type: object
             properties:
                 id:
@@ -75,12 +136,9 @@ components:
                 createdAt:
                     type: string
                     format: date-time
-        v1.PONEResponse:
-            type: object
-            properties:
-                message:
-                    type: string
 tags:
+    - name: Account
+      description: The Account service definition.
     - name: Heartbeat
       description: The Heartbeat service definition.
     - name: Manager

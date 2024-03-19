@@ -2,14 +2,14 @@ package types
 
 import "time"
 
-type CreateRequest struct {
+type ManagerCreateRequest struct {
 	Ident     string    `json:"ident"`
 	Name      string    `json:"name"`
-	Status    uint32    `json:"status"`
+	Status    int8      `json:"status"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-type CreateResponse struct {
+type ManagerCreateResponse struct {
 	Id        int       `json:"id"`
 	Ident     string    `json:"ident"`
 	Name      string    `json:"name"`
@@ -20,7 +20,7 @@ type CreateResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type CreateData struct {
+type ManagerCreateData struct {
 	Ident     string    `json:"ident"`
 	Name      string    `json:"name"`
 	Key       uint64    `json:"key"`

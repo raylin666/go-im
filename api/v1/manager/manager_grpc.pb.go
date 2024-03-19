@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v3.21.12
-// source: v1/manager.proto
+// source: v1/manager/manager.proto
 
-package v1
+package manager
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Manager_Create_FullMethodName = "/v1.Manager/Create"
+	Manager_Create_FullMethodName = "/v1.manager.Manager/Create"
 )
 
 // ManagerClient is the client API for Manager service.
@@ -27,7 +27,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ManagerClient interface {
 	// Manager detection
-	Create(ctx context.Context, in *ManagerCreateRequest, opts ...grpc.CallOption) (*ManagerCreateResponse, error)
+	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 }
 
 type managerClient struct {
@@ -38,8 +38,8 @@ func NewManagerClient(cc grpc.ClientConnInterface) ManagerClient {
 	return &managerClient{cc}
 }
 
-func (c *managerClient) Create(ctx context.Context, in *ManagerCreateRequest, opts ...grpc.CallOption) (*ManagerCreateResponse, error) {
-	out := new(ManagerCreateResponse)
+func (c *managerClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
+	out := new(CreateResponse)
 	err := c.cc.Invoke(ctx, Manager_Create_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -52,7 +52,7 @@ func (c *managerClient) Create(ctx context.Context, in *ManagerCreateRequest, op
 // for forward compatibility
 type ManagerServer interface {
 	// Manager detection
-	Create(context.Context, *ManagerCreateRequest) (*ManagerCreateResponse, error)
+	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	mustEmbedUnimplementedManagerServer()
 }
 
@@ -60,7 +60,7 @@ type ManagerServer interface {
 type UnimplementedManagerServer struct {
 }
 
-func (UnimplementedManagerServer) Create(context.Context, *ManagerCreateRequest) (*ManagerCreateResponse, error) {
+func (UnimplementedManagerServer) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 func (UnimplementedManagerServer) mustEmbedUnimplementedManagerServer() {}
@@ -77,7 +77,7 @@ func RegisterManagerServer(s grpc.ServiceRegistrar, srv ManagerServer) {
 }
 
 func _Manager_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ManagerCreateRequest)
+	in := new(CreateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func _Manager_Create_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: Manager_Create_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ManagerServer).Create(ctx, req.(*ManagerCreateRequest))
+		return srv.(ManagerServer).Create(ctx, req.(*CreateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -98,7 +98,7 @@ func _Manager_Create_Handler(srv interface{}, ctx context.Context, dec func(inte
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Manager_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "v1.Manager",
+	ServiceName: "v1.manager.Manager",
 	HandlerType: (*ManagerServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -107,5 +107,5 @@ var Manager_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "v1/manager.proto",
+	Metadata: "v1/manager/manager.proto",
 }

@@ -15,7 +15,8 @@ var ProviderSet = wire.NewSet(
 	NewData,
 	repositories.NewDataRepo,
 	NewHeartbeatRepo,
-	NewManagerRepo)
+	NewManagerRepo,
+	NewAccountRepo)
 
 // Data .
 type Data struct {

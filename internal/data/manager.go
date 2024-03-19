@@ -25,7 +25,7 @@ func NewManagerRepo(data *Data, logger *logger.Logger) biz.ManagerRepo {
 	}
 }
 
-func (r *managerRepo) Create(ctx context.Context, data types.CreateData) (*model.App, error) {
+func (r *managerRepo) Create(ctx context.Context, data types.ManagerCreateData) (*model.App, error) {
 	app := &model.App{
 		Ident:     data.Ident,
 		Name:      data.Name,

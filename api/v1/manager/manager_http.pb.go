@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-http v2.7.2
 // - protoc             v3.21.12
-// source: v1/manager.proto
+// source: v1/manager/manager.proto
 
-package v1
+package manager
 
 import (
 	context "context"
@@ -19,11 +19,11 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationManagerCreate = "/v1.Manager/Create"
+const OperationManagerCreate = "/v1.manager.Manager/Create"
 
 type ManagerHTTPServer interface {
 	// Create Manager detection
-	Create(context.Context, *ManagerCreateRequest) (*ManagerCreateResponse, error)
+	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 }
 
 func RegisterManagerHTTPServer(s *http.Server, srv ManagerHTTPServer) {
@@ -33,7 +33,7 @@ func RegisterManagerHTTPServer(s *http.Server, srv ManagerHTTPServer) {
 
 func _Manager_Create0_HTTP_Handler(srv ManagerHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
-		var in ManagerCreateRequest
+		var in CreateRequest
 		if err := ctx.Bind(&in); err != nil {
 			return err
 		}
@@ -42,19 +42,19 @@ func _Manager_Create0_HTTP_Handler(srv ManagerHTTPServer) func(ctx http.Context)
 		}
 		http.SetOperation(ctx, OperationManagerCreate)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-			return srv.Create(ctx, req.(*ManagerCreateRequest))
+			return srv.Create(ctx, req.(*CreateRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
 			return err
 		}
-		reply := out.(*ManagerCreateResponse)
+		reply := out.(*CreateResponse)
 		return ctx.Result(200, reply)
 	}
 }
 
 type ManagerHTTPClient interface {
-	Create(ctx context.Context, req *ManagerCreateRequest, opts ...http.CallOption) (rsp *ManagerCreateResponse, err error)
+	Create(ctx context.Context, req *CreateRequest, opts ...http.CallOption) (rsp *CreateResponse, err error)
 }
 
 type ManagerHTTPClientImpl struct {
@@ -65,8 +65,8 @@ func NewManagerHTTPClient(client *http.Client) ManagerHTTPClient {
 	return &ManagerHTTPClientImpl{client}
 }
 
-func (c *ManagerHTTPClientImpl) Create(ctx context.Context, in *ManagerCreateRequest, opts ...http.CallOption) (*ManagerCreateResponse, error) {
-	var out ManagerCreateResponse
+func (c *ManagerHTTPClientImpl) Create(ctx context.Context, in *CreateRequest, opts ...http.CallOption) (*CreateResponse, error) {
+	var out CreateResponse
 	pattern := "/api/manager/create"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationManagerCreate))

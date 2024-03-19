@@ -3,6 +3,8 @@ package server
 import (
 	"github.com/go-kratos/kratos/v2/middleware/metadata"
 	"mt/api/v1"
+	accountPb "mt/api/v1/account"
+	managerPb "mt/api/v1/manager"
 	"mt/config"
 	"mt/internal/middleware/auth"
 	logging "mt/internal/middleware/logger"
@@ -19,6 +21,7 @@ func NewGRPCServer(
 	c *config.Server,
 	apiHeartbeat *service.HeartbeatService,
 	apiManager *service.ManagerService,
+	apiAccount *service.AccountService,
 	logger *logger.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -42,7 +45,8 @@ func NewGRPCServer(
 	srv := grpc.NewServer(opts...)
 
 	v1.RegisterHeartbeatServer(srv, apiHeartbeat)
-	v1.RegisterManagerServer(srv, apiManager)
+	managerPb.RegisterManagerServer(srv, apiManager)
+	accountPb.RegisterAccountServer(srv, apiAccount)
 
 	return srv
 }

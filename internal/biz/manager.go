@@ -13,7 +13,7 @@ type Manager struct {
 }
 
 type ManagerRepo interface {
-	Create(context.Context, types.CreateData) (*model.App, error)
+	Create(context.Context, types.ManagerCreateData) (*model.App, error)
 }
 
 type ManagerUsecase struct {
@@ -25,11 +25,11 @@ func NewManagerUsecase(repo ManagerRepo, logger *logger.Logger) *ManagerUsecase 
 	return &ManagerUsecase{repo: repo, log: logger}
 }
 
-func (uc *ManagerUsecase) Create(ctx context.Context, req *types.CreateRequest) (*types.CreateResponse, error) {
+func (uc *ManagerUsecase) Create(ctx context.Context, req *types.ManagerCreateRequest) (*types.ManagerCreateResponse, error) {
 	// 生成应用ID
 	uuidApp := uuid.New()
 
-	var createData types.CreateData
+	var createData types.ManagerCreateData
 	createData.Ident = req.Ident
 	createData.Name = req.Name
 	createData.Key = uint64(uuidApp.ID())
@@ -42,7 +42,7 @@ func (uc *ManagerUsecase) Create(ctx context.Context, req *types.CreateRequest) 
 		return nil, err
 	}
 
-	resp := &types.CreateResponse{
+	resp := &types.ManagerCreateResponse{
 		Id:        m.ID,
 		Ident:     m.Ident,
 		Name:      m.Name,

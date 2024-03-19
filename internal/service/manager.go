@@ -3,13 +3,13 @@ package service
 import (
 	"context"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"mt/api/v1"
+	pb "mt/api/v1/manager"
 	"mt/internal/biz"
 	"mt/internal/constant/types"
 )
 
 type ManagerService struct {
-	v1.UnimplementedManagerServer
+	pb.UnimplementedManagerServer
 
 	uc *biz.ManagerUsecase
 }
@@ -19,11 +19,11 @@ func NewManagerService(uc *biz.ManagerUsecase) *ManagerService {
 }
 
 // Create 创建应用
-func (s *ManagerService) Create(ctx context.Context, req *v1.ManagerCreateRequest) (*v1.ManagerCreateResponse, error) {
-	createRequest := &types.CreateRequest{
+func (s *ManagerService) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
+	createRequest := &types.ManagerCreateRequest{
 		Ident:     req.GetIdent(),
 		Name:      req.GetName(),
-		Status:    uint32(req.GetStatus()),
+		Status:    int8(req.GetStatus()),
 		ExpiredAt: req.GetExpiredAt().AsTime(),
 	}
 
@@ -32,13 +32,13 @@ func (s *ManagerService) Create(ctx context.Context, req *v1.ManagerCreateReques
 		return nil, err
 	}
 
-	resp := &v1.ManagerCreateResponse{
+	resp := &pb.CreateResponse{
 		Id:        uint64(createResponse.Id),
 		Ident:     createResponse.Ident,
 		Name:      createResponse.Name,
 		Key:       createResponse.Key,
 		Secret:    createResponse.Secret,
-		Status:    v1.ManagerStatus(createResponse.Status),
+		Status:    pb.Status(createResponse.Status),
 		ExpiredAt: timestamppb.New(createResponse.ExpiredAt),
 		CreatedAt: timestamppb.New(createResponse.CreatedAt),
 	}
