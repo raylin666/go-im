@@ -32,29 +32,11 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	q := dbrepo.NewDefaultDbQuery(h.dbRepo).App
-	m, err := q.WithContext(ctx).FirstByKeyAndSecret(uint64(appKey), appSecret)
-	if err != nil {
-		var e = defined.ErrorNotVisitAuth
-		_, _ = w.Write([]byte(e.GetReason()))
-		w.WriteHeader(int(e.GetCode()))
-
-		return
-	}
-
-	// 应用状态已关闭或已冻结
-	if m.Status != model.AppStatusOpen {
-		var e = defined.ErrorAppAuthClose
-		_, _ = w.Write([]byte(e.GetReason()))
-		w.WriteHeader(int(e.GetCode()))
-
-		return
-	}
-
-	// 应用已过期
-	if m.ExpiredAt.Before(time.Now()) {
-		var e = defined.ErrorAppAuthExpired
-		_, _ = w.Write([]byte(e.GetReason()))
-		w.WriteHeader(int(e.GetCode()))
+	m, _ := q.WithContext(ctx).FirstByKeyAndSecret(uint64(appKey), appSecret)
+	modelErr := model.AppAvailableByKeyAndSecret(&m)
+	if modelErr != nil {
+		_, _ = w.Write([]byte(modelErr.GetReason()))
+		w.WriteHeader(int(modelErr.GetCode()))
 
 		return
 	}

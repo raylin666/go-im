@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-http v2.7.2
 // - protoc             v3.21.12
-// source: v1/account/account.proto
+// source: v1/account/service.proto
 
 package account
 
@@ -19,19 +19,19 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationAccountCreate = "/v1.account.Account/Create"
+const OperationServiceCreate = "/v1.account.Service/Create"
 
-type AccountHTTPServer interface {
-	// Create Account detection
+type ServiceHTTPServer interface {
+	// Create Service detection
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 }
 
-func RegisterAccountHTTPServer(s *http.Server, srv AccountHTTPServer) {
+func RegisterServiceHTTPServer(s *http.Server, srv ServiceHTTPServer) {
 	r := s.Route("/")
-	r.POST("/api/account/create", _Account_Create1_HTTP_Handler(srv))
+	r.POST("/api/account/create", _Service_Create1_HTTP_Handler(srv))
 }
 
-func _Account_Create1_HTTP_Handler(srv AccountHTTPServer) func(ctx http.Context) error {
+func _Service_Create1_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in CreateRequest
 		if err := ctx.Bind(&in); err != nil {
@@ -40,7 +40,7 @@ func _Account_Create1_HTTP_Handler(srv AccountHTTPServer) func(ctx http.Context)
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationAccountCreate)
+		http.SetOperation(ctx, OperationServiceCreate)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Create(ctx, req.(*CreateRequest))
 		})
@@ -53,23 +53,23 @@ func _Account_Create1_HTTP_Handler(srv AccountHTTPServer) func(ctx http.Context)
 	}
 }
 
-type AccountHTTPClient interface {
+type ServiceHTTPClient interface {
 	Create(ctx context.Context, req *CreateRequest, opts ...http.CallOption) (rsp *CreateResponse, err error)
 }
 
-type AccountHTTPClientImpl struct {
+type ServiceHTTPClientImpl struct {
 	cc *http.Client
 }
 
-func NewAccountHTTPClient(client *http.Client) AccountHTTPClient {
-	return &AccountHTTPClientImpl{client}
+func NewServiceHTTPClient(client *http.Client) ServiceHTTPClient {
+	return &ServiceHTTPClientImpl{client}
 }
 
-func (c *AccountHTTPClientImpl) Create(ctx context.Context, in *CreateRequest, opts ...http.CallOption) (*CreateResponse, error) {
+func (c *ServiceHTTPClientImpl) Create(ctx context.Context, in *CreateRequest, opts ...http.CallOption) (*CreateResponse, error) {
 	var out CreateResponse
 	pattern := "/api/account/create"
 	path := binding.EncodeURL(pattern, in, false)
-	opts = append(opts, http.Operation(OperationAccountCreate))
+	opts = append(opts, http.Operation(OperationServiceCreate))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

@@ -9,9 +9,9 @@ paths:
     /api/account/create:
         post:
             tags:
-                - Account
-            description: Account detection
-            operationId: Account_Create
+                - Service
+            description: Service detection
+            operationId: Service_Create
             requestBody:
                 content:
                     application/json:
@@ -41,9 +41,9 @@ paths:
     /api/manager/create:
         post:
             tags:
-                - Manager
-            description: Manager detection
-            operationId: Manager_Create
+                - Service
+            description: Service detection
+            operationId: Service_Create
             requestBody:
                 content:
                     application/json:
@@ -131,9 +131,9 @@ components:
                     type: string
                     format: date-time
 tags:
-    - name: Account
-      description: The Account service definition.
     - name: Heartbeat
       description: The Heartbeat service definition.
-    - name: Manager
-      description: The Manager service definition.
+    - name: Service
+      description: The Service service definition.
+    - name: Service
+      description: The Service service definition.

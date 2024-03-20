@@ -8,11 +8,11 @@ import "validate/validate.proto";
 
 option go_package = "api/v1/account;account";
 
-// kratos proto client api/v1/account/account.proto
+// kratos proto client api/v1/account/service.proto
 
-// The Account service definition.
-service Account {
-  // Account detection
+// The Service service definition.
+service Service {
+  // Service detection
   rpc Create (CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
       post: "/api/account/create"

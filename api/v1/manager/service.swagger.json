@@ -1,12 +1,12 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "v1/account/account.proto",
+    "title": "v1/manager/service.proto",
     "version": "version not set"
   },
   "tags": [
     {
-      "name": "Account"
+      "name": "Service"
     }
   ],
   "consumes": [
@@ -16,15 +16,15 @@
     "application/json"
   ],
   "paths": {
-    "/api/account/create": {
+    "/api/manager/create": {
       "post": {
-        "summary": "Account detection",
-        "operationId": "Account_Create",
+        "summary": "Service detection",
+        "operationId": "Service_Create",
         "responses": {
           "200": {
             "description": "A successful response.",
             "schema": {
-              "$ref": "#/definitions/v1accountCreateResponse"
+              "$ref": "#/definitions/v1managerCreateResponse"
             }
           },
           "default": {
@@ -40,12 +40,12 @@
             "in": "body",
             "required": true,
             "schema": {
-              "$ref": "#/definitions/v1accountCreateRequest"
+              "$ref": "#/definitions/v1managerCreateRequest"
             }
           }
         ],
         "tags": [
-          "Account"
+          "Service"
         ]
       }
     }
@@ -79,43 +79,50 @@
       },
       "additionalProperties": {}
     },
-    "v1accountCreateRequest": {
+    "v1managerCreateRequest": {
       "type": "object",
       "properties": {
-        "user_id": {
+        "ident": {
           "type": "string"
         },
-        "username": {
-          "type": "string"
-        },
-        "avatar": {
+        "name": {
           "type": "string"
         },
         "status": {
-          "$ref": "#/definitions/v1accountStatus"
+          "$ref": "#/definitions/v1managerStatus"
         },
-        "is_admin": {
-          "type": "boolean"
+        "expired_at": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
-    "v1accountCreateResponse": {
+    "v1managerCreateResponse": {
       "type": "object",
       "properties": {
-        "user_id": {
+        "id": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "ident": {
           "type": "string"
         },
-        "username": {
+        "name": {
           "type": "string"
         },
-        "avatar": {
+        "key": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "secret": {
           "type": "string"
         },
         "status": {
-          "$ref": "#/definitions/v1accountStatus"
+          "$ref": "#/definitions/v1managerStatus"
         },
-        "is_admin": {
-          "type": "boolean"
+        "expired_at": {
+          "type": "string",
+          "format": "date-time"
         },
         "created_at": {
           "type": "string",
@@ -123,11 +130,12 @@
         }
       }
     },
-    "v1accountStatus": {
+    "v1managerStatus": {
       "type": "string",
       "enum": [
         "CLOSE",
-        "OPEN"
+        "OPEN",
+        "FREEZE"
       ],
       "default": "CLOSE"
     }

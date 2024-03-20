@@ -9,7 +9,7 @@ import (
 )
 
 type ManagerService struct {
-	pb.UnimplementedManagerServer
+	pb.UnimplementedServiceServer
 
 	uc *biz.ManagerUsecase
 }

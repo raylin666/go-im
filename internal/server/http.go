@@ -16,6 +16,7 @@ import (
 	"mt/internal/service"
 	"mt/internal/websocket"
 	"mt/pkg/logger"
+	"mt/pkg/repositories"
 	netHttp "net/http"
 )
 
@@ -27,6 +28,7 @@ func NewHTTPServer(
 	apiAccount *service.AccountService,
 	apiHandler *api.Handler,
 	wsManager *websocket.Manager,
+	repo repositories.DataRepo,
 	logger *logger.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -35,7 +37,7 @@ func NewHTTPServer(
 			metadata.Server(),
 			logging.Server(logger),
 			auth.NewJWTAuthServer(),
-			auth.NewAccountAuthServer(),
+			auth.NewAccountAuthServer(repo),
 		),
 		http.ResponseEncoder(encode.ResponseEncoder),
 	}
@@ -59,8 +61,8 @@ func NewHTTPServer(
 
 	// HTTP 服务路由处理器
 	v1.RegisterHeartbeatHTTPServer(srv, apiHeartbeat)
-	managerPb.RegisterManagerHTTPServer(srv, apiManager)
-	accountPb.RegisterAccountHTTPServer(srv, apiAccount)
+	managerPb.RegisterServiceHTTPServer(srv, apiManager)
+	accountPb.RegisterServiceHTTPServer(srv, apiAccount)
 
 	return srv
 }

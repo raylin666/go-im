@@ -41,10 +41,10 @@ func wireApp(configServer *config.Server, configData *config.Data, loggerLogger 
 	accountRepo := data.NewAccountRepo(dataData, loggerLogger)
 	accountUsecase := biz.NewAccountUsecase(accountRepo, loggerLogger)
 	accountService := service.NewAccountService(accountUsecase)
-	grpcServer := server.NewGRPCServer(configServer, heartbeatService, managerService, accountService, loggerLogger)
+	grpcServer := server.NewGRPCServer(configServer, heartbeatService, managerService, accountService, dataRepo, loggerLogger)
 	handler := api.NewHandler(loggerLogger, dataRepo)
 	manager := websocket.NewManager(loggerLogger, dataData)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, managerService, accountService, handler, manager, loggerLogger)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, managerService, accountService, handler, manager, dataRepo, loggerLogger)
 	app := newApp(loggerLogger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()
