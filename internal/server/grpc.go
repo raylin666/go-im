@@ -29,7 +29,8 @@ func NewGRPCServer(
 			validate.Validator(),
 			metadata.Server(),
 			logging.Server(logger),
-			auth.NewAuthServer(),
+			auth.NewJWTAuthServer(),
+			auth.NewAccountAuthServer(),
 		),
 	}
 	if c.Grpc.Network != "" {

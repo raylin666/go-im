@@ -67,12 +67,6 @@ components:
         v1.account.CreateRequest:
             type: object
             properties:
-                key:
-                    type: string
-                secret:
-                    type: string
-                usersig:
-                    type: string
                 userId:
                     type: string
                 username:

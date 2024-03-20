@@ -19,8 +19,6 @@ func NewAccountService(uc *biz.AccountUsecase) *AccountService {
 
 // Create 创建账号
 func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
-	// 权限验证
-
 	createRequest := &types.AccountCreateRequest{
 		UserId:   req.GetUserId(),
 		Username: req.GetUsername(),

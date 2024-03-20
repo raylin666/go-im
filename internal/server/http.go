@@ -34,7 +34,8 @@ func NewHTTPServer(
 			validate.Validator(),
 			metadata.Server(),
 			logging.Server(logger),
-			auth.NewAuthServer(),
+			auth.NewJWTAuthServer(),
+			auth.NewAccountAuthServer(),
 		),
 		http.ResponseEncoder(encode.ResponseEncoder),
 	}

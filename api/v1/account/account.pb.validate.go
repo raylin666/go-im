@@ -57,39 +57,6 @@ func (m *CreateRequest) validate(all bool) error {
 
 	var errors []error
 
-	if m.GetKey() < 0 {
-		err := CreateRequestValidationError{
-			field:  "Key",
-			reason: "value must be greater than or equal to 0",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if utf8.RuneCountInString(m.GetSecret()) < 1 {
-		err := CreateRequestValidationError{
-			field:  "Secret",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	if utf8.RuneCountInString(m.GetUsersig()) < 1 {
-		err := CreateRequestValidationError{
-			field:  "Usersig",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	if l := utf8.RuneCountInString(m.GetUserId()); l < 1 || l > 30 {
 		err := CreateRequestValidationError{
 			field:  "UserId",
