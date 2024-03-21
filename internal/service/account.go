@@ -23,7 +23,6 @@ func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb
 		UserId:   req.GetUserId(),
 		Username: req.GetUsername(),
 		Avatar:   req.GetAvatar(),
-		Status:   int8(req.GetStatus()),
 		IsAdmin:  req.GetIsAdmin(),
 	}
 

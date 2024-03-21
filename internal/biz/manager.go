@@ -34,7 +34,7 @@ func (uc *ManagerUsecase) Create(ctx context.Context, req *types.ManagerCreateRe
 	createData.Name = req.Name
 	createData.Key = uint64(uuidApp.ID())
 	createData.Secret = strings.ReplaceAll(uuidApp.String(), "-", "")
-	createData.Status = int8(req.Status)
+	createData.Status = req.Status
 	createData.ExpiredAt = req.ExpiredAt
 
 	m, err := uc.repo.Create(ctx, createData)

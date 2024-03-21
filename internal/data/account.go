@@ -2,8 +2,10 @@ package data
 
 import (
 	"context"
+	"fmt"
 	"mt/internal/biz"
 	"mt/internal/constant/types"
+	"mt/internal/middleware/auth"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/logger"
 	"time"
@@ -26,12 +28,13 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 		UserId:   data.UserId,
 		Username: data.Username,
 		Avatar:   data.Avatar,
-		Status:   data.Status,
 		IsAdmin:  data.IsAdmin,
 	}
 	account.CreatedAt = time.Now()
 
-	/*q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account.Table()
+	fmt.Println(ctx.Value(auth.AppID))
+
+	/*q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account.Table(model.AccountTableName())
 	if createDataErr := tx.WithContext(ctx).Create(app).Error; createDataErr != nil {
 		tx.Rollback()
 		r.log.UseSQL(ctx).Error("创建应用错误", zap.Any("data", app), zap.Error(createDataErr))

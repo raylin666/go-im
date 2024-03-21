@@ -28,7 +28,6 @@ func (uc *AccountUsecase) Create(ctx context.Context, req *types.AccountCreateRe
 	createData.UserId = req.UserId
 	createData.Username = req.Username
 	createData.Avatar = req.Avatar
-	createData.Status = req.Status
 
 	if req.IsAdmin {
 		createData.IsAdmin = 1

@@ -21,11 +21,6 @@ service Service {
   }
 }
 
-enum Status {
-  CLOSE = 0;
-  OPEN = 1;
-}
-
 message CreateRequest {
   string user_id = 4 [(validate.rules).string = {
     pattern: "^[a-zA-Z0-9]+$",
@@ -34,15 +29,13 @@ message CreateRequest {
   }];
   string username = 5 [(validate.rules).string = {min_len: 1, max_len: 30}];
   string avatar = 6 [(validate.rules).string.uri = true];
-  Status status = 7 [(validate.rules).enum.defined_only = true];
-  bool is_admin = 8;
+  bool is_admin = 7;
 }
 
 message CreateResponse {
   string user_id = 1;
   string username = 2;
   string avatar = 3;
-  Status status = 4;
-  bool is_admin = 5;
-  google.protobuf.Timestamp created_at = 6;
+  bool is_admin = 4;
+  google.protobuf.Timestamp created_at = 5;
 }

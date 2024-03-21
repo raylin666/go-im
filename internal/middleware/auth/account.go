@@ -5,11 +5,27 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/middleware/selector"
 	"github.com/go-kratos/kratos/v2/transport"
+	"google.golang.org/grpc/metadata"
 	"mt/internal/constant/defined"
+	"mt/internal/constant/types"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/repositories"
 	"strconv"
+)
+
+const (
+	// AppKey Headers 头权限应用认证参数名称
+	AppKey     = "key"
+	AppSecret  = "secret"
+	AppUsersig = "usersig"
+	// AppID Context 上下文切换保存的应用权限认证ID名称
+	AppID = "AppID"
+
+	// XMdGlobalKeyName Metadata 元数据传递保存的全局应用权限认证参数名称
+	XMdGlobalKeyName     = "x-md-global-key"
+	XMdGlobalSecretName  = "x-md-global-secret"
+	XMdGlobalUsersigName = "x-md-global-usersig"
 )
 
 var (
@@ -40,25 +56,38 @@ func NewAccountAuthServer(repo repositories.DataRepo) func(handler middleware.Ha
 func AccountMiddlewareHandler(repo repositories.DataRepo) func(handler middleware.Handler) middleware.Handler {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if tr, ok := transport.FromServerContext(ctx); ok {
-				var header = tr.RequestHeader()
+			var (
+				appKey    int
+				appSecret string
+				usersig   string
+			)
 
-				defer func() {}()
-
-				appKey, err := strconv.Atoi(header.Get("key"))
-				appSecret := header.Get("secret")
-				usersig := header.Get("usersig")
-				if err != nil || appKey <= 0 || appSecret == "" || usersig == "" {
-					return nil, defined.ErrorNotVisitAuth
-				}
-
-				q := dbrepo.NewDefaultDbQuery(repo).App
-				m, _ := q.WithContext(ctx).FirstByKeyAndSecret(uint64(appKey), appSecret)
-				modelErr := model.AppAvailableByKeyAndSecret(&m)
-				if modelErr != nil {
-					return nil, defined.ErrorNotVisitAuth
-				}
+			if md, ok := metadata.FromIncomingContext(ctx); ok {
+				appKey, _ = strconv.Atoi(md.Get(XMdGlobalKeyName)[0])
+				appSecret = md.Get(XMdGlobalSecretName)[0]
+				usersig = md.Get(XMdGlobalUsersigName)[0]
+			} else if tr, ok := transport.FromServerContext(ctx); ok {
+				appKey, _ = strconv.Atoi(tr.RequestHeader().Get(AppKey))
+				appSecret = tr.RequestHeader().Get(AppSecret)
+				usersig = tr.RequestHeader().Get(AppUsersig)
 			}
+
+			if appKey <= 0 || appSecret == "" || usersig == "" {
+				return nil, defined.ErrorNotVisitAuth
+			}
+
+			q := dbrepo.NewDefaultDbQuery(repo).App
+			m, _ := q.WithContext(ctx).FirstByKeyAndSecret(uint64(appKey), appSecret)
+			modelErr := model.AppAvailableByKeyAndSecret(&m)
+			if modelErr != nil {
+				return nil, defined.ErrorNotVisitAuth
+			}
+
+			ctx = context.WithValue(ctx, AppID, types.HeaderAppID{
+				Key:     m.Key,
+				Secret:  m.Secret,
+				Usersig: usersig,
+			})
 
 			return handler(ctx, req)
 		}

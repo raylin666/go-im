@@ -73,9 +73,6 @@ components:
                     type: string
                 avatar:
                     type: string
-                status:
-                    type: integer
-                    format: enum
                 isAdmin:
                     type: boolean
         v1.account.CreateResponse:
@@ -87,9 +84,6 @@ components:
                     type: string
                 avatar:
                     type: string
-                status:
-                    type: integer
-                    format: enum
                 isAdmin:
                     type: boolean
                 createdAt:

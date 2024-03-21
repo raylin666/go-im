@@ -35,7 +35,6 @@ func newAccount(db *gorm.DB, opts ...gen.DOOption) account {
 	_account.UserId = field.NewString(tableName, "user_id")
 	_account.Username = field.NewString(tableName, "username")
 	_account.Avatar = field.NewString(tableName, "avatar")
-	_account.Status = field.NewInt8(tableName, "status")
 	_account.IsAdmin = field.NewInt8(tableName, "is_admin")
 	_account.LastLoginIp = field.NewString(tableName, "last_login_ip")
 	_account.FirstLoginTime = field.NewTime(tableName, "first_login_time")
@@ -57,7 +56,6 @@ type account struct {
 	UserId         field.String
 	Username       field.String
 	Avatar         field.String
-	Status         field.Int8
 	IsAdmin        field.Int8
 	LastLoginIp    field.String
 	FirstLoginTime field.Time
@@ -85,7 +83,6 @@ func (a *account) updateTableName(table string) *account {
 	a.UserId = field.NewString(table, "user_id")
 	a.Username = field.NewString(table, "username")
 	a.Avatar = field.NewString(table, "avatar")
-	a.Status = field.NewInt8(table, "status")
 	a.IsAdmin = field.NewInt8(table, "is_admin")
 	a.LastLoginIp = field.NewString(table, "last_login_ip")
 	a.FirstLoginTime = field.NewTime(table, "first_login_time")
@@ -112,7 +109,7 @@ func (a *account) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (a *account) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 12)
+	a.fieldMap = make(map[string]field.Expr, 11)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["created_at"] = a.CreatedAt
 	a.fieldMap["updated_at"] = a.UpdatedAt
@@ -120,7 +117,6 @@ func (a *account) fillFieldMap() {
 	a.fieldMap["user_id"] = a.UserId
 	a.fieldMap["username"] = a.Username
 	a.fieldMap["avatar"] = a.Avatar
-	a.fieldMap["status"] = a.Status
 	a.fieldMap["is_admin"] = a.IsAdmin
 	a.fieldMap["last_login_ip"] = a.LastLoginIp
 	a.fieldMap["first_login_time"] = a.FirstLoginTime

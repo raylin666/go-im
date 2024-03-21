@@ -91,9 +91,6 @@
         "avatar": {
           "type": "string"
         },
-        "status": {
-          "$ref": "#/definitions/v1accountStatus"
-        },
         "is_admin": {
           "type": "boolean"
         }
@@ -111,9 +108,6 @@
         "avatar": {
           "type": "string"
         },
-        "status": {
-          "$ref": "#/definitions/v1accountStatus"
-        },
         "is_admin": {
           "type": "boolean"
         },
@@ -122,14 +116,6 @@
           "format": "date-time"
         }
       }
-    },
-    "v1accountStatus": {
-      "type": "string",
-      "enum": [
-        "CLOSE",
-        "OPEN"
-      ],
-      "default": "CLOSE"
     }
   }
 }

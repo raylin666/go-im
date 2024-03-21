@@ -111,17 +111,6 @@ func (m *CreateRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if _, ok := Status_name[int32(m.GetStatus())]; !ok {
-		err := CreateRequestValidationError{
-			field:  "Status",
-			reason: "value must be one of the defined enum values",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
 	// no validation rules for IsAdmin
 
 	if len(errors) > 0 {
@@ -231,8 +220,6 @@ func (m *CreateResponse) validate(all bool) error {
 	// no validation rules for Username
 
 	// no validation rules for Avatar
-
-	// no validation rules for Status
 
 	// no validation rules for IsAdmin
 
