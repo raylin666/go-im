@@ -3,8 +3,10 @@ package websocket
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go.uber.org/zap"
+	"gorm.io/gorm"
 	"mt/internal/constant/defined"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
@@ -56,8 +58,14 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	}
 
 	q := dbrepo.NewDefaultDbQuery(DbRepo()).Account.Table(model.AccountTableName(client.AppKey))
-	m, err := q.WithContext(ctx).FirstByUserId(request.UserId)
-	fmt.Println(m)
+	accountModel, err := q.WithContext(ctx).FirstByUserId(request.UserId)
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		code, msg = utils.ErrorMessage(defined.ErrorNotVisitAuth)
+		return
+	}
+
+	//accountModel.LastLoginIp = utils.ClientIP()
+	fmt.Println(accountModel, ctx)
 
 	return
 }

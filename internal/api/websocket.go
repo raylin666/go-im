@@ -68,8 +68,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	client := websocket.NewClient(uint64(appKey), conn)
 
-	go client.Read(ctx)
-	go client.Write(ctx)
+	reqCtx := context.WithValue(ctx, "request", r)
+	go client.Read(reqCtx)
+	go client.Write(reqCtx)
 
 	// 用户连接处理
 	websocket.ManagerInstance().ClientManager().Register <- client
