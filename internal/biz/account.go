@@ -35,12 +35,18 @@ func (uc *AccountUsecase) Create(ctx context.Context, req *types.AccountCreateRe
 		createData.IsAdmin = 0
 	}
 
-	_, err := uc.repo.Create(ctx, createData)
+	m, err := uc.repo.Create(ctx, createData)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &types.AccountCreateResponse{}
+	resp := &types.AccountCreateResponse{
+		UserId:    m.UserId,
+		Username:  m.Username,
+		Avatar:    m.Avatar,
+		IsAdmin:   m.IsAdmin == 1,
+		CreatedAt: m.CreatedAt,
+	}
 
 	return resp, nil
 }
