@@ -96,7 +96,7 @@ func (c *Client) Write(ctx context.Context) {
 		case message, ok := <-c.Send:
 			if !ok {
 				// 写入待发送客户端消息错误并关闭连接
-				Logger(ctx).Error("写入待发送客户端消息错误并关闭连接", logAddr)
+				Logger(ctx).Error("写入待发送客户端消息错误, 客户端连接将关闭", logAddr)
 
 				return
 			}

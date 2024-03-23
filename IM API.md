@@ -66,11 +66,11 @@ server {
 
 <a id="http_header_auth"></a>
 
-| 参数名称    | 是否必须 | 示例                                                                                                                               | 说明                    |
-|---------|------|----------------------------------------------------------------------------------------------------------------------------------|-----------------------|
-| key     | 是    | 2475506427                                                                                                                       | 应用ID                  |
-| secret  | 是    | 938d3afb72664b1b8652cd71c2a4d0f0                                                                                                 | 应用密钥                  |
-| usersig | 是    | baafe63b4c11e0ec5ede99efd0df8795d0d26a9af4d1bebcc7671450d56a9124cff0f9c12a4200dc3780ff235f9e4a91d94cfcd87b3fa0937e43ba4766d5b0c5 | 授权账号TOKEN(应用下的账号体系用户) |
+| 参数名称    | 是否必须 | 示例                                                                                                                               | 说明                       |
+|---------|------|----------------------------------------------------------------------------------------------------------------------------------|--------------------------|
+| key     | 是    | 2475506427                                                                                                                       | 应用ID                     |
+| secret  | 是    | 938d3afb72664b1b8652cd71c2a4d0f0                                                                                                 | 应用密钥                     |
+| usersig | 是    | baafe63b4c11e0ec5ede99efd0df8795d0d26a9af4d1bebcc7671450d56a9124cff0f9c12a4200dc3780ff235f9e4a91d94cfcd87b3fa0937e43ba4766d5b0c5 | 授权账号用户签名TOKEN (应用下的账号体系) |
 
 ### HTTP Web API 接口文档
 
@@ -171,10 +171,11 @@ server {
 
 <a id="message_event_req"></a>
 
-| 事件名称  | 事件数据结构                                                 | 事件描述                   |
-|-------|--------------------------------------------------------|------------------------|
-| ping  | 无                                                      | 发送 Socket PING 心跳检测    |
-| login | [WebSocketLoginRequest](#struct_WebSocketLoginRequest) | 账号登录 (必须登录完成后才能进行用户事件) |
+| 事件名称   | 事件数据结构                                                 | 事件描述                   |
+|--------|--------------------------------------------------------|------------------------|
+| ping   | 无                                                      | 发送 Socket PING 心跳检测    |
+| login  | [WebSocketLoginRequest](#struct_WebSocketLoginRequest) | 账号登录 (必须登录完成后才能进行用户事件) |
+| logout | 无                                                      | 账号登出                   |
 
 ###### 响应消息协议
 
@@ -219,9 +220,10 @@ server {
 
 <a id="struct_WebSocketLoginRequest"></a>
 
-| 字段值      | 字段类型      | 是否必须 | 字段描述     |
-|----------|-----------|------|----------|
-| user_id  | string    | 是    | 用户ID     |
+| 字段值     | 字段类型      | 是否必须 | 字段描述 |
+|---------|-----------|------|------|
+| user_id | string    | 是    | 用户ID |
+| usersig | string    | 是    | 用户签名 |
 
 ###### [WebSocket] - [响应事件: login] 账号登录 WebSocketLoginResponse
 
@@ -237,4 +239,13 @@ server {
 | first_login_time | time.Time | 是    | 用户首次登录时间                    |
 | last_login_time  | time.Time | 是    | 用户最后登录时间                    |
 | last_login_ip    | string    | 是    | 用户最后登录IP                    |
+
+###### [WebSocket] - [响应事件: logout] 账号登出 WebSocketLogoutResponse
+
+<a id="struct_WebSocketLogoutResponse"></a>
+
+| 字段值         | 字段类型      | 是否必须 | 字段描述   |
+|-------------|-----------|------|--------|
+| user_id     | string    | 是    | 用户ID   |
+| logout_time | time.Time | 是    | 用户登出时间 |
 

@@ -28,6 +28,7 @@ func NewEvents() (events *Events) {
 	// 注册处理事件
 	events.Registers["ping"] = events.Ping
 	events.Registers["login"] = events.Login
+	events.Registers["logout"] = events.Logout
 
 	return
 }
@@ -74,7 +75,7 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	}
 
 	// 判断是否已登录
-	if len(client.UserId) > 0 {
+	if client.AccountOnline() {
 		account, err := accountFunc(client.UserId)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			code, msg = utils.ErrorMessage(defined.ErrorAccountNotFound)
@@ -88,7 +89,7 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	// 解析数据包
 	request := &typesEvent.LoginRequest{}
 	err := json.Unmarshal(message, request)
-	if err != nil || request.UserId == "" {
+	if err != nil || request.UserId == "" || request.Usersig == "" {
 		Logger(ctx).Error("账号登录事件-解析消息数据包错误 json.Marshal", zap.Error(err))
 		code, msg = utils.ErrorMessage(defined.ErrorRequestParamsError)
 		return
@@ -124,10 +125,60 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	client.AccountLogin(account.UserId, uint64(account.LastLoginTime.Unix()), account.LastLoginIp, 0)
 
 	Logger(ctx).Info("账号登录事件-登录成功",
-		zap.String("user_id", client.UserId),
+		zap.String("user_id", account.UserId),
 		zap.Time("first_time", *account.LastLoginTime),
 		zap.String("login_ip", client.LoginIp),
 		zap.Uint32("login_platform", client.LoginPlatform),
+		zap.Any("account", account),
+		zap.Any("response", data))
+
+	return
+}
+
+// Logout 账号登出
+func (event *Events) Logout(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}) {
+	code = codeStatusOk
+	msg = codeMessageOk
+	data = nil
+
+	// 判断是否未登录
+	if !client.AccountOnline() {
+		code, msg = utils.ErrorMessage(defined.ErrorNotLoginError)
+		return
+	}
+
+	userId := client.UserId
+	currentTime := time.Now()
+	data = typesEvent.LogoutResponse{UserId: userId, LogoutTime: currentTime}
+
+	// TODO 账号登出成功, 更新连接账号数据
+	client.AccountLogout()
+
+	// 设置账号数据表
+	tableName := model.AccountTableName(client.AppKey)
+	q := dbrepo.NewDefaultDbQuery(DbRepo()).Account.Table(tableName)
+	// 查询用户信息
+	account, err := q.WithContext(ctx).FirstByUserId(userId)
+	// 账号不存在也直接返回登出成功
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return
+	}
+
+	account.LastLogoutTime = &currentTime
+	account.Status = model.AccountStatusOffline
+
+	httpRequest := lib.GetContextHttpRequest(ctx)
+	if httpRequest != nil {
+		account.LastLogoutIp = utils.ClientIP(httpRequest)
+	}
+
+	if err = q.WithContext(ctx).Save(&account); err != nil {
+		Logger(ctx).Error("账号登出事件-数据写入失败", zap.String("table_name", tableName), zap.Any("data", account), zap.Error(err))
+		return
+	}
+
+	Logger(ctx).Info("账号登出事件-登出成功",
+		zap.String("user_id", userId),
 		zap.Any("account", account),
 		zap.Any("response", data))
 

@@ -4,7 +4,8 @@ import "time"
 
 // LoginRequest 事件登录请求
 type LoginRequest struct {
-	UserId string `json:"user_id"` // 用户ID
+	UserId  string `json:"user_id"` // 用户ID
+	Usersig string `json:"usersig"` // 用户签名
 }
 
 // LoginResponse 事件登录响应
@@ -17,4 +18,10 @@ type LoginResponse struct {
 	FirstLoginTime time.Time `json:"first_login_time"` // 用户首次登录时间
 	LastLoginTime  time.Time `json:"last_login_time"`  // 用户最后登录时间
 	LastLoginIp    string    `json:"last_login_ip"`    // 用户最后登录IP
+}
+
+// LogoutResponse 事件登出响应
+type LogoutResponse struct {
+	UserId     string    `json:"user_id"`     // 用户ID
+	LogoutTime time.Time `json:"logout_time"` // 用户登出时间
 }
