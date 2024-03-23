@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"mt/internal/constant/defined"
+	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/internal/websocket"
@@ -15,7 +16,7 @@ import (
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var (
-		ctx = context.Background()
+		ctx = lib.NewContextHttpRequest(context.Background(), r)
 
 		query = r.URL.Query()
 	)
@@ -68,9 +69,8 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	client := websocket.NewClient(uint64(appKey), conn)
 
-	reqCtx := context.WithValue(ctx, "request", r)
-	go client.Read(reqCtx)
-	go client.Write(reqCtx)
+	go client.Read(ctx)
+	go client.Write(ctx)
 
 	// 用户连接处理
 	websocket.ManagerInstance().ClientManager().Register <- client

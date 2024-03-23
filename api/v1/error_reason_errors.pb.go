@@ -263,20 +263,6 @@ func ErrorRequestParamsError(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_REQUEST_PARAMS_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
-// 请先登录后再操作
-func IsNotLoginError(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == ErrorReason_NOT_LOGIN_ERROR.String() && e.Code == 401
-}
-
-// 请先登录后再操作
-func ErrorNotLoginError(format string, args ...interface{}) *errors.Error {
-	return errors.New(401, ErrorReason_NOT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
-}
-
 // 没有访问权限, 请联系管理员
 func IsNotVisitAuth(err error) bool {
 	if err == nil {
@@ -331,4 +317,46 @@ func IsWebsocketUpgraderError(err error) bool {
 // WebSocket 协议升级失败
 func ErrorWebsocketUpgraderError(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_WEBSOCKET_UPGRADER_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
+// 请先登录后再操作
+func IsNotLoginError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_NOT_LOGIN_ERROR.String() && e.Code == 401
+}
+
+// 请先登录后再操作
+func ErrorNotLoginError(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_NOT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
+// 账号不存在
+func IsAccountNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ACCOUNT_NOT_FOUND.String() && e.Code == 400
+}
+
+// 账号不存在
+func ErrorAccountNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ACCOUNT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
+// 账号登录错误
+func IsAccountLoginError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ACCOUNT_LOGIN_ERROR.String() && e.Code == 500
+}
+
+// 账号登录错误
+func ErrorAccountLoginError(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_ACCOUNT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
 }

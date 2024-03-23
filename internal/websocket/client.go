@@ -24,7 +24,7 @@ type Client struct {
 
 	// TODO 用户相关 (登录之后才有)
 	UserId        string // 用户ID
-	LoginPlatform uint32 // 登录的平台ID (App/Web/iOS)
+	LoginPlatform uint32 // 登录的平台ID (App/Web/iOS) - 暂时未用到
 	LoginTime     uint64 // 用户登录时间
 	LoginIp       string // 用户登录IP
 }
@@ -143,4 +143,34 @@ func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
 	}
 
 	return
+}
+
+// AccountLogin 账号登录
+func (c *Client) AccountLogin(userId string, currentTime uint64, loginIp string, loginPlatform uint32) bool {
+	c.UserId = userId
+	c.FirstTime = currentTime
+	c.LoginIp = loginIp
+	c.LoginPlatform = loginPlatform
+	c.Heartbeat(currentTime)
+
+	return true
+}
+
+// AccountLogout 账号登出
+func (c *Client) AccountLogout() bool {
+	c.UserId = ""
+	c.FirstTime = 0
+	c.LoginIp = ""
+	c.LoginPlatform = 0
+
+	return true
+}
+
+// AccountOnline 账号是否在线
+func (c *Client) AccountOnline() bool {
+	if c.UserId != "" {
+		return true
+	}
+
+	return false
 }

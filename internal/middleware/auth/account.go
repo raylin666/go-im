@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc/metadata"
 	"mt/internal/constant/defined"
 	"mt/internal/constant/types"
+	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/repositories"
@@ -19,8 +20,6 @@ const (
 	AppKey     = "key"
 	AppSecret  = "secret"
 	AppUsersig = "usersig"
-	// AppID Context 上下文切换保存的应用权限认证ID名称
-	AppID = "AppID"
 
 	// XMdGlobalKeyName Metadata 元数据传递保存的全局应用权限认证参数名称
 	XMdGlobalKeyName     = "x-md-global-key"
@@ -83,7 +82,7 @@ func AccountMiddlewareHandler(repo repositories.DataRepo) func(handler middlewar
 				return nil, defined.ErrorNotVisitAuth
 			}
 
-			ctx = context.WithValue(ctx, AppID, types.HeaderAppID{
+			ctx = lib.NewContextHeaderAppID(ctx, types.HeaderAppID{
 				Key:     m.Key,
 				Secret:  m.Secret,
 				Usersig: usersig,

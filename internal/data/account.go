@@ -36,7 +36,7 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 	}
 	account.CreatedAt = time.Now()
 
-	appid, err := lib.HeaderAppID(ctx)
+	appid, err := lib.GetContextHeaderAppID(ctx)
 	if err != nil {
 		return nil, defined.ErrorNotVisitAuth
 	}
@@ -47,7 +47,7 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 		return nil, defined.ErrorDataAlreadyExists
 	}
 	if createDataErr := q.WithContext(ctx).Create(account); createDataErr != nil {
-		r.log.UseSQL(ctx).Error("创建应用账号错误", zap.String("table_name", tableName), zap.Any("data", account), zap.Error(createDataErr))
+		r.log.UseSQL(ctx).Error("创建账号错误", zap.String("table_name", tableName), zap.Any("data", account), zap.Error(createDataErr))
 		return nil, defined.ErrorDataAddError
 	}
 

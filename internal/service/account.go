@@ -18,7 +18,7 @@ func NewAccountService(uc *biz.AccountUsecase) *AccountService {
 	return &AccountService{uc: uc}
 }
 
-// Create 创建应用账号
+// Create 创建账号
 func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
 	createRequest := &types.AccountCreateRequest{
 		UserId:   req.GetUserId(),

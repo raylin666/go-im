@@ -23,10 +23,13 @@ var (
 	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行事件")
 	ErrorRequestParamsError     = api.ErrorRequestParamsError("请求参数错误")
 
-	ErrorNotLoginError  = api.ErrorNotLoginError("请先登录后再操作")
 	ErrorNotVisitAuth   = api.ErrorNotVisitAuth("没有访问权限, 请联系管理员")
 	ErrorAppAuthClose   = api.ErrorAppAuthClose("应用权限已被关闭, 请联系管理员")
 	ErrorAppAuthExpired = api.ErrorAppAuthExpired("应用已过期, 请联系管理员")
 
 	ErrorWebsocketUpgraderError = api.ErrorWebsocketUpgraderError("WebSocket 协议升级失败")
+
+	ErrorNotLoginError     = api.ErrorNotLoginError("请先登录后再操作")
+	ErrorAccountNotFound   = api.ErrorAccountNotFound("账号不存在")
+	ErrorAccountLoginError = api.ErrorAccountLoginError("账号登录错误")
 )

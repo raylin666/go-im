@@ -12,4 +12,4 @@ CREATE TABLE `app` (
    PRIMARY KEY (`id`),
    UNIQUE KEY `uk_key` (`key`) USING BTREE,
    UNIQUE KEY `uk_ident_name` (`ident`,`name`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT "应用账号管理表";
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT "应用管理表";

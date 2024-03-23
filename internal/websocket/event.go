@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"mt/internal/constant/defined"
+	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
 	typesEvent "mt/internal/websocket/types/event"
@@ -49,6 +49,43 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	msg = codeMessageOk
 	data = nil
 
+	// 设置账号数据表
+	tableName := model.AccountTableName(client.AppKey)
+	q := dbrepo.NewDefaultDbQuery(DbRepo()).Account.Table(tableName)
+
+	// 获取账号信息
+	accountFunc := func(userId string) (account model.Account, err error) {
+		account, err = q.WithContext(ctx).FirstByUserId(userId)
+		return
+	}
+
+	// 获取响应协议
+	responseFunc := func(account model.Account) typesEvent.LoginResponse {
+		return typesEvent.LoginResponse{
+			UserId:         account.UserId,
+			Username:       account.Username,
+			Avatar:         account.Avatar,
+			IsAdmin:        account.IsAdmin == 1,
+			Status:         model.AccountConvertStatus(account.Status),
+			FirstLoginTime: *account.FirstLoginTime,
+			LastLoginTime:  *account.LastLoginTime,
+			LastLoginIp:    account.LastLoginIp,
+		}
+	}
+
+	// 判断是否已登录
+	if len(client.UserId) > 0 {
+		account, err := accountFunc(client.UserId)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			code, msg = utils.ErrorMessage(defined.ErrorAccountNotFound)
+			return
+		}
+
+		data = responseFunc(account)
+		return
+	}
+
+	// 解析数据包
 	request := &typesEvent.LoginRequest{}
 	err := json.Unmarshal(message, request)
 	if err != nil || request.UserId == "" {
@@ -57,15 +94,42 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 		return
 	}
 
-	q := dbrepo.NewDefaultDbQuery(DbRepo()).Account.Table(model.AccountTableName(client.AppKey))
-	accountModel, err := q.WithContext(ctx).FirstByUserId(request.UserId)
+	// 查询用户信息
+	account, err := accountFunc(request.UserId)
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		code, msg = utils.ErrorMessage(defined.ErrorNotVisitAuth)
+		code, msg = utils.ErrorMessage(defined.ErrorAccountNotFound)
 		return
 	}
 
-	//accountModel.LastLoginIp = utils.ClientIP()
-	fmt.Println(accountModel, ctx)
+	currentTime := time.Now()
+	account.Status = model.AccountStatusOnline
+	account.LastLoginTime = &currentTime
+	if account.FirstLoginTime == nil {
+		account.FirstLoginTime = &currentTime
+	}
+
+	httpRequest := lib.GetContextHttpRequest(ctx)
+	if httpRequest != nil {
+		account.LastLoginIp = utils.ClientIP(httpRequest)
+	}
+
+	if err = q.WithContext(ctx).Save(&account); err != nil {
+		Logger(ctx).Error("账号登录事件-数据写入失败", zap.String("table_name", tableName), zap.Any("data", account), zap.Error(err))
+		code, msg = utils.ErrorMessage(defined.ErrorAccountLoginError)
+		return
+	}
+
+	// TODO 账号登录成功, 更新连接账号数据
+	data = responseFunc(account)
+	client.AccountLogin(account.UserId, uint64(account.LastLoginTime.Unix()), account.LastLoginIp, 0)
+
+	Logger(ctx).Info("账号登录事件-登录成功",
+		zap.String("user_id", client.UserId),
+		zap.Time("first_time", *account.LastLoginTime),
+		zap.String("login_ip", client.LoginIp),
+		zap.Uint32("login_platform", client.LoginPlatform),
+		zap.Any("account", account),
+		zap.Any("response", data))
 
 	return
 }
