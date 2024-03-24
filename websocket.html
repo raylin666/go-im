@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket 测试页面</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<style>
+    input {
+        width: 500px;
+        padding: 10px;
+    }
+
+    button {
+        width: 80px;
+        padding: 10px;
+        cursor: pointer;
+        border: 1px solid #000;
+    }
+
+    #left {
+        width: 700px;
+        float: left;
+    }
+
+    #left .online_users {
+        width: 590px;
+        padding: 10px;
+        border: 1px solid #000000;
+    }
+
+    #left .online_users table {
+        width: 590px;
+        margin-top: 10px;
+        font-size: 14px;
+        border: 1px solid black;
+    }
+
+    #left .online_users table td {
+        padding: 5px;
+    }
+
+    #right {
+        width: 700px;
+        float: right;
+        border: 1px solid #000000;
+        padding: 10px;
+    }
+
+    #right .message {
+        font-size: 14px;
+        line-height: 30px;
+    }
+
+    #right .heartbeat {
+        color: orange;
+        font-size: 14px;
+    }
+
+    #connect {
+        height: 20px;
+        padding: 10px;
+    }
+    #connect_status {
+        color: #fff;
+        background-color: blue;
+    }
+</style>
+
+<body>
+    <br />
+    <div>
+        <div id="left">
+            <div>
+                <input type="text" id="connect" placeholder="请输入连接地址" value="ws://im.docker?key=2770125682&secret=a51cc372c02740f297860e0767d8ef77">
+                <button id="connect_status" data-value="0">开始连接</button>
+            </div>
+            <br />
+
+            <div class="online_users">
+                <div><b>在线用户列表</b></div>
+                <table>
+                    <tr style="text-align: center;">
+                        <td>用户ID</td>
+                        <td>用户名称</td>
+                        <td>登录IP</td>
+                        <td>登录时间</td>
+                    </tr>
+                </table>
+            </div>
+            <br />
+
+            <div class="event_login">
+                <input type="text" class="user_id" placeholder="请输入用户ID">
+                <button class="event_login_send" data-value="0">用户登录</button>
+            </div>
+            <br />
+
+        </div>
+
+        <div id="right">
+            <b>消息列表</b>
+            <p class="heartbeat" data-value="0"></p>
+            <p></p>
+        </div>
+    </div>
+</body>
+</html>
+
+<script>
+    // 开启 WebSocket 连接后的消息事件处理
+    function eventConnectOpen(event) {
+        $('#connect').prop('disabled', true);
+        $('#connect_status').data('value', 1)
+        $('#connect_status').text('断开连接');
+        $('#connect_status').css('background-color', 'red');
+
+        $('#right').append('<div class="message" style="color: green">欢迎使用 WebSocket 服务, 当前已连接成功 !!!</div>')
+    }
+
+    // 关闭 WebSocket 连接后的消息事件处理
+    function eventConnectClose(event) {
+        eventBuildLogout();
+
+        socket = null;
+        isUserLogin = false;
+
+        $('#connect').prop('disabled', false);
+        $('#connect_status').data('value', 0)
+        $('#connect_status').text('开始连接');
+        $('#connect_status').css('background-color', 'blue');
+
+        $('#right').append('<div class="message" style="color: red">感谢使用 WebSocket 服务, 当前已断开连接, 期待您下次的光临 !!!</div>')
+        $('#right .heartbeat').html('')
+        $('#right .heartbeat').data('value', 0)
+    }
+
+    // 处理登录事件
+    function eventLogin() {
+        isUserLogin = true;
+        $('#left .event_login .user_id').prop('disabled', true);
+        $('#left .event_login .event_login_send').text('退出登录');
+        $('#left .event_login .event_login_send').data('value', 1);
+    }
+
+    // 处理登出事件
+    function eventLogout() {
+        isUserLogin = false;
+        $('#left .event_login .user_id').prop('disabled', false);
+        $('#left .event_login .event_login_send').text('用户登录');
+        $('#left .event_login .event_login_send').data('value', 0);
+    }
+
+    // 构建心跳检测事件
+    function eventBuildPing() {
+        return '{"seq": "0", "event": "ping"}';
+    }
+
+    // 构建用户登录事件
+    function eventBuildLogin(userId) {
+        return '{"seq": "0", "event": "login", "data": {"user_id": "'+ userId +'", "usersig": "123456"}}';
+    }
+
+    // 构建用户退出事件
+    function eventBuildLogout() {
+        return '{"seq": "0", "event": "logout", "data": {}}';
+    }
+
+    var socket = null;
+    var isUserLogin = false;
+    $(document).ready(function(){
+        // TODO 连接/断开 Socket
+        $('#connect_status').click(function () {
+
+            // TODO 断开
+            if ($('#connect_status').data('value') === 1) {
+                eventConnectClose();
+                return;
+            }
+
+            // TODO 连接
+            socket = new WebSocket($('#connect').val());
+            if (!(socket instanceof WebSocket)) {
+                $('#right').append('<div class="message" style="color: red">WebSocket 服务连接失败, 请检查服务端或连接地址及参数是否正确!!!</div>')
+                return;
+            }
+
+            // TODO 连接完成事件
+            socket.onopen = function(event) {
+                eventConnectOpen(event);
+            };
+
+            // TODO 发送消息事件
+            socket.onmessage = function(eventMessage) {
+                console.log("Message received: " + eventMessage.data);
+
+                var dataJson = $.parseJSON(eventMessage.data);
+                var event = dataJson['event']
+                var seq = dataJson['seq']
+                var response = dataJson['response']
+                var responseCode = response['code']
+                var responseMessage = response['message']
+                var responseData = response['data']
+
+                switch (event) {
+                    // 心跳检测事件
+                    case 'ping':
+                        var heartbeatNum = $('#right .heartbeat').data('value') + 1;
+                        $('#right .heartbeat').data('value', heartbeatNum);
+                        $('#right .heartbeat').html('心跳检测正常, 已完成第 <font color=red><b>' + heartbeatNum + '</b></font> 次检测。');
+                        break;
+                    // 用户登录事件
+                    case 'login':
+                        eventLogin();
+                        $('#right').append('<div class="message" style="color: orchid;">' + responseData['user_id'] + ' 用户登录成功, 登录IP: ' + responseData['last_login_ip'] + ', 登录时间: ' + responseData['last_login_time'] + '</div>')
+                        break;
+                    // 用户登出事件
+                    case 'logout':
+                        eventLogout();
+                        $('#right').append('<div class="message" style="color: orangered;">' + responseData['user_id'] + ' 用户登出成功, 登出时间: ' + responseData['logout_time'] + '</div>')
+                        break;
+                    default:
+                }
+            };
+
+            // TODO 关闭连接事件
+            socket.onclose = function(event) {
+                eventConnectClose(event);
+            };
+        });
+
+        // TODO 用户登录/登出事件
+        $('#left .event_login .event_login_send').click(function () {
+            if (socket == null) {
+                alert('请先连接 WebSocket 服务');
+                return;
+            }
+
+            // TODO 登出
+            if ($('#left .event_login .event_login_send').data('value') === 1) {
+                socket.send(eventBuildLogout());
+                return;
+            }
+
+            var userId = $('#left .event_login .user_id').val();
+            if (userId === "") {
+                alert('请先输入需要登录的用户ID');
+                return;
+            }
+
+            // TODO 登录
+            socket.send(eventBuildLogin(userId));
+        });
+
+        setInterval(function () {
+            if (!(socket instanceof WebSocket)) {
+                return;
+            }
+
+            // TODO 发送心跳包
+            socket.send(eventBuildPing());
+        }, 10000);
+    });
+</script>
