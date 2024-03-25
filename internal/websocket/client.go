@@ -145,7 +145,6 @@ func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
 // AccountLogin 账号登录
 func (c *Client) AccountLogin(userId string, currentTime uint64) bool {
 	c.UserId = userId
-	c.FirstTime = currentTime
 	c.Heartbeat(currentTime)
 
 	return true
@@ -154,7 +153,6 @@ func (c *Client) AccountLogin(userId string, currentTime uint64) bool {
 // AccountLogout 账号登出
 func (c *Client) AccountLogout() bool {
 	c.UserId = ""
-	c.FirstTime = 0
 
 	return true
 }

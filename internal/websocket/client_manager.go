@@ -8,7 +8,7 @@ import (
 type ClientManager struct {
 	Clients     map[*Client]bool   // 全部的连接
 	ClientsLock sync.RWMutex       // 读写锁
-	Users       map[string]*Client // 登录的用户 APPID+UUID
+	Users       map[string]*Client // 登录的用户 APPID_UUID
 	UserLock    sync.RWMutex       // 读写锁
 	Register    chan *Client       // 连接处理
 	UnRegister  chan *Client       // 断开连接处理
