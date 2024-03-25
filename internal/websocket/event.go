@@ -29,6 +29,7 @@ func NewEvents() (events *Events) {
 	events.Registers["ping"] = events.Ping
 	events.Registers["login"] = events.Login
 	events.Registers["logout"] = events.Logout
+	events.Registers["loginStatus"] = events.LoginStatus
 
 	return
 }
@@ -61,7 +62,7 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	}
 
 	// 获取响应协议
-	responseFunc := func(account model.Account) typesEvent.LoginResponse {
+	responseFunc := func(account model.Account, repeatLogin bool) typesEvent.LoginResponse {
 		return typesEvent.LoginResponse{
 			UserId:         account.UserId,
 			Username:       account.Username,
@@ -71,6 +72,7 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 			FirstLoginTime: *account.FirstLoginTime,
 			LastLoginTime:  *account.LastLoginTime,
 			LastLoginIp:    account.LastLoginIp,
+			RepeatLogin:    repeatLogin,
 		}
 	}
 
@@ -82,7 +84,7 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 			return
 		}
 
-		data = responseFunc(account)
+		data = responseFunc(account, true)
 		return
 	}
 
@@ -121,14 +123,13 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	}
 
 	// TODO 账号登录成功, 更新连接账号数据
-	data = responseFunc(account)
-	client.AccountLogin(account.UserId, uint64(account.LastLoginTime.Unix()), account.LastLoginIp, 0)
+	data = responseFunc(account, false)
+	client.AccountLogin(account.UserId, uint64(account.LastLoginTime.Unix()))
 
 	Logger(ctx).Info("账号登录事件-登录成功",
 		zap.String("user_id", account.UserId),
 		zap.Time("first_time", *account.LastLoginTime),
-		zap.String("login_ip", client.LoginIp),
-		zap.Uint32("login_platform", client.LoginPlatform),
+		zap.String("login_ip", account.LastLoginIp),
 		zap.Any("account", account),
 		zap.Any("response", data))
 
@@ -181,6 +182,24 @@ func (event *Events) Logout(ctx context.Context, client *Client, seq string, mes
 		zap.String("user_id", userId),
 		zap.Any("account", account),
 		zap.Any("response", data))
+
+	return
+}
+
+// LoginStatus 获取登录状态
+func (event *Events) LoginStatus(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}) {
+	code = codeStatusOk
+	msg = codeMessageOk
+
+	var loginUserId string
+	var loginStatus = "Logout"
+	// 判断是否已登录
+	if client.AccountOnline() {
+		loginUserId = client.UserId
+		loginStatus = "Login"
+	}
+
+	data = typesEvent.LoginStatusResponse{UserId: loginUserId, Status: loginStatus}
 
 	return
 }

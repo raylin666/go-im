@@ -212,6 +212,10 @@
                         break;
                     // 用户登录事件
                     case 'login':
+                        if (responseData['repeat_login'] === true) {
+                            return;
+                        }
+
                         eventLogin();
                         $('#right').append('<div class="message" style="color: orchid;">' + responseData['user_id'] + ' 用户登录成功, 登录IP: ' + responseData['last_login_ip'] + ', 登录时间: ' + responseData['last_login_time'] + '</div>')
                         break;

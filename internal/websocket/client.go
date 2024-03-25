@@ -23,10 +23,7 @@ type Client struct {
 	HeartbeatTime uint64          // 上次心跳时间
 
 	// TODO 用户相关 (登录之后才有)
-	UserId        string // 用户ID
-	LoginPlatform uint32 // 登录的平台ID (App/Web/iOS) - 暂时未用到
-	LoginTime     uint64 // 用户登录时间
-	LoginIp       string // 用户登录IP
+	UserId string // 用户ID
 }
 
 func NewClient(key uint64, conn *websocket.Conn) (client *Client) {
@@ -146,11 +143,9 @@ func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
 }
 
 // AccountLogin 账号登录
-func (c *Client) AccountLogin(userId string, currentTime uint64, loginIp string, loginPlatform uint32) bool {
+func (c *Client) AccountLogin(userId string, currentTime uint64) bool {
 	c.UserId = userId
 	c.FirstTime = currentTime
-	c.LoginIp = loginIp
-	c.LoginPlatform = loginPlatform
 	c.Heartbeat(currentTime)
 
 	return true
@@ -160,8 +155,6 @@ func (c *Client) AccountLogin(userId string, currentTime uint64, loginIp string,
 func (c *Client) AccountLogout() bool {
 	c.UserId = ""
 	c.FirstTime = 0
-	c.LoginIp = ""
-	c.LoginPlatform = 0
 
 	return true
 }

@@ -171,11 +171,12 @@ server {
 
 <a id="message_event_req"></a>
 
-| 事件名称   | 事件数据结构                                                 | 事件描述                   |
-|--------|--------------------------------------------------------|------------------------|
-| ping   | 无                                                      | 发送 Socket PING 心跳检测    |
-| login  | [WebSocketLoginRequest](#struct_WebSocketLoginRequest) | 账号登录 (必须登录完成后才能进行用户事件) |
-| logout | 无                                                      | 账号登出                   |
+| 事件名称        | 事件数据结构                                                 | 事件描述                   |
+|-------------|--------------------------------------------------------|------------------------|
+| ping        | 无                                                      | 发送 Socket PING 心跳检测    |
+| login       | [WebSocketLoginRequest](#struct_WebSocketLoginRequest) | 账号登录 (必须登录完成后才能进行用户事件) |
+| logout      | 无                                                      | 账号登出                   |
+| loginStatus | 无                                                      | 获取账号登录状态               |
 
 ###### 响应消息协议
 
@@ -191,10 +192,12 @@ server {
 
 <a id="message_event_resp"></a>
 
-| 事件名称  | 事件内容                                                     | 事件描述                |
-|-------|----------------------------------------------------------|---------------------|
-| ping  | 固定字符串 "PONE"                                             | 正常 Socket PING 心跳状态 |
-| login | [WebSocketLoginResponse](#struct_WebSocketLoginResponse) | 账号登录                |
+| 事件名称        | 事件内容                                                                 | 事件描述                |
+|-------------|----------------------------------------------------------------------|---------------------|
+| ping        | 固定字符串 "PONE"                                                         | 正常 Socket PING 心跳状态 |
+| login       | [WebSocketLoginResponse](#struct_WebSocketLoginResponse)             | 账号登录                |
+| logout      | [WebSocketLogoutResponse](#struct_WebSocketLogoutResponse)            | 账号登出                |
+| loginStatus | [WebSocketLoginStatusResponse](#struct_WebSocketLoginStatusResponse) | 账号登录状态              |
 
 ###### 响应状态码
 
@@ -229,16 +232,17 @@ server {
 
 <a id="struct_WebSocketLoginResponse"></a>
 
-| 字段值              | 字段类型      | 是否必须 | 字段描述                        |
-|------------------|-----------|------|-----------------------------|
-| user_id          | string    | 是    | 用户ID                        |
-| username         | string    | 是    | 用户名称                        |
-| avatar           | string    | 是    | 用户头像                        |
-| is_admin         | bool      | 是    | 是否管理员                       |
-| status           | string    | 是    | 在线状态 离线(Offline) 在线(Online) |
-| first_login_time | time.Time | 是    | 用户首次登录时间                    |
-| last_login_time  | time.Time | 是    | 用户最后登录时间                    |
-| last_login_ip    | string    | 是    | 用户最后登录IP                    |
+| 字段值              | 字段类型      | 是否必须 | 字段描述                                                                             |
+|------------------|-----------|------|----------------------------------------------------------------------------------|
+| user_id          | string    | 是    | 用户ID                                                                             |
+| username         | string    | 是    | 用户名称                                                                             |
+| avatar           | string    | 是    | 用户头像                                                                             |
+| is_admin         | bool      | 是    | 是否管理员                                                                            |
+| status           | string    | 是    | 在线状态 离线(Offline) 在线(Online)                                                      |
+| first_login_time | time.Time | 是    | 用户首次登录时间                                                                         |
+| last_login_time  | time.Time | 是    | 用户最后登录时间                                                                         |
+| last_login_ip    | string    | 是    | 用户最后登录IP                                                                         |
+| repeat_login    | bool      | 是    | 在此之前用户是否已登录状态 (如果用户此前未登录将返回false); 如果返回true, 表示服务端并不会更新登录信息, 只是把上次登录成功的信息返回给客户端。 |
 
 ###### [WebSocket] - [响应事件: logout] 账号登出 WebSocketLogoutResponse
 
@@ -248,4 +252,13 @@ server {
 |-------------|-----------|------|--------|
 | user_id     | string    | 是    | 用户ID   |
 | logout_time | time.Time | 是    | 用户登出时间 |
+
+###### [WebSocket] - [响应事件: loginStatus] 账号登录状态 WebSocketLoginStatusResponse
+
+<a id="struct_WebSocketLoginStatusResponse"></a>
+
+| 字段值     | 字段类型   | 是否必须 | 字段描述   |
+|---------|--------|------|--------|
+| user_id | string | 是    | 用户ID, 未登录返回空字符串   |
+| status  | string | 是    | 登录状态 已登录(Login) 未登录(Logout) |
 

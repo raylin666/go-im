@@ -19,11 +19,13 @@ const (
 	// AppKey Headers 头权限应用认证参数名称
 	AppKey     = "key"
 	AppSecret  = "secret"
+	AppUserId  = "userid"
 	AppUsersig = "usersig"
 
 	// XMdGlobalKeyName Metadata 元数据传递保存的全局应用权限认证参数名称
 	XMdGlobalKeyName     = "x-md-global-key"
 	XMdGlobalSecretName  = "x-md-global-secret"
+	XMdGlobalUserIdName  = "x-md-global-userid"
 	XMdGlobalUsersigName = "x-md-global-usersig"
 )
 
@@ -58,23 +60,27 @@ func AccountMiddlewareHandler(repo repositories.DataRepo) func(handler middlewar
 			var (
 				appKey    int
 				appSecret string
+				appUserId string
 				usersig   string
 			)
 
 			if md, ok := metadata.FromIncomingContext(ctx); ok {
 				appKey, _ = strconv.Atoi(md.Get(XMdGlobalKeyName)[0])
 				appSecret = md.Get(XMdGlobalSecretName)[0]
+				appUserId = md.Get(XMdGlobalUserIdName)[0]
 				usersig = md.Get(XMdGlobalUsersigName)[0]
 			} else if tr, ok := transport.FromServerContext(ctx); ok {
 				appKey, _ = strconv.Atoi(tr.RequestHeader().Get(AppKey))
 				appSecret = tr.RequestHeader().Get(AppSecret)
+				appUserId = tr.RequestHeader().Get(AppUserId)
 				usersig = tr.RequestHeader().Get(AppUsersig)
 			}
 
-			if appKey <= 0 || appSecret == "" || usersig == "" {
+			if appKey <= 0 || appSecret == "" || appUserId == "" || usersig == "" {
 				return nil, defined.ErrorNotVisitAuth
 			}
 
+			// TODO 验证应用是否存在
 			q := dbrepo.NewDefaultDbQuery(repo).App
 			m, _ := q.WithContext(ctx).FirstByKeyAndSecret(uint64(appKey), appSecret)
 			modelErr := model.AppAvailableByKeyAndSecret(&m)
@@ -82,9 +88,19 @@ func AccountMiddlewareHandler(repo repositories.DataRepo) func(handler middlewar
 				return nil, defined.ErrorNotVisitAuth
 			}
 
+			// TODO 验证用户是否存在
+			tableName := model.AccountTableName(m.Key)
+			accountQuery := dbrepo.NewDefaultDbQuery(repo).Account.Table(tableName)
+			account, accountErr := accountQuery.WithContext(ctx).FirstByUserId(appUserId)
+			if accountErr != nil {
+				return nil, defined.ErrorAccountNotFound
+			}
+
+			// TODO 存储鉴权验证信息到上下文
 			ctx = lib.NewContextHeaderAppID(ctx, types.HeaderAppID{
 				Key:     m.Key,
 				Secret:  m.Secret,
+				UserId:  account.UserId,
 				Usersig: usersig,
 			})
 
