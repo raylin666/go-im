@@ -11,6 +11,8 @@ const (
 	codeMessageOk string = "OK"
 )
 
+var ctx = context.TODO()
+
 func Logger(ctx context.Context) (logger *zap.Logger) {
 	logger = ManagerInstance().Logger().UseWebSocket(ctx)
 	return

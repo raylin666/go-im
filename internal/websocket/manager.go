@@ -38,6 +38,9 @@ func NewManager(logger *logger.Logger, data *data.Data) (manager *Manager) {
 		manager.WithEventHandler(event, fn)
 	}
 
+	// 管道事件处理
+	go manager.clientManager.ChanEventStart()
+
 	return
 }
 
