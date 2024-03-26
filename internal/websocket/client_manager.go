@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"sync"
 	"time"
@@ -8,20 +9,21 @@ import (
 
 // ClientManager 连接管理
 type ClientManager struct {
-	Clients     map[*Client]bool   // 全部的连接
-	ClientsLock sync.RWMutex       // 读写锁
-	Users       map[string]*Client // 登录的用户 APPID_UUID
-	UserLock    sync.RWMutex       // 读写锁
-	Register    chan *Client       // 建立连接处理
-	UnRegister  chan *Client       // 断开连接处理
-	Broadcast   chan []byte        // 广播消息-向全部成员发送数据
+	Clients      map[*Client]bool   // 全部的连接
+	ClientsLock  sync.RWMutex       // 读写锁
+	Accounts     map[string]*Client // 登录的用户账号 APPID_UUID
+	AccountsLock sync.RWMutex       // 读写锁
+	Register     chan *Client       // 建立连接处理
+	AccountLogin chan *AccountLogin // 用户账号登录处理
+	UnRegister   chan *Client       // 断开连接处理
+	Broadcast    chan []byte        // 广播消息-向全部成员发送数据
 }
 
 // NewClientManager 初始化连接管理
 func NewClientManager() (clientManager *ClientManager) {
 	clientManager = &ClientManager{
 		Clients:    make(map[*Client]bool),
-		Users:      make(map[string]*Client),
+		Accounts:   make(map[string]*Client),
 		Register:   make(chan *Client, 1000),
 		UnRegister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
@@ -50,6 +52,23 @@ func (manager *ClientManager) EventUnRegister(client *Client) {
 		zap.String("user_id", client.UserId))
 
 	manager.DeleteClient(client)
+}
+
+// EventAccountLogin 用户账号登录事件
+func (manager *ClientManager) EventAccountLogin(account *AccountLogin) {
+	client := account.Client
+	// 连接存在，在添加
+	if manager.InClient(client) {
+		key := account.ManagerKey()
+		// TODO 添加用户账号
+		fmt.Println(key)
+	}
+
+	Logger(ctx).Info("客户端管理器 - 用户账号登录事件",
+		zap.String("user_id", account.UserId),
+		zap.String("address", client.Addr),
+		zap.Uint64("app_key", client.AppKey),
+		zap.Time("heartbeat_time", time.Unix(int64(client.HeartbeatTime), 0)))
 }
 
 // InClient 客户端连接是否存在
@@ -127,6 +146,9 @@ func (manager *ClientManager) ChanEventStart() {
 		case client := <-manager.UnRegister:
 			manager.EventUnRegister(client)
 
+		// TODO 用户账号登录处理
+		case login := <-manager.AccountLogin:
+			manager.EventAccountLogin(login)
 		}
 	}
 }

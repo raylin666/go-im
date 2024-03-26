@@ -27,7 +27,7 @@ type LogoutResponse struct {
 	LogoutTime time.Time `json:"logout_time"` // 用户登出时间
 }
 
-// LogoutStatusResponse 事件登录状态响应
+// LoginStatusResponse 事件登录状态响应
 type LoginStatusResponse struct {
 	UserId string `json:"user_id"` // 用户ID, 未登录返回空字符串
 	Status string `json:"status"`  // 登录状态 已登录(Login) 未登录(Logout)

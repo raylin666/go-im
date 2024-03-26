@@ -125,12 +125,16 @@ func (event *Events) Login(ctx context.Context, client *Client, seq string, mess
 	// TODO 账号登录成功, 更新连接账号数据
 	data = responseFunc(account, false)
 	client.AccountLogin(account.UserId, uint64(account.LastLoginTime.Unix()))
+	// 将登录用户写入至管理器
+	login := NewAccountLogin(account.UserId, client)
+	ManagerInstance().ClientManager().AccountLogin <- login
 
 	Logger(ctx).Info("账号登录事件-登录成功",
 		zap.String("user_id", account.UserId),
 		zap.Time("first_time", *account.LastLoginTime),
 		zap.String("login_ip", account.LastLoginIp),
 		zap.Any("account", account),
+		zap.Any("account_login", login),
 		zap.Any("response", data))
 
 	return
