@@ -29,8 +29,8 @@ func newAccount(db *gorm.DB, opts ...gen.DOOption) account {
 	tableName := _account.accountDo.TableName()
 	_account.ALL = field.NewAsterisk(tableName)
 	_account.ID = field.NewInt(tableName, "id")
-	_account.CreatedAt = field.NewInt64(tableName, "created_at")
-	_account.UpdatedAt = field.NewInt64(tableName, "updated_at")
+	_account.CreatedAt = field.NewTime(tableName, "created_at")
+	_account.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_account.DeletedAt = field.NewField(tableName, "deleted_at")
 	_account.AccountId = field.NewString(tableName, "account_id")
 	_account.Nickname = field.NewString(tableName, "nickname")
@@ -51,8 +51,8 @@ type account struct {
 
 	ALL            field.Asterisk
 	ID             field.Int
-	CreatedAt      field.Int64
-	UpdatedAt      field.Int64
+	CreatedAt      field.Time
+	UpdatedAt      field.Time
 	DeletedAt      field.Field
 	AccountId      field.String
 	Nickname       field.String
@@ -79,8 +79,8 @@ func (a account) As(alias string) *account {
 func (a *account) updateTableName(table string) *account {
 	a.ALL = field.NewAsterisk(table)
 	a.ID = field.NewInt(table, "id")
-	a.CreatedAt = field.NewInt64(table, "created_at")
-	a.UpdatedAt = field.NewInt64(table, "updated_at")
+	a.CreatedAt = field.NewTime(table, "created_at")
+	a.UpdatedAt = field.NewTime(table, "updated_at")
 	a.DeletedAt = field.NewField(table, "deleted_at")
 	a.AccountId = field.NewString(table, "account_id")
 	a.Nickname = field.NewString(table, "nickname")

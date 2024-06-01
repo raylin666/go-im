@@ -3,10 +3,28 @@
 
 openapi: 3.0.3
 info:
-    title: Heartbeat API
-    description: The Heartbeat service definition.
+    title: ""
     version: 0.0.1
 paths:
+    /api/account/create:
+        post:
+            tags:
+                - Service
+            description: Service detection
+            operationId: Service_Create
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.CreateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.CreateResponse'
     /heartbeat:
         get:
             tags:
@@ -27,5 +45,33 @@ components:
             properties:
                 message:
                     type: string
+        v1.account.CreateRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+        v1.account.CreateResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
 tags:
     - name: Heartbeat
+      description: The Heartbeat service definition.
+    - name: Service
+      description: The Service service definition.

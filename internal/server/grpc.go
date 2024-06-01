@@ -12,10 +12,15 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
+
+	accountPb "mt/api/v1/account"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *config.Server, heartbeat *service.HeartbeatService, logger *logger.Logger) *grpc.Server {
+func NewGRPCServer(c *config.Server,
+	heartbeat *service.HeartbeatService,
+	account *service.AccountService,
+	logger *logger.Logger) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -34,7 +39,11 @@ func NewGRPCServer(c *config.Server, heartbeat *service.HeartbeatService, logger
 	if c.Grpc.Timeout != nil {
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
+
 	srv := grpc.NewServer(opts...)
+
 	v1.RegisterHeartbeatServer(srv, heartbeat)
+	accountPb.RegisterServiceServer(srv, account)
+
 	return srv
 }

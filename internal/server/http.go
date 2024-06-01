@@ -15,11 +15,14 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/http"
+
+	accountPb "mt/api/v1/account"
 )
 
 // NewHTTPServer new a HTTP server.
 func NewHTTPServer(c *config.Server,
 	heartbeat *service.HeartbeatService,
+	account *service.AccountService,
 	apiHandler *api.Handler,
 	logger *logger.Logger) *http.Server {
 	var opts = []http.ServerOption{
@@ -48,6 +51,7 @@ func NewHTTPServer(c *config.Server,
 	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))
 
 	v1.RegisterHeartbeatHTTPServer(srv, heartbeat)
+	accountPb.RegisterServiceHTTPServer(srv, account)
 
 	return srv
 }
