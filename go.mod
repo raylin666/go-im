@@ -6,6 +6,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-kratos/kratos/v2 v2.4.1
 	github.com/google/wire v0.6.0
+	github.com/gorilla/mux v1.8.0
 	github.com/raylin666/go-utils v1.4.4
 	go.uber.org/automaxprocs v1.5.1
 	go.uber.org/zap v1.21.0
@@ -27,7 +28,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/subcommands v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
