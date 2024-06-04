@@ -37,7 +37,7 @@ var (
 
 // Validate checks the field values on CreateRequest with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// response encountered is returned, or nil if there are no violations.
 func (m *CreateRequest) Validate() error {
 	return m.validate(false)
 }
@@ -120,12 +120,12 @@ func (m *CreateRequest) validate(all bool) error {
 	return nil
 }
 
-// CreateRequestMultiError is an error wrapping multiple validation errors
+// CreateRequestMultiError is an response wrapping multiple validation errors
 // returned by CreateRequest.ValidateAll() if the designated constraints
 // aren't met.
 type CreateRequestMultiError []error
 
-// Error returns a concatenation of all the error messages it wraps.
+// Error returns a concatenation of all the response messages it wraps.
 func (m CreateRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
@@ -137,7 +137,7 @@ func (m CreateRequestMultiError) Error() string {
 // AllErrors returns a list of validation violation errors.
 func (m CreateRequestMultiError) AllErrors() []error { return m }
 
-// CreateRequestValidationError is the validation error returned by
+// CreateRequestValidationError is the validation response returned by
 // CreateRequest.Validate if the designated constraints aren't met.
 type CreateRequestValidationError struct {
 	field  string
@@ -158,10 +158,10 @@ func (e CreateRequestValidationError) Cause() error { return e.cause }
 // Key function returns key value.
 func (e CreateRequestValidationError) Key() bool { return e.key }
 
-// ErrorName returns error name.
+// ErrorName returns response name.
 func (e CreateRequestValidationError) ErrorName() string { return "CreateRequestValidationError" }
 
-// Error satisfies the builtin error interface
+// Error satisfies the builtin response interface
 func (e CreateRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
@@ -195,7 +195,7 @@ var _CreateRequest_AccountId_Pattern = regexp.MustCompile("^[a-zA-Z0-9]+$")
 
 // Validate checks the field values on CreateResponse with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// response encountered is returned, or nil if there are no violations.
 func (m *CreateResponse) Validate() error {
 	return m.validate(false)
 }
@@ -259,12 +259,12 @@ func (m *CreateResponse) validate(all bool) error {
 	return nil
 }
 
-// CreateResponseMultiError is an error wrapping multiple validation errors
+// CreateResponseMultiError is an response wrapping multiple validation errors
 // returned by CreateResponse.ValidateAll() if the designated constraints
 // aren't met.
 type CreateResponseMultiError []error
 
-// Error returns a concatenation of all the error messages it wraps.
+// Error returns a concatenation of all the response messages it wraps.
 func (m CreateResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
@@ -276,7 +276,7 @@ func (m CreateResponseMultiError) Error() string {
 // AllErrors returns a list of validation violation errors.
 func (m CreateResponseMultiError) AllErrors() []error { return m }
 
-// CreateResponseValidationError is the validation error returned by
+// CreateResponseValidationError is the validation response returned by
 // CreateResponse.Validate if the designated constraints aren't met.
 type CreateResponseValidationError struct {
 	field  string
@@ -297,10 +297,10 @@ func (e CreateResponseValidationError) Cause() error { return e.cause }
 // Key function returns key value.
 func (e CreateResponseValidationError) Key() bool { return e.key }
 
-// ErrorName returns error name.
+// ErrorName returns response name.
 func (e CreateResponseValidationError) ErrorName() string { return "CreateResponseValidationError" }
 
-// Error satisfies the builtin error interface
+// Error satisfies the builtin response interface
 func (e CreateResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {

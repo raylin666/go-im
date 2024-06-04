@@ -37,7 +37,7 @@ var (
 
 // Validate checks the field values on PONEResponse with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
-// error encountered is returned, or nil if there are no violations.
+// response encountered is returned, or nil if there are no violations.
 func (m *PONEResponse) Validate() error {
 	return m.validate(false)
 }
@@ -66,11 +66,11 @@ func (m *PONEResponse) validate(all bool) error {
 	return nil
 }
 
-// PONEResponseMultiError is an error wrapping multiple validation errors
+// PONEResponseMultiError is an response wrapping multiple validation errors
 // returned by PONEResponse.ValidateAll() if the designated constraints aren't met.
 type PONEResponseMultiError []error
 
-// Error returns a concatenation of all the error messages it wraps.
+// Error returns a concatenation of all the response messages it wraps.
 func (m PONEResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
@@ -82,7 +82,7 @@ func (m PONEResponseMultiError) Error() string {
 // AllErrors returns a list of validation violation errors.
 func (m PONEResponseMultiError) AllErrors() []error { return m }
 
-// PONEResponseValidationError is the validation error returned by
+// PONEResponseValidationError is the validation response returned by
 // PONEResponse.Validate if the designated constraints aren't met.
 type PONEResponseValidationError struct {
 	field  string
@@ -103,10 +103,10 @@ func (e PONEResponseValidationError) Cause() error { return e.cause }
 // Key function returns key value.
 func (e PONEResponseValidationError) Key() bool { return e.key }
 
-// ErrorName returns error name.
+// ErrorName returns response name.
 func (e PONEResponseValidationError) ErrorName() string { return "PONEResponseValidationError" }
 
-// Error satisfies the builtin error interface
+// Error satisfies the builtin response interface
 func (e PONEResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {

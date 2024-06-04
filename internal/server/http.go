@@ -32,6 +32,7 @@ func NewHTTPServer(c *config.Server,
 			metadata.Server(),
 			logging.Server(logger),
 			auth.NewJWTAuthServer(),
+			// response.ErrorHandler(),
 		),
 		http.ResponseEncoder(encode.ResponseEncoder),
 	}
