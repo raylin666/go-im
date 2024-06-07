@@ -32,9 +32,11 @@ func NewHTTPServer(c *config.Server,
 			metadata.Server(),
 			logging.Server(logger),
 			auth.NewJWTAuthServer(),
-			// response.ErrorHandler(),
 		),
+		// 请求响应序列化
 		http.ResponseEncoder(encode.ResponseEncoder),
+		// 错误响应序列化
+		http.ErrorEncoder(encode.ErrorEncoder),
 	}
 	if c.Http.Network != "" {
 		opts = append(opts, http.Network(c.Http.Network))
