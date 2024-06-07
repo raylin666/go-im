@@ -41,7 +41,7 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 		return nil, defined.ErrorDataAlreadyExists
 	}
 	if createDataErr := q.WithContext(ctx).Create(account); createDataErr != nil {
-		r.log.UseSQL(ctx).Error("创建账号错误", zap.Any("data", account), zap.Error(createDataErr))
+		r.log.UseSQL(ctx).Error("创建账号错误", zap.Any("account", account), zap.Error(createDataErr))
 		return nil, defined.ErrorDataAddError
 	}
 
@@ -50,22 +50,21 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 
 // Update 更新账号
 func (r *accountRepo) Update(ctx context.Context, data types.AccountUpdateData) (*model.Account, error) {
-	account := &model.Account{
-		Nickname: data.Nickname,
-		Avatar:   data.Avatar,
-		IsAdmin:  data.IsAdmin,
-	}
-
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
-	if _, dataExistErr := q.WithContext(ctx).FirstByAccountId(data.AccountId); errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(data.AccountId)
+	if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 		return nil, defined.ErrorDataNotFound
 	}
-	if updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(data.AccountId)).Save(account); updateDataErr != nil {
-		r.log.UseSQL(ctx).Error("更新账号错误", zap.Any("data", account), zap.Error(updateDataErr))
+
+	account.Nickname = data.Nickname
+	account.Avatar = data.Avatar
+	account.IsAdmin = data.IsAdmin
+	if updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(data.AccountId)).Save(&account); updateDataErr != nil {
+		r.log.UseSQL(ctx).Error("更新账号错误", zap.Any("account", account), zap.Error(updateDataErr))
 		return nil, defined.ErrorDataUpdateError
 	}
 
-	return account, nil
+	return &account, nil
 }
 
 // Delete 删除账号
