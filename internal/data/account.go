@@ -26,6 +26,7 @@ func NewAccountRepo(data *Data, logger *logger.Logger) biz.AccountRepo {
 	}
 }
 
+// Create 创建账号
 func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) (*model.Account, error) {
 	account := &model.Account{
 		AccountId: data.AccountId,
@@ -42,6 +43,42 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 	if createDataErr := q.WithContext(ctx).Create(account); createDataErr != nil {
 		r.log.UseSQL(ctx).Error("创建账号错误", zap.Any("data", account), zap.Error(createDataErr))
 		return nil, defined.ErrorDataAddError
+	}
+
+	return account, nil
+}
+
+// Update 更新账号
+func (r *accountRepo) Update(ctx context.Context, data types.AccountUpdateData) (*model.Account, error) {
+	account := &model.Account{
+		Nickname: data.Nickname,
+		Avatar:   data.Avatar,
+		IsAdmin:  data.IsAdmin,
+	}
+
+	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
+	if _, dataExistErr := q.WithContext(ctx).FirstByAccountId(data.AccountId); errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+		return nil, defined.ErrorDataNotFound
+	}
+	if updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(data.AccountId)).Save(account); updateDataErr != nil {
+		r.log.UseSQL(ctx).Error("更新账号错误", zap.Any("data", account), zap.Error(updateDataErr))
+		return nil, defined.ErrorDataUpdateError
+	}
+
+	return account, nil
+}
+
+// Delete 删除账号
+func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Account, error) {
+	account := &model.Account{}
+
+	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
+	if _, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId); errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+		return nil, defined.ErrorDataNotFound
+	}
+	if result, deleteDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(accountId)).Delete(account); deleteDataErr != nil {
+		r.log.UseSQL(ctx).Error("删除账号错误", zap.Any("account_id", accountId), zap.Any("result", result), zap.Error(deleteDataErr))
+		return nil, defined.ErrorDataDeleteError
 	}
 
 	return account, nil

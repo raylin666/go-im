@@ -25,6 +25,45 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.account.CreateResponse'
+    /api/account/delete/{accountId}:
+        delete:
+            tags:
+                - Service
+            operationId: Service_Delete
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/account/update/{accountId}:
+        put:
+            tags:
+                - Service
+            operationId: Service_Update
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.UpdateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.UpdateResponse'
     /heartbeat:
         get:
             tags:
@@ -57,6 +96,31 @@ components:
                 isAdmin:
                     type: boolean
         v1.account.CreateResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+        v1.account.UpdateRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+        v1.account.UpdateResponse:
             type: object
             properties:
                 accountId:

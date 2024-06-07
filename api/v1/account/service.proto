@@ -5,6 +5,7 @@ package v1.account;
 import "google/api/annotations.proto";
 import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "api/v1/account;account";
 
@@ -17,6 +18,19 @@ service Service {
     option (google.api.http) = {
       post: "/api/account/create"
       body: "*"
+    };
+  }
+
+  rpc Update (UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      put: "/api/account/update/{account_id}"
+      body: "*"
+    };
+  }
+
+  rpc Delete (DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/account/delete/{account_id}"
     };
   }
 }
@@ -38,4 +52,23 @@ message CreateResponse {
   string avatar = 3;
   bool is_admin = 4;
   google.protobuf.Timestamp created_at = 5;
+}
+
+message UpdateRequest {
+  string account_id = 1;
+  string nickname = 2 [(validate.rules).string = {min_len: 1, max_len: 30}];
+  string avatar = 3 [(validate.rules).string.uri = true];
+  bool is_admin = 4;
+}
+
+message UpdateResponse {
+  string account_id = 1;
+  string nickname = 2;
+  string avatar = 3;
+  bool is_admin = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message DeleteRequest {
+  string account_id = 1;
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	pb "mt/api/v1/account"
 	"mt/internal/biz"
@@ -41,4 +42,38 @@ func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb
 	}
 
 	return resp, nil
+}
+
+// Update 更新账号
+func (s *AccountService) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
+	updateRequest := &types.AccountUpdateRequest{
+		Nickname: req.GetNickname(),
+		Avatar:   req.GetAvatar(),
+		IsAdmin:  req.GetIsAdmin(),
+	}
+
+	updateResponse, err := s.uc.Update(ctx, req.GetAccountId(), updateRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.UpdateResponse{
+		AccountId: updateResponse.AccountId,
+		Nickname:  updateResponse.Nickname,
+		Avatar:    updateResponse.Avatar,
+		IsAdmin:   updateResponse.IsAdmin,
+		CreatedAt: timestamppb.New(updateResponse.CreatedAt),
+	}
+
+	return resp, nil
+}
+
+// Delete 删除账号
+func (s *AccountService) Delete(ctx context.Context, req *pb.DeleteRequest) (*emptypb.Empty, error) {
+	_, err := s.uc.Delete(ctx, req.GetAccountId())
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
