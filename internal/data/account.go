@@ -37,7 +37,7 @@ func (r *accountRepo) Create(ctx context.Context, data types.AccountCreateData) 
 	account.CreatedAt = time.Now()
 
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
-	if _, dataExistErr := q.WithContext(ctx).FirstByAccountId(account.AccountId); !errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+	if _, dataExistErr := q.WithContext(ctx).Where().FirstByAccountId(account.AccountId); !errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 		return nil, defined.ErrorDataAlreadyExists
 	}
 	if createDataErr := q.WithContext(ctx).Create(account); createDataErr != nil {
@@ -69,16 +69,15 @@ func (r *accountRepo) Update(ctx context.Context, data types.AccountUpdateData) 
 
 // Delete 删除账号
 func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Account, error) {
-	account := &model.Account{}
-
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
-	if _, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId); errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
+	if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 		return nil, defined.ErrorDataNotFound
 	}
-	if result, deleteDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(accountId)).Delete(account); deleteDataErr != nil {
+	if result, deleteDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(accountId)).Delete(&account); deleteDataErr != nil {
 		r.log.UseSQL(ctx).Error("删除账号错误", zap.Any("account_id", accountId), zap.Any("result", result), zap.Error(deleteDataErr))
 		return nil, defined.ErrorDataDeleteError
 	}
 
-	return account, nil
+	return &account, nil
 }
