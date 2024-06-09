@@ -20,7 +20,7 @@ import (
 )
 
 // NewHTTPServer new a HTTP server.
-func NewHTTPServer(c *config.Server,
+func NewHTTPServer(cServer *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
 	apiHandler *api.Handler,
@@ -38,14 +38,14 @@ func NewHTTPServer(c *config.Server,
 		// 错误响应序列化
 		http.ErrorEncoder(encode.ErrorEncoder),
 	}
-	if c.Http.Network != "" {
-		opts = append(opts, http.Network(c.Http.Network))
+	if cServer.Http.Network != "" {
+		opts = append(opts, http.Network(cServer.Http.Network))
 	}
-	if c.Http.Addr != "" {
-		opts = append(opts, http.Address(c.Http.Addr))
+	if cServer.Http.Addr != "" {
+		opts = append(opts, http.Address(cServer.Http.Addr))
 	}
-	if c.Http.Timeout != nil {
-		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
+	if cServer.Http.Timeout != nil {
+		opts = append(opts, http.Timeout(cServer.Http.Timeout.AsDuration()))
 	}
 
 	srv := http.NewServer(opts...)

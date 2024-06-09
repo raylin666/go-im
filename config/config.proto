@@ -15,6 +15,7 @@ message Bootstrap {
   Language language = 7;
   Validator validator = 8;
   Log log = 9;
+  Websocket websocket = 10;
 }
 
 message App {
@@ -114,4 +115,10 @@ message Log {
   int32 max_age = 3;
   bool local_time = 4;
   bool compress = 5;
+}
+
+message Websocket {
+  google.protobuf.Duration handshake_timeout = 1;
+  int32 read_buffer_size = 2;
+  int32 write_buffer_size = 3;
 }

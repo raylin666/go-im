@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/google/wire"
 	"github.com/gorilla/mux"
+	"mt/config"
 	"mt/pkg/logger"
 	"mt/pkg/repositories"
 )
@@ -16,15 +17,21 @@ type Handler struct {
 	redisRepo repositories.RedisRepo
 	logger    *logger.Logger
 	Prefix    string
+
+	cApp       *config.App
+	cWebsocket *config.Websocket
 }
 
-func NewHandler(logger *logger.Logger, dataRepo repositories.DataRepo) *Handler {
+func NewHandler(cApp *config.App, cWebsocket *config.Websocket, logger *logger.Logger, dataRepo repositories.DataRepo) *Handler {
 	return &Handler{
 		r:         mux.NewRouter(),
 		dbRepo:    dataRepo.DbRepo(),
 		redisRepo: dataRepo.RedisRepo(),
 		logger:    logger,
 		Prefix:    "/app/",
+
+		cApp:       cApp,
+		cWebsocket: cWebsocket,
 	}
 }
 

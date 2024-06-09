@@ -17,7 +17,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *config.Server,
+func NewGRPCServer(cServer *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
 	logger *logger.Logger) *grpc.Server {
@@ -30,14 +30,14 @@ func NewGRPCServer(c *config.Server,
 			auth.NewJWTAuthServer(),
 		),
 	}
-	if c.Grpc.Network != "" {
-		opts = append(opts, grpc.Network(c.Grpc.Network))
+	if cServer.Grpc.Network != "" {
+		opts = append(opts, grpc.Network(cServer.Grpc.Network))
 	}
-	if c.Grpc.Addr != "" {
-		opts = append(opts, grpc.Address(c.Grpc.Addr))
+	if cServer.Grpc.Addr != "" {
+		opts = append(opts, grpc.Address(cServer.Grpc.Addr))
 	}
-	if c.Grpc.Timeout != nil {
-		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
+	if cServer.Grpc.Timeout != nil {
+		opts = append(opts, grpc.Timeout(cServer.Grpc.Timeout.AsDuration()))
 	}
 
 	srv := grpc.NewServer(opts...)

@@ -13,7 +13,7 @@ option go_package = "api/v1/account;account";
 
 // The Service service definition.
 service Service {
-  // Service detection
+  // 创建账号
   rpc Create (CreateRequest) returns (CreateResponse) {
     option (google.api.http) = {
       post: "/api/account/create"
@@ -21,6 +21,7 @@ service Service {
     };
   }
 
+  // 更新账号
   rpc Update (UpdateRequest) returns (UpdateResponse) {
     option (google.api.http) = {
       put: "/api/account/update/{account_id}"
@@ -28,9 +29,18 @@ service Service {
     };
   }
 
+  // 删除账号
   rpc Delete (DeleteRequest) returns (google.protobuf.Empty) {
     option (google.api.http) = {
       delete: "/api/account/delete/{account_id}"
+    };
+  }
+
+  // 生成TOKEN
+  rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/account/token/{account_id}"
+      body: "*"
     };
   }
 }
@@ -71,4 +81,15 @@ message UpdateResponse {
 
 message DeleteRequest {
   string account_id = 1;
+}
+
+message GenerateTokenRequest {
+  string account_id = 1;
+  int64 ttl = 2;
+}
+
+message GenerateTokenResponse {
+  string account_id = 1;
+  string token = 2;
+  int64 token_expire = 3;
 }

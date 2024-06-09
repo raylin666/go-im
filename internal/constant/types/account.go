@@ -48,3 +48,9 @@ type AccountUpdateData struct {
 type AccountDeleteResponse struct {
 	AccountId string `json:"account_id"`
 }
+
+type AccountGenerateTokenResponse struct {
+	AccountId   string `json:"account_id"`
+	Token       string `json:"token"`
+	TokenExpire int64  `json:"token_expire"`
+}

@@ -77,3 +77,19 @@ func (s *AccountService) Delete(ctx context.Context, req *pb.DeleteRequest) (*em
 
 	return nil, nil
 }
+
+// GenerateToken 生成TOKEN
+func (s *AccountService) GenerateToken(ctx context.Context, req *pb.GenerateTokenRequest) (*pb.GenerateTokenResponse, error) {
+	generateTokenResponse, err := s.uc.GenerateToken(ctx, req.GetAccountId(), req.GetTtl())
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.GenerateTokenResponse{
+		AccountId:   generateTokenResponse.AccountId,
+		Token:       generateTokenResponse.Token,
+		TokenExpire: generateTokenResponse.TokenExpire,
+	}
+
+	return resp, nil
+}

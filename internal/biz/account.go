@@ -2,9 +2,13 @@ package biz
 
 import (
 	"context"
+	"github.com/raylin666/go-utils/auth"
+	"mt/internal/app"
+	"mt/internal/constant/defined"
 	"mt/internal/constant/types"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/logger"
+	"time"
 )
 
 type Account struct {
@@ -89,4 +93,29 @@ func (uc *AccountUsecase) Delete(ctx context.Context, accountId string) (*types.
 	}
 
 	return &types.AccountDeleteResponse{AccountId: m.AccountId}, nil
+}
+
+// GenerateToken 生成TOKEN
+func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, ttl int64) (*types.AccountGenerateTokenResponse, error) {
+	if accountId == "" {
+		return nil, defined.ErrorRequestParamsError
+	}
+
+	// 默认Token为1天过期
+	if ttl <= 0 {
+		ttl = 86400
+	}
+
+	token, err := app.JWT.GenerateToken(accountId, time.Duration(ttl)*time.Second, auth.JWTClaimsOptions{})
+	if err != nil {
+		return nil, defined.ErrorGenerateTokenError
+	}
+
+	resp := &types.AccountGenerateTokenResponse{
+		AccountId:   accountId,
+		Token:       token,
+		TokenExpire: ttl,
+	}
+
+	return resp, nil
 }

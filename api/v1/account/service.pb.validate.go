@@ -704,3 +704,217 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = DeleteRequestValidationError{}
+
+// Validate checks the field values on GenerateTokenRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GenerateTokenRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GenerateTokenRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GenerateTokenRequestMultiError, or nil if none found.
+func (m *GenerateTokenRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GenerateTokenRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AccountId
+
+	// no validation rules for Ttl
+
+	if len(errors) > 0 {
+		return GenerateTokenRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GenerateTokenRequestMultiError is an error wrapping multiple validation
+// errors returned by GenerateTokenRequest.ValidateAll() if the designated
+// constraints aren't met.
+type GenerateTokenRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GenerateTokenRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GenerateTokenRequestMultiError) AllErrors() []error { return m }
+
+// GenerateTokenRequestValidationError is the validation error returned by
+// GenerateTokenRequest.Validate if the designated constraints aren't met.
+type GenerateTokenRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GenerateTokenRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GenerateTokenRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GenerateTokenRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GenerateTokenRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GenerateTokenRequestValidationError) ErrorName() string {
+	return "GenerateTokenRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GenerateTokenRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGenerateTokenRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GenerateTokenRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GenerateTokenRequestValidationError{}
+
+// Validate checks the field values on GenerateTokenResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GenerateTokenResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GenerateTokenResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GenerateTokenResponseMultiError, or nil if none found.
+func (m *GenerateTokenResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GenerateTokenResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AccountId
+
+	// no validation rules for Token
+
+	// no validation rules for TokenExpire
+
+	if len(errors) > 0 {
+		return GenerateTokenResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GenerateTokenResponseMultiError is an error wrapping multiple validation
+// errors returned by GenerateTokenResponse.ValidateAll() if the designated
+// constraints aren't met.
+type GenerateTokenResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GenerateTokenResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GenerateTokenResponseMultiError) AllErrors() []error { return m }
+
+// GenerateTokenResponseValidationError is the validation error returned by
+// GenerateTokenResponse.Validate if the designated constraints aren't met.
+type GenerateTokenResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GenerateTokenResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GenerateTokenResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GenerateTokenResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GenerateTokenResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GenerateTokenResponseValidationError) ErrorName() string {
+	return "GenerateTokenResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GenerateTokenResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGenerateTokenResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GenerateTokenResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GenerateTokenResponseValidationError{}

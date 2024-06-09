@@ -18,7 +18,7 @@
   "paths": {
     "/api/account/create": {
       "post": {
-        "summary": "Service detection",
+        "summary": "创建账号",
         "operationId": "Service_Create",
         "responses": {
           "200": {
@@ -51,6 +51,7 @@
     },
     "/api/account/delete/{account_id}": {
       "delete": {
+        "summary": "删除账号",
         "operationId": "Service_Delete",
         "responses": {
           "200": {
@@ -80,8 +81,48 @@
         ]
       }
     },
+    "/api/account/token/{account_id}": {
+      "post": {
+        "summary": "生成TOKEN",
+        "operationId": "Service_GenerateToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountGenerateTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceGenerateTokenBody"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/api/account/update/{account_id}": {
       "put": {
+        "summary": "更新账号",
         "operationId": "Service_Update",
         "responses": {
           "200": {
@@ -120,6 +161,15 @@
     }
   },
   "definitions": {
+    "ServiceGenerateTokenBody": {
+      "type": "object",
+      "properties": {
+        "ttl": {
+          "type": "string",
+          "format": "int64"
+        }
+      }
+    },
     "ServiceUpdateBody": {
       "type": "object",
       "properties": {
@@ -169,6 +219,21 @@
         "created_at": {
           "type": "string",
           "format": "date-time"
+        }
+      }
+    },
+    "accountGenerateTokenResponse": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string"
+        },
+        "token": {
+          "type": "string"
+        },
+        "token_expire": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },

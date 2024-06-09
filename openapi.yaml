@@ -10,7 +10,7 @@ paths:
         post:
             tags:
                 - Service
-            description: Service detection
+            description: 创建账号
             operationId: Service_Create
             requestBody:
                 content:
@@ -29,6 +29,7 @@ paths:
         delete:
             tags:
                 - Service
+            description: 删除账号
             operationId: Service_Delete
             parameters:
                 - name: accountId
@@ -40,10 +41,36 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /api/account/token/{accountId}:
+        post:
+            tags:
+                - Service
+            description: 生成TOKEN
+            operationId: Service_GenerateToken
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.GenerateTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.GenerateTokenResponse'
     /api/account/update/{accountId}:
         put:
             tags:
                 - Service
+            description: 更新账号
             operationId: Service_Update
             parameters:
                 - name: accountId
@@ -109,6 +136,22 @@ components:
                 createdAt:
                     type: string
                     format: date-time
+        v1.account.GenerateTokenRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                ttl:
+                    type: string
+        v1.account.GenerateTokenResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                token:
+                    type: string
+                tokenExpire:
+                    type: string
         v1.account.UpdateRequest:
             type: object
             properties:
