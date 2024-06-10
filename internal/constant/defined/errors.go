@@ -23,7 +23,8 @@ var (
 	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行事件")
 	ErrorRequestParamsError     = api.ErrorRequestParamsError("请求参数错误")
 
-	ErrorNotVisitAuth = api.ErrorNotVisitAuth("没有访问权限, 请联系管理员")
+	ErrorNotVisitAuth        = api.ErrorNotVisitAuth("没有访问权限, 请联系管理员")
+	ErrorAuthenticationError = api.ErrorAuthenticationError("身份验证失败")
 
 	ErrorWebsocketUpgraderError = api.ErrorWebsocketUpgraderError("WebSocket 协议升级失败")
 

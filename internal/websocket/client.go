@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 	"time"
 )
@@ -48,4 +49,12 @@ func (c *Client) IsHeartbeatTimeout(currentTime uint64) (timeout bool) {
 	}
 
 	return
+}
+
+func (c *Client) Read(ctx context.Context) {
+
+}
+
+func (c *Client) Write(ctx context.Context) {
+
 }

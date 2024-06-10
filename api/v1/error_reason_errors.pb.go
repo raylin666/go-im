@@ -277,6 +277,20 @@ func ErrorNotVisitAuth(format string, args ...interface{}) *errors.Error {
 	return errors.New(401, ErrorReason_NOT_VISIT_AUTH.String(), fmt.Sprintf(format, args...))
 }
 
+// 身份验证失败
+func IsAuthenticationError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_AUTHENTICATION_ERROR.String() && e.Code == 400
+}
+
+// 身份验证失败
+func ErrorAuthenticationError(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_AUTHENTICATION_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
 // WebSocket 协议升级失败
 func IsWebsocketUpgraderError(err error) bool {
 	if err == nil {
