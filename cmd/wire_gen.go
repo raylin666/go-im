@@ -14,6 +14,7 @@ import (
 	"mt/internal/data"
 	"mt/internal/server"
 	"mt/internal/service"
+	"mt/internal/websocket"
 	"mt/pkg/logger"
 	"mt/pkg/repositories"
 )
@@ -25,7 +26,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(configServer *config.Server, configData *config.Data, app *config.App, websocket *config.Websocket, loggerLogger *logger.Logger) (*kratos.App, func(), error) {
+func wireApp(configServer *config.Server, configData *config.Data, app *config.App, configWebsocket *config.Websocket, loggerLogger *logger.Logger) (*kratos.App, func(), error) {
 	dataRepo := repositories.NewDataRepo(loggerLogger, configData)
 	dataData, cleanup, err := data.NewData(configData, loggerLogger, dataRepo)
 	if err != nil {
@@ -38,8 +39,9 @@ func wireApp(configServer *config.Server, configData *config.Data, app *config.A
 	accountUsecase := biz.NewAccountUsecase(accountRepo, loggerLogger)
 	accountService := service.NewAccountService(accountUsecase)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, loggerLogger)
-	handler := api.NewHandler(app, websocket, loggerLogger, dataRepo)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, handler, loggerLogger)
+	handler := api.NewHandler(app, configWebsocket, loggerLogger, dataRepo)
+	manager := websocket.NewManager(configServer, dataData, loggerLogger)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, handler, manager, loggerLogger)
 	kratosApp := newApp(loggerLogger, grpcServer, httpServer)
 	return kratosApp, func() {
 		cleanup()

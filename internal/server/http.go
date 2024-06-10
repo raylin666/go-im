@@ -10,6 +10,7 @@ import (
 	"mt/internal/middleware/encode"
 	logging "mt/internal/middleware/logger"
 	"mt/internal/service"
+	"mt/internal/websocket"
 	"mt/pkg/logger"
 	netHttp "net/http"
 
@@ -19,11 +20,12 @@ import (
 	accountPb "mt/api/v1/account"
 )
 
-// NewHTTPServer new a HTTP server.
+// NewHTTPServer new an HTTP server.
 func NewHTTPServer(cServer *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
 	apiHandler *api.Handler,
+	websocketManager *websocket.Manager,
 	logger *logger.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -47,6 +49,9 @@ func NewHTTPServer(cServer *config.Server,
 	if cServer.Http.Timeout != nil {
 		opts = append(opts, http.Timeout(cServer.Http.Timeout.AsDuration()))
 	}
+
+	// 注册 Websocket 管理器
+	websocket.RegisterManagerInstance(websocketManager)
 
 	srv := http.NewServer(opts...)
 
