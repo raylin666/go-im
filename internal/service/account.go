@@ -7,6 +7,7 @@ import (
 	pb "mt/api/v1/account"
 	"mt/internal/biz"
 	"mt/internal/constant/types"
+	"time"
 )
 
 type AccountService struct {
@@ -80,6 +81,7 @@ func (s *AccountService) Delete(ctx context.Context, req *pb.DeleteRequest) (*em
 
 // GenerateToken 生成TOKEN
 func (s *AccountService) GenerateToken(ctx context.Context, req *pb.GenerateTokenRequest) (*pb.GenerateTokenResponse, error) {
+	var nowTime = time.Now()
 	generateTokenResponse, err := s.uc.GenerateToken(ctx, req.GetAccountId(), req.GetTtl())
 	if err != nil {
 		return nil, err
@@ -88,7 +90,7 @@ func (s *AccountService) GenerateToken(ctx context.Context, req *pb.GenerateToke
 	resp := &pb.GenerateTokenResponse{
 		AccountId:   generateTokenResponse.AccountId,
 		Token:       generateTokenResponse.Token,
-		TokenExpire: generateTokenResponse.TokenExpire,
+		TokenExpire: timestamppb.New(nowTime.Add(time.Duration(generateTokenResponse.TokenExpire) * time.Second)),
 	}
 
 	return resp, nil

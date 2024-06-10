@@ -152,6 +152,7 @@ components:
                     type: string
                 tokenExpire:
                     type: string
+                    format: date-time
         v1.account.UpdateRequest:
             type: object
             properties:

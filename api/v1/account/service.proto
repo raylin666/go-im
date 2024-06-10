@@ -91,5 +91,5 @@ message GenerateTokenRequest {
 message GenerateTokenResponse {
   string account_id = 1;
   string token = 2;
-  int64 token_expire = 3;
+  google.protobuf.Timestamp token_expire = 3;
 }

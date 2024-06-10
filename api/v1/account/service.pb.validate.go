@@ -837,7 +837,34 @@ func (m *GenerateTokenResponse) validate(all bool) error {
 
 	// no validation rules for Token
 
-	// no validation rules for TokenExpire
+	if all {
+		switch v := interface{}(m.GetTokenExpire()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GenerateTokenResponseValidationError{
+					field:  "TokenExpire",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GenerateTokenResponseValidationError{
+					field:  "TokenExpire",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetTokenExpire()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GenerateTokenResponseValidationError{
+				field:  "TokenExpire",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return GenerateTokenResponseMultiError(errors)
