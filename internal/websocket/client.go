@@ -2,8 +2,13 @@ package websocket
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
+	"mt/internal/constant/defined"
+	"mt/internal/websocket/types"
+	"runtime/debug"
 	"time"
 )
 
@@ -45,15 +50,15 @@ func (c *Client) Heartbeat(currentTime time.Time) {
 
 // IsHeartbeatTimeout 判断连接心跳是否超时
 func (c *Client) IsHeartbeatTimeout(currentTime time.Time) (timeout bool) {
-	if !currentTime.Before(c.HeartbeatTime.Add(heartbeatExpirationTime)) {
+	if c.HeartbeatTime.Add(heartbeatExpirationTime).Before(currentTime) {
 		timeout = true
 	}
 
 	return
 }
 
-// connLoggerFields 获取连接日志字段信息
-func (c *Client) connLoggerFields() []zap.Field {
+// loggerConnFields 获取连接日志字段信息
+func (c *Client) loggerConnFields() []zap.Field {
 	var addr = zap.String("address", c.Addr)
 	var accountId = zap.String("account_id", c.AccountId)
 	var firstTime = zap.Time("first_time", c.FirstTime)
@@ -64,22 +69,158 @@ func (c *Client) connLoggerFields() []zap.Field {
 
 // Read 读取客户端消息
 func (c *Client) Read(ctx context.Context) {
-	/*var connLoggerFields = c.connLoggerFields()
+	var loggerConnFields = c.loggerConnFields()
+
+	defer func() {
+		if r := recover(); r != nil {
+			loggerConnFields = append(loggerConnFields, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+			Logger(ctx).Error("读取客户端消息异常", loggerConnFields...)
+		}
+	}()
+
+	defer func() {
+		Logger(ctx).Debug("读取客户端消息结束", loggerConnFields...)
+
+		// 关闭接收及待发送消息
+		close(c.Send)
+	}()
 
 	for {
 		// c.Conn.ReadMessage 该方法会阻塞等待, 直到收到消息才能继续往下执行
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
-			Logger(ctx).Error("读取客户端消息失败", connLoggerFields, zap.Error(err))
+			loggerConnFields = append(loggerConnFields, zap.Error(err))
+			Logger(ctx).Error("读取客户端消息失败", loggerConnFields...)
 
 			return
 		}
 
-		// 消息处理
-		Logger(ctx).Info("读取客户端消息并开始处理", logAddr, zap.String("message", string(message)))
-	}*/
+		loggerConnFields = append(loggerConnFields, zap.String("message", string(message)))
+		Logger(ctx).Info("读取客户端消息成功", loggerConnFields...)
+
+		// 事件消息处理
+		c.EventMessageHandler(ctx, message)
+	}
 }
 
 // Write 写入客户端消息
 func (c *Client) Write(ctx context.Context) {
+}
+
+// WriteMessage 写入待发送消息到通道
+func (c *Client) WriteMessage(ctx context.Context, message []byte) bool {
+	if c == nil {
+		return false
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			loggerConnFields := c.loggerConnFields()
+			loggerConnFields = append(loggerConnFields, zap.String("message", string(message)), zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+			Logger(ctx).Error("发送消息异常", loggerConnFields...)
+		}
+	}()
+
+	c.Send <- message
+
+	return true
+}
+
+// WriteEventMessage 写入待发送事件消息到通道
+func (c *Client) WriteEventMessage(ctx context.Context, event string, seq string, code uint32, msg string, data interface{}) (ok bool, err error) {
+	// 事件不存在的消息不推送给客户端
+	if _, hasEvent := ManagerInstance().GetEventHandler(event); !hasEvent {
+		return false, nil
+	}
+
+	response := types.NewResponse(seq, event, code, msg, data)
+	headByte, err := json.Marshal(response)
+	if err != nil {
+		return false, err
+	}
+
+	return c.WriteMessage(ctx, headByte), nil
+}
+
+// EventMessageHandler 事件消息处理, 对数据包进行合法校验、解析、事件消息分发及消息发送处理
+func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
+	var loggerConnFields = c.loggerConnFields()
+
+	Logger(ctx).Info("进入事件消息处理", loggerConnFields...)
+
+	defer func() {
+		if r := recover(); r != nil {
+			loggerConnFields = append(loggerConnFields, zap.Any("recover", r))
+			Logger(ctx).Error("事件消息处理异常", loggerConnFields...)
+		}
+	}()
+
+	// TODO 数据包合法性校验/解析消息数据包
+	request := &types.Request{}
+	err := json.Unmarshal(message, request)
+	if err != nil {
+		loggerConnFields = append(loggerConnFields, zap.Error(err))
+		Logger(ctx).Error("事件消息数据包合法性校验失败 json.Unmarshal", loggerConnFields...)
+
+		// 返回错误给客户端
+		c.WriteMessage(ctx, []byte("事件消息发送数据包协议格式错误"))
+
+		return
+	}
+
+	requestData, err := json.Marshal(request.Data)
+	if err != nil {
+		loggerConnFields = append(loggerConnFields, zap.Error(err))
+		Logger(ctx).Error("事件消息解析数据包错误 json.Marshal", loggerConnFields...)
+
+		// 返回错误给客户端
+		c.WriteMessage(ctx, []byte("事件消息协议格式错误"))
+
+		return
+	}
+
+	// TODO 将处理完成的数据包返回给客户端
+	var (
+		seq   = request.Seq
+		event = request.Event
+
+		responseCode    uint32
+		responseMessage string
+		responseData    interface{}
+	)
+
+	loggerConnFields = append(loggerConnFields, zap.String("seq", seq), zap.String("event", event), zap.String("data", string(requestData)))
+	Logger(ctx).Info("事件消息解析数据包完成", loggerConnFields...)
+
+	// 采用 MAP 处理事件
+	if value, ok := ManagerInstance().GetEventHandler(event); ok {
+		responseCode, responseMessage, responseData = value(ctx, c, seq, requestData)
+	} else {
+		e := defined.ErrorCommandInvalidNotFound
+		responseCode = uint32(e.Code)
+		responseMessage = e.Message
+		Logger(ctx).Warn(fmt.Sprintf("事件消息处理: `%s` 事件不存在!", event), loggerConnFields...)
+	}
+
+	ok, err := c.WriteEventMessage(ctx, event, seq, responseCode, responseMessage, responseData)
+	if err != nil {
+		loggerConnFields = append(loggerConnFields,
+			zap.Uint32("response_code", responseCode),
+			zap.String("response_message", responseMessage),
+			zap.Any("response_data", responseData),
+			zap.Error(err))
+		Logger(ctx).Error("事件消息处理响应数据错误 json.Marshal", loggerConnFields...)
+
+		return
+	}
+
+	responseDataJson, _ := json.Marshal(responseData)
+	loggerConnFields = append(loggerConnFields, zap.String("message", string(responseDataJson)))
+
+	if !ok {
+		Logger(ctx).Error("事件消息发送失败", loggerConnFields...)
+		return
+	}
+
+	Logger(ctx).Info("事件消息发送成功", loggerConnFields...)
 }

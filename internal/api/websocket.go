@@ -80,4 +80,5 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	go client.Read(ctx)
 	go client.Write(ctx)
 
+	websocket.ManagerInstance().ClientManager().Register <- client
 }
