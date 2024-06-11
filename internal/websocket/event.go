@@ -20,8 +20,7 @@ func Events() (events map[string]EventDisposeFunc) {
 	return
 }
 
-type Event struct {
-}
+type Event struct{}
 
 // Ping 心跳检测[消息事件处理]
 func (event *Event) Ping(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}) {
