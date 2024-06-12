@@ -10,6 +10,7 @@ import (
 	"mt/internal/api"
 	"mt/internal/biz"
 	"mt/internal/data"
+	"mt/internal/event"
 	"mt/internal/server"
 	"mt/internal/service"
 	"mt/internal/websocket"
@@ -32,5 +33,6 @@ func wireApp(*config.Server,
 		api.ProviderSet,
 		service.ProviderSet,
 		websocket.ProviderSet,
+		event.ProviderSet,
 		newApp))
 }

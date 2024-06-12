@@ -20,10 +20,6 @@ func Events() (events map[string]EventDisposeFunc) {
 	return
 }
 
-type MessageEvent interface {
-	Ping(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{})
-}
-
 type Event struct{}
 
 // Ping 心跳检测[消息事件处理]

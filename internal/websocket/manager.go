@@ -3,6 +3,7 @@ package websocket
 import (
 	"mt/config"
 	"mt/internal/data"
+	"mt/internal/event"
 	"mt/pkg/logger"
 	"sync"
 )
@@ -11,7 +12,9 @@ var (
 	manager *Manager
 )
 
-func RegisterManagerInstance(managerInstance *Manager) { manager = managerInstance }
+func RegisterManagerInstance(managerInstance *Manager) {
+	manager = managerInstance
+}
 
 func ManagerInstance() *Manager { return manager }
 
@@ -27,7 +30,7 @@ type Manager struct {
 	logger   *logger.Logger
 }
 
-func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logger) (manager *Manager) {
+func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logger, events event.Events) (manager *Manager) {
 	manager = &Manager{
 		clientManager: NewClientManager(),
 		events:        make(map[string]EventDisposeFunc),
