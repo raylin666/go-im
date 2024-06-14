@@ -2,7 +2,7 @@ package websocket
 
 import "sync"
 
-// 客户端连接管理
+// ClientManager 客户端连接管理
 type ClientManager struct {
 	Clients      map[*Client]bool    // 全部客户端连接资源
 	ClientsLock  sync.RWMutex        // 客户端链接读写锁
