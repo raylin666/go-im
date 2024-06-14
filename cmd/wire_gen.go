@@ -15,6 +15,7 @@ import (
 	"mt/internal/server"
 	"mt/internal/service"
 	"mt/internal/websocket"
+	"mt/internal/websocket/event"
 	"mt/pkg/logger"
 	"mt/pkg/repositories"
 )
@@ -40,7 +41,8 @@ func wireApp(configServer *config.Server, configData *config.Data, app *config.A
 	accountService := service.NewAccountService(accountUsecase)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, loggerLogger)
 	handler := api.NewHandler(app, configWebsocket, loggerLogger, dataRepo)
-	manager := websocket.NewManager(configServer, dataData, loggerLogger)
+	events := event.NewEvents()
+	manager := websocket.NewManager(configServer, dataData, loggerLogger, events)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, handler, manager, loggerLogger)
 	kratosApp := newApp(loggerLogger, grpcServer, httpServer)
 	return kratosApp, func() {

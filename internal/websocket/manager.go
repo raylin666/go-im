@@ -3,7 +3,6 @@ package websocket
 import (
 	"mt/config"
 	"mt/internal/data"
-	"mt/internal/event"
 	"mt/pkg/logger"
 	"sync"
 )
@@ -30,7 +29,7 @@ type Manager struct {
 	logger   *logger.Logger
 }
 
-func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logger, events event.Events) (manager *Manager) {
+func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logger, events Events) (manager *Manager) {
 	manager = &Manager{
 		clientManager: NewClientManager(),
 		events:        make(map[string]EventDisposeFunc),
@@ -39,8 +38,8 @@ func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logg
 		logger:        logger,
 	}
 
-	// 注册消息事件处理
-	for event, fn := range Events() {
+	// 注册消息事件处理器
+	for event, fn := range events.GetAll() {
 		manager.WithEventHandler(event, fn)
 	}
 
@@ -52,17 +51,17 @@ func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logg
 
 func (manager *Manager) ClientManager() *ClientManager { return manager.clientManager }
 
-// WithEventHandler 注册消息事件处理
-func (m *Manager) WithEventHandler(event string, fn EventDisposeFunc) {
-	m.eventRWMutex.Lock()
-	defer m.eventRWMutex.Unlock()
-	m.events[event] = fn
+// WithEventHandler 注册消息事件处理器
+func (manager *Manager) WithEventHandler(event string, fn EventDisposeFunc) {
+	manager.eventRWMutex.Lock()
+	defer manager.eventRWMutex.Unlock()
+	manager.events[event] = fn
 }
 
-// GetEventHandler 获取消息事件处理
-func (m *Manager) GetEventHandler(event string) (value EventDisposeFunc, ok bool) {
-	m.eventRWMutex.RLock()
-	defer m.eventRWMutex.RUnlock()
-	value, ok = m.events[event]
+// GetEventHandler 获取消息事件处理器
+func (manager *Manager) GetEventHandler(event string) (value EventDisposeFunc, ok bool) {
+	manager.eventRWMutex.RLock()
+	defer manager.eventRWMutex.RUnlock()
+	value, ok = manager.events[event]
 	return
 }

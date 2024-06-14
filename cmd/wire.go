@@ -10,10 +10,10 @@ import (
 	"mt/internal/api"
 	"mt/internal/biz"
 	"mt/internal/data"
-	"mt/internal/event"
 	"mt/internal/server"
 	"mt/internal/service"
 	"mt/internal/websocket"
+	"mt/internal/websocket/event"
 	"mt/pkg/logger"
 
 	"github.com/go-kratos/kratos/v2"
