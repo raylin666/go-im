@@ -4,7 +4,7 @@ import (
 	"github.com/google/wire"
 	"github.com/gorilla/mux"
 	"mt/config"
-	"mt/pkg/logger"
+	"mt/internal/app"
 	"mt/pkg/repositories"
 )
 
@@ -15,19 +15,19 @@ type Handler struct {
 	r         *mux.Router
 	dbRepo    repositories.DbRepo
 	redisRepo repositories.RedisRepo
-	logger    *logger.Logger
+	tools     *app.Tools
 	Prefix    string
 
 	cApp       *config.App
 	cWebsocket *config.Websocket
 }
 
-func NewHandler(cApp *config.App, cWebsocket *config.Websocket, logger *logger.Logger, dataRepo repositories.DataRepo) *Handler {
+func NewHandler(cApp *config.App, cWebsocket *config.Websocket, tools *app.Tools, dataRepo repositories.DataRepo) *Handler {
 	return &Handler{
 		r:         mux.NewRouter(),
 		dbRepo:    dataRepo.DbRepo(),
 		redisRepo: dataRepo.RedisRepo(),
-		logger:    logger,
+		tools:     tools,
 		Prefix:    "/app/",
 
 		cApp:       cApp,
@@ -38,11 +38,9 @@ func NewHandler(cApp *config.App, cWebsocket *config.Websocket, logger *logger.L
 func (h *Handler) Router() *mux.Router {
 	// WebSocket
 	var ws = h.r.PathPrefix(h.Prefix + "ws").Subrouter()
-	h.routerWS(ws)
+	{
+		ws.HandleFunc("", h.WebSocket)
+	}
 
 	return h.r
-}
-
-func (h *Handler) routerWS(r *mux.Router) {
-	r.HandleFunc("", h.WebSocket)
 }

@@ -2,8 +2,8 @@ package websocket
 
 import (
 	"mt/config"
+	"mt/internal/app"
 	"mt/internal/data"
-	"mt/pkg/logger"
 	"sync"
 )
 
@@ -26,16 +26,16 @@ type Manager struct {
 
 	cServer  *config.Server
 	resource *data.Data
-	logger   *logger.Logger
+	tools    *app.Tools
 }
 
-func NewManager(cServer *config.Server, resource *data.Data, logger *logger.Logger, events Events) (manager *Manager) {
+func NewManager(cServer *config.Server, resource *data.Data, tools *app.Tools, events Events) (manager *Manager) {
 	manager = &Manager{
 		clientManager: NewClientManager(),
 		events:        make(map[string]EventDisposeFunc),
 		cServer:       cServer,
 		resource:      resource,
-		logger:        logger,
+		tools:         tools,
 	}
 
 	// 注册消息事件处理器

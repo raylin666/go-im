@@ -6,12 +6,12 @@ import (
 	"mt/api/v1"
 	"mt/config"
 	"mt/internal/api"
+	"mt/internal/app"
 	"mt/internal/middleware/auth"
 	"mt/internal/middleware/encode"
 	logging "mt/internal/middleware/logger"
 	"mt/internal/service"
 	"mt/internal/websocket"
-	"mt/pkg/logger"
 	netHttp "net/http"
 
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
@@ -26,14 +26,14 @@ func NewHTTPServer(cServer *config.Server,
 	account *service.AccountService,
 	apiHandler *api.Handler,
 	websocketManager *websocket.Manager,
-	logger *logger.Logger) *http.Server {
+	tools *app.Tools) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
 			validate.Validator(),
 			metadata.Server(),
-			logging.Server(logger),
-			auth.NewJWTAuthServer(),
+			logging.Server(tools.Logger()),
+			auth.NewJWTAuthServer(tools.JWT()),
 		),
 		// 请求响应序列化
 		http.ResponseEncoder(encode.ResponseEncoder),

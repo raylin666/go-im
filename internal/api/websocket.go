@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
-	"mt/internal/app"
 	"mt/internal/constant/defined"
 	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
@@ -30,7 +29,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 解析TOKEN
-	jwtClaims, err := app.JWT.ParseToken(accountToken)
+	jwtClaims, err := h.tools.JWT().ParseToken(accountToken)
 	if err != nil {
 		var e = defined.ErrorAuthenticationError
 		_, _ = w.Write([]byte(e.Reason))
@@ -69,11 +68,11 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(e.Reason))
 		w.WriteHeader(int(e.Code))
 
-		h.logger.UseWebSocket(ctx).Error("WebSocket 连接失败", zap.Error(e))
+		h.tools.Logger().UseWebSocket(ctx).Error("WebSocket 连接失败", zap.Error(e))
 		return
 	}
 
-	h.logger.UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()))
+	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()))
 
 	client := websocket.NewClient(account.AccountId, conn)
 

@@ -6,18 +6,17 @@
 package main
 
 import (
+	"github.com/go-kratos/kratos/v2"
+	"github.com/google/wire"
 	"mt/config"
 	"mt/internal/api"
+	"mt/internal/app"
 	"mt/internal/biz"
 	"mt/internal/data"
 	"mt/internal/server"
 	"mt/internal/service"
 	"mt/internal/websocket"
 	"mt/internal/websocket/event"
-	"mt/pkg/logger"
-
-	"github.com/go-kratos/kratos/v2"
-	"github.com/google/wire"
 )
 
 // wireApp init kratos application.
@@ -25,7 +24,7 @@ func wireApp(*config.Server,
 	*config.Data,
 	*config.App,
 	*config.Websocket,
-	*logger.Logger) (*kratos.App, func(), error) {
+	*app.Tools) (*kratos.App, func(), error) {
 	panic(wire.Build(
 		server.ProviderSet,
 		data.ProviderSet,

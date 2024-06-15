@@ -23,6 +23,6 @@ func RedisRepo() (repo repositories.RedisRepo) {
 }
 
 func Logger(ctx context.Context) (logger *zap.Logger) {
-	logger = ManagerInstance().logger.UseWebSocket(ctx)
+	logger = ManagerInstance().tools.Logger().UseWebSocket(ctx)
 	return
 }

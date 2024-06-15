@@ -7,7 +7,6 @@ import (
 	"mt/internal/constant/defined"
 	"mt/internal/constant/types"
 	"mt/internal/repositories/dbrepo/model"
-	"mt/pkg/logger"
 	"time"
 )
 
@@ -21,12 +20,12 @@ type AccountRepo interface {
 }
 
 type AccountUsecase struct {
-	repo AccountRepo
-	log  *logger.Logger
+	repo  AccountRepo
+	tools *app.Tools
 }
 
-func NewAccountUsecase(repo AccountRepo, logger *logger.Logger) *AccountUsecase {
-	return &AccountUsecase{repo: repo, log: logger}
+func NewAccountUsecase(repo AccountRepo, tools *app.Tools) *AccountUsecase {
+	return &AccountUsecase{repo: repo, tools: tools}
 }
 
 // Create 创建账号
@@ -106,7 +105,7 @@ func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, t
 		ttl = 86400
 	}
 
-	token, err := app.JWT.GenerateToken(accountId, time.Duration(ttl)*time.Second, auth.JWTClaimsOptions{})
+	token, err := uc.tools.JWT().GenerateToken(accountId, time.Duration(ttl)*time.Second, auth.JWTClaimsOptions{})
 	if err != nil {
 		return nil, defined.ErrorGenerateTokenError
 	}

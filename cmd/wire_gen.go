@@ -10,14 +10,13 @@ import (
 	"github.com/go-kratos/kratos/v2"
 	"mt/config"
 	"mt/internal/api"
+	"mt/internal/app"
 	"mt/internal/biz"
 	"mt/internal/data"
 	"mt/internal/server"
 	"mt/internal/service"
 	"mt/internal/websocket"
 	"mt/internal/websocket/event"
-	"mt/pkg/logger"
-	"mt/pkg/repositories"
 )
 
 import (
@@ -27,24 +26,24 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(configServer *config.Server, configData *config.Data, app *config.App, configWebsocket *config.Websocket, loggerLogger *logger.Logger) (*kratos.App, func(), error) {
-	dataRepo := repositories.NewDataRepo(loggerLogger, configData)
-	dataData, cleanup, err := data.NewData(configData, loggerLogger, dataRepo)
+func wireApp(configServer *config.Server, configData *config.Data, configApp *config.App, configWebsocket *config.Websocket, tools *app.Tools) (*kratos.App, func(), error) {
+	dataRepo := data.NewDataRepo(tools, configData)
+	dataData, cleanup, err := data.NewData(tools, dataRepo)
 	if err != nil {
 		return nil, nil, err
 	}
-	heartbeatRepo := data.NewHeartbeatRepo(dataData, loggerLogger)
-	heartbeatUsecase := biz.NewHeartbeatUsecase(heartbeatRepo, loggerLogger)
+	heartbeatRepo := data.NewHeartbeatRepo(dataData, tools)
+	heartbeatUsecase := biz.NewHeartbeatUsecase(heartbeatRepo, tools)
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
-	accountRepo := data.NewAccountRepo(dataData, loggerLogger)
-	accountUsecase := biz.NewAccountUsecase(accountRepo, loggerLogger)
+	accountRepo := data.NewAccountRepo(dataData, tools)
+	accountUsecase := biz.NewAccountUsecase(accountRepo, tools)
 	accountService := service.NewAccountService(accountUsecase)
-	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, loggerLogger)
-	handler := api.NewHandler(app, configWebsocket, loggerLogger, dataRepo)
+	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
+	handler := api.NewHandler(configApp, configWebsocket, tools, dataRepo)
 	events := event.NewEvents()
-	manager := websocket.NewManager(configServer, dataData, loggerLogger, events)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, handler, manager, loggerLogger)
-	kratosApp := newApp(loggerLogger, grpcServer, httpServer)
+	manager := websocket.NewManager(configServer, dataData, tools, events)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, handler, manager, tools)
+	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
 		cleanup()
 	}, nil
