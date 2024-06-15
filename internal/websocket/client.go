@@ -79,10 +79,10 @@ func (c *Client) Read(ctx context.Context) {
 	}()
 
 	defer func() {
-		Logger(ctx).Debug("读取客户端消息结束", loggerConnFields...)
-
 		// 关闭接收及待发送消息
 		close(c.Send)
+
+		Logger(ctx).Debug("读取客户端消息结束, 已关闭数据接收", loggerConnFields...)
 	}()
 
 	for {
@@ -105,6 +105,35 @@ func (c *Client) Read(ctx context.Context) {
 
 // Write 写入客户端消息
 func (c *Client) Write(ctx context.Context) {
+	var loggerConnFields = c.loggerConnFields()
+
+	defer func() {
+		if r := recover(); r != nil {
+			loggerConnFields = append(loggerConnFields, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
+			Logger(ctx).Error("写入客户端消息异常", loggerConnFields...)
+		}
+	}()
+
+	defer func() {
+		Logger(ctx).Debug("写入客户端消息结束, 已关闭客户端连接", loggerConnFields...)
+		ManagerInstance().ClientManager().UnRegister <- c
+		c.Conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-c.Send:
+			if !ok {
+				// 写入待发送客户端消息错误并关闭连接
+				Logger(ctx).Error("写入待发送客户端消息错误, 客户端连接将关闭", loggerConnFields...)
+
+				return
+			}
+
+			// 将消息推送至客户端
+			c.Conn.WriteMessage(websocket.TextMessage, message)
+		}
+	}
 }
 
 // WriteMessage 写入待发送消息到通道
