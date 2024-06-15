@@ -11,22 +11,18 @@ var (
 	manager *Manager
 )
 
-func RegisterManagerInstance(managerInstance *Manager) {
-	manager = managerInstance
-}
+func RegisterManagerInstance(managerInstance *Manager) { manager = managerInstance }
 
 func ManagerInstance() *Manager { return manager }
 
 // Manager WebSocket 资源分发管理器
 type Manager struct {
 	clientManager *ClientManager
-
-	events       map[string]EventDisposeFunc
-	eventRWMutex sync.RWMutex
-
-	cServer  *config.Server
-	resource *data.Data
-	tools    *app.Tools
+	events        map[string]EventDisposeFunc
+	eventRWMutex  sync.RWMutex
+	cServer       *config.Server
+	resource      *data.Data
+	tools         *app.Tools
 }
 
 func NewManager(cServer *config.Server, resource *data.Data, tools *app.Tools, events Events) (manager *Manager) {
