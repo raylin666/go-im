@@ -40,7 +40,7 @@ func wireApp(configServer *config.Server, configData *config.Data, configApp *co
 	accountService := service.NewAccountService(accountUsecase)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
 	handler := api.NewHandler(configApp, configWebsocket, tools, dataRepo)
-	events := event.NewEvents()
+	events := event.NewEvents(tools, dataRepo)
 	manager := websocket.NewManager(configServer, dataData, tools, events)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, handler, manager, tools)
 	kratosApp := newApp(tools, grpcServer, httpServer)

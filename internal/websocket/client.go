@@ -24,10 +24,10 @@ type Client struct {
 	Send          chan []byte     // 待发送的数据
 	FirstTime     time.Time       // 首次连接时间
 	HeartbeatTime time.Time       // 上次心跳时间
-	AccountId     string          // 账号ID
+	Account       Account         // 账号信息
 }
 
-func NewClient(accountId string, conn *websocket.Conn) (client *Client) {
+func NewClient(account Account, conn *websocket.Conn) (client *Client) {
 	var currentTime = time.Now()
 	client = &Client{
 		Addr:          conn.RemoteAddr().String(),
@@ -35,7 +35,7 @@ func NewClient(accountId string, conn *websocket.Conn) (client *Client) {
 		Send:          make(chan []byte, 100), // 默认预创建容量为100的消息数据包
 		FirstTime:     currentTime,
 		HeartbeatTime: currentTime,
-		AccountId:     accountId,
+		Account:       account,
 	}
 
 	return
@@ -60,7 +60,7 @@ func (c *Client) IsHeartbeatTimeout(currentTime time.Time) (timeout bool) {
 // loggerConnFields 获取连接日志字段信息
 func (c *Client) loggerConnFields() []zap.Field {
 	var addr = zap.String("address", c.Addr)
-	var accountId = zap.String("account_id", c.AccountId)
+	var accountId = zap.String("account_id", c.Account.ID)
 	var firstTime = zap.Time("first_time", c.FirstTime)
 	var heartbeatTime = zap.Time("heartbeat_time", c.HeartbeatTime)
 
@@ -216,6 +216,7 @@ func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
 		responseCode    uint32
 		responseMessage string
 		responseData    interface{}
+		responseSend    bool
 	)
 
 	loggerConnFields = append(loggerConnFields, zap.String("seq", seq), zap.String("event", event), zap.String("data", string(requestData)))
@@ -223,7 +224,12 @@ func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
 
 	// 采用 MAP 处理事件
 	if value, ok := ManagerInstance().GetEventHandler(event); ok {
-		responseCode, responseMessage, responseData = value(ctx, c, seq, requestData)
+		responseCode, responseMessage, responseData, responseSend = value(ctx, c, seq, requestData)
+		// 判断该消息事件是否需要推送给客户端
+		if responseSend == false {
+
+			return
+		}
 	} else {
 		e := defined.ErrorCommandInvalidNotFound
 		responseCode = uint32(e.Code)
@@ -237,6 +243,7 @@ func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
 			zap.Uint32("response_code", responseCode),
 			zap.String("response_message", responseMessage),
 			zap.Any("response_data", responseData),
+			zap.Bool("response_send", responseSend),
 			zap.Error(err))
 		Logger(ctx).Error("事件消息处理响应数据错误 json.Marshal", loggerConnFields...)
 

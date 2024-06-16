@@ -1,11 +1,15 @@
 package websocket
 
 type Account struct {
-	ID string `json:"id"`
+	ID       string `json:"id"`
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar"`
 }
 
-func NewAccount(accountId string) *Account {
+func NewAccount(id, nickname, avatar string) *Account {
 	return &Account{
-		ID: accountId,
+		ID:       id,
+		Nickname: nickname,
+		Avatar:   avatar,
 	}
 }
