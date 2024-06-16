@@ -2,10 +2,8 @@ package event
 
 import (
 	"context"
-	"encoding/json"
 	"mt/internal/constant/defined"
 	"mt/internal/websocket"
-	"mt/internal/websocket/types"
 	"mt/pkg/utils"
 )
 
@@ -26,10 +24,8 @@ func (event *events) Bind(ctx context.Context, client *websocket.Client, seq str
 	client.Account.Nickname = account.Nickname
 	client.Account.Avatar = account.Avatar
 
-	data = &client.Account
-
-	js, _ := json.Marshal(&types.Request{Seq: "1", Event: "ping"})
-	client.EventMessageHandler(ctx, js)
+	// 推送账号信息消息事件
+	event.newPushMessage(ctx, client, websocket.EventAccountInfo, seq, nil)
 
 	return
 }

@@ -2,12 +2,15 @@ package event
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/google/wire"
 	"go.uber.org/zap"
 	"mt/internal/app"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/query"
 	"mt/internal/websocket"
+	"mt/internal/websocket/types"
 	"mt/pkg/repositories"
 )
 
@@ -33,6 +36,8 @@ func (event *events) GetAll() map[string]websocket.EventDisposeFunc {
 	event.relation[websocket.EventPing] = event.Ping
 	// 客户端和账号信息绑定
 	event.relation[websocket.EventBind] = event.Bind
+	// 获取账号信息
+	event.relation[websocket.EventAccountInfo] = event.AccountInfo
 
 	return event.relation
 }
@@ -45,6 +50,29 @@ func (event *events) logger(ctx context.Context) *zap.Logger {
 // dbQuery 获取数据库查询对象
 func (event *events) dbQuery() *query.Query {
 	return dbrepo.NewDefaultDbQuery(event.repo.DbRepo())
+}
+
+// newPushMessage 给客户端推送新消息事件
+func (event *events) newPushMessage(ctx context.Context, client *websocket.Client, eventName string, seq string, message []byte) bool {
+	var loggerFields = event.loggerFields(eventName, seq, message)
+	message, err := json.Marshal(&types.Request{Seq: seq, Event: eventName, Data: message})
+	if err != nil {
+		event.logger(ctx).Error(fmt.Sprintf("`%s` 消息推送给客户端失败", eventName), loggerFields...)
+		return false
+	}
+
+	event.logger(ctx).Info(fmt.Sprintf("将 `%s` 消息推送给客户端", eventName), loggerFields...)
+	client.EventMessageHandler(ctx, message)
+	return true
+}
+
+// loggerFields 获取事件日志字段信息
+func (event *events) loggerFields(eventName, seq string, message []byte) []zap.Field {
+	var logEvent = zap.String("event", eventName)
+	var logSeq = zap.String("seq", seq)
+	var logMessage = zap.String("message", string(message))
+
+	return []zap.Field{logEvent, logSeq, logMessage}
 }
 
 // defaultEventResponse 默认事件返回值

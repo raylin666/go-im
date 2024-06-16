@@ -6,8 +6,8 @@ type Account struct {
 	Avatar   string `json:"avatar"`
 }
 
-func NewAccount(id, nickname, avatar string) *Account {
-	return &Account{
+func NewAccount(id, nickname, avatar string) Account {
+	return Account{
 		ID:       id,
 		Nickname: nickname,
 		Avatar:   avatar,
