@@ -49,6 +49,8 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO 处理账号登录
+
 	// TODO HTTP 协议升级
 	upgraderResponseHeader := new(websocket.UpgraderResponseHeader)
 	upgraderResponseHeader.Name = h.cApp.Name
