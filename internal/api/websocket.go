@@ -4,15 +4,21 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
+	"gorm.io/gen/field"
 	"mt/internal/constant/defined"
 	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
+	"mt/internal/repositories/dbrepo/model"
 	"mt/internal/websocket"
+	"mt/pkg/utils"
 	"net/http"
+	"time"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var (
+		timeNow = time.Now()
+
 		ctx = lib.NewContextHttpRequest(context.Background(), r)
 
 		query = r.URL.Query()
@@ -39,8 +45,8 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 账号校验
-	q := dbrepo.NewDefaultDbQuery(h.dbRepo).Account
-	account, err := q.WithContext(ctx).FirstByAccountId(jwtClaims.ID)
+	accountQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).Account
+	account, err := accountQuery.WithContext(ctx).FirstByAccountId(jwtClaims.ID)
 	if err != nil {
 		var e = defined.ErrorAccountLoginError
 		_, _ = w.Write([]byte(e.Reason))
@@ -49,7 +55,15 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var assignExpr = []field.AssignExpr{
+		accountQuery.Status.Value(model.AccountStatusOnline),
+		accountQuery.LastLoginTime.Value(timeNow),
+		accountQuery.LastLoginIp.Value(utils.ClientIP(r)),
+		accountQuery.UpdatedAt.Value(timeNow),
+	}
+
 	// TODO 处理账号登录
+	accountQuery.WithContext(ctx).UpdateSimple(assignExpr...)
 
 	// TODO HTTP 协议升级
 	upgraderResponseHeader := new(websocket.UpgraderResponseHeader)
