@@ -142,7 +142,7 @@ func (a accountOnline) replaceDB(db *gorm.DB) accountOnline {
 type accountOnlineDo struct{ gen.DO }
 
 // SELECT 1 FROM @@table a WHERE EXISTS (select * from @@table where a.`account_id`=@accountId)
-func (a accountOnlineDo) ExistsByAccountId(accountId string) (result model.AccountOnline, err error) {
+func (a accountOnlineDo) ExistsByAccountId(accountId string) (result gen.ResultInfo, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder

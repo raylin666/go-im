@@ -55,6 +55,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	accountOnlineQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).AccountOnline
+	fmt.Println(accountOnlineQuery.WithContext(ctx).ExistsByAccountId(account.AccountId))
+
 	var assignExpr = []field.AssignExpr{
 		accountQuery.Status.Value(model.AccountStatusOnline),
 		accountQuery.LastLoginTime.Value(timeNow),
