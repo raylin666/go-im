@@ -19,21 +19,23 @@ const (
 
 // Client 客户端连接
 type Client struct {
+	Ctx           context.Context
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
-	FirstTime     time.Time       // 首次连接时间
+	ConnectTime   time.Time       // 客户端连接时间
 	HeartbeatTime time.Time       // 上次心跳时间
-	Account       Account         // 账号信息
+	Account       *Account        // 账号信息
 }
 
-func NewClient(account Account, conn *websocket.Conn) (client *Client) {
+func NewClient(ctx context.Context, account *Account, conn *websocket.Conn) (client *Client) {
 	var currentTime = time.Now()
 	client = &Client{
+		Ctx:           ctx,
 		Addr:          conn.RemoteAddr().String(),
 		Conn:          conn,
 		Send:          make(chan []byte, 100), // 默认预创建容量为100的消息数据包
-		FirstTime:     currentTime,
+		ConnectTime:   currentTime,
 		HeartbeatTime: currentTime,
 		Account:       account,
 	}
@@ -61,7 +63,7 @@ func (c *Client) IsHeartbeatTimeout(currentTime time.Time) (timeout bool) {
 func (c *Client) loggerFields() []zap.Field {
 	var addr = zap.String("address", c.Addr)
 	var accountId = zap.String("account_id", c.Account.ID)
-	var firstTime = zap.Time("first_time", c.FirstTime)
+	var firstTime = zap.Time("connect_time", c.ConnectTime)
 	var heartbeatTime = zap.Time("heartbeat_time", c.HeartbeatTime)
 
 	return []zap.Field{addr, accountId, firstTime, heartbeatTime}

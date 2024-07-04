@@ -19,6 +19,8 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var (
 		timeNow = time.Now()
 
+		clientIp = utils.ClientIP(r)
+
 		ctx = lib.NewContextHttpRequest(context.Background(), r)
 
 		query = r.URL.Query()
@@ -55,18 +57,32 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accountOnlineQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).AccountOnline
-	fmt.Println(accountOnlineQuery.WithContext(ctx).ExistsByAccountId(account.AccountId))
-
+	// TODO 处理账号登录, 更新账号信息
 	var assignExpr = []field.AssignExpr{
 		accountQuery.Status.Value(model.AccountStatusOnline),
 		accountQuery.LastLoginTime.Value(timeNow),
-		accountQuery.LastLoginIp.Value(utils.ClientIP(r)),
+		accountQuery.LastLoginIp.Value(clientIp),
 		accountQuery.UpdatedAt.Value(timeNow),
 	}
 
-	// TODO 处理账号登录
-	accountQuery.WithContext(ctx).UpdateSimple(assignExpr...)
+	accountOnlineQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).AccountOnline
+	if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(account.AccountId); err == nil {
+		if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
+			existsValue, existsValueOk := existsResult.(int64)
+			if existsValueOk && existsValue == 0 {
+				assignExpr = append(assignExpr, accountQuery.FirstLoginTime.Value(timeNow))
+			}
+		}
+	}
+
+	_, err = accountQuery.WithContext(ctx).Where(accountQuery.AccountId.Eq(account.AccountId)).UpdateSimple(assignExpr...)
+	if err != nil {
+		var e = defined.ErrorNotLoginError
+		_, _ = w.Write([]byte(e.Reason))
+		w.WriteHeader(int(e.Code))
+
+		return
+	}
 
 	// TODO HTTP 协议升级
 	upgraderResponseHeader := new(websocket.UpgraderResponseHeader)
@@ -93,7 +109,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
-	client := websocket.NewClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar), conn)
+	client := websocket.NewClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar), conn)
 
 	go client.Read(ctx)
 	go client.Write(ctx)

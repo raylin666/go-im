@@ -56,3 +56,14 @@ func ClientIP(r *http.Request) string {
 
 	return "127.0.0.1"
 }
+
+// GetTCPConnFd 获取TCP连接FD
+func GetTCPConnFd(conn net.Conn) (uintptr, error) {
+	file, err := conn.(*net.TCPConn).File()
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	return file.Fd(), nil
+}

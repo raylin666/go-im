@@ -34,8 +34,7 @@ func newAccountOnline(db *gorm.DB, opts ...gen.DOOption) accountOnline {
 	_accountOnline.LogoutTime = field.NewTime(tableName, "logout_time")
 	_accountOnline.LoginIp = field.NewString(tableName, "login_ip")
 	_accountOnline.LogoutIp = field.NewString(tableName, "logout_ip")
-	_accountOnline.ClientIp = field.NewString(tableName, "client_ip")
-	_accountOnline.ClientPort = field.NewInt(tableName, "client_port")
+	_accountOnline.ClientAddr = field.NewString(tableName, "client_addr")
 	_accountOnline.ClientId = field.NewInt(tableName, "client_id")
 	_accountOnline.DeviceId = field.NewString(tableName, "device_id")
 	_accountOnline.Os = field.NewString(tableName, "os")
@@ -56,8 +55,7 @@ type accountOnline struct {
 	LogoutTime field.Time
 	LoginIp    field.String
 	LogoutIp   field.String
-	ClientIp   field.String
-	ClientPort field.Int
+	ClientAddr field.String
 	ClientId   field.Int
 	DeviceId   field.String
 	Os         field.String
@@ -84,8 +82,7 @@ func (a *accountOnline) updateTableName(table string) *accountOnline {
 	a.LogoutTime = field.NewTime(table, "logout_time")
 	a.LoginIp = field.NewString(table, "login_ip")
 	a.LogoutIp = field.NewString(table, "logout_ip")
-	a.ClientIp = field.NewString(table, "client_ip")
-	a.ClientPort = field.NewInt(table, "client_port")
+	a.ClientAddr = field.NewString(table, "client_addr")
 	a.ClientId = field.NewInt(table, "client_id")
 	a.DeviceId = field.NewString(table, "device_id")
 	a.Os = field.NewString(table, "os")
@@ -114,15 +111,14 @@ func (a *accountOnline) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (a *accountOnline) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 12)
+	a.fieldMap = make(map[string]field.Expr, 11)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["account_id"] = a.AccountId
 	a.fieldMap["login_time"] = a.LoginTime
 	a.fieldMap["logout_time"] = a.LogoutTime
 	a.fieldMap["login_ip"] = a.LoginIp
 	a.fieldMap["logout_ip"] = a.LogoutIp
-	a.fieldMap["client_ip"] = a.ClientIp
-	a.fieldMap["client_port"] = a.ClientPort
+	a.fieldMap["client_addr"] = a.ClientAddr
 	a.fieldMap["client_id"] = a.ClientId
 	a.fieldMap["device_id"] = a.DeviceId
 	a.fieldMap["os"] = a.Os
@@ -141,17 +137,18 @@ func (a accountOnline) replaceDB(db *gorm.DB) accountOnline {
 
 type accountOnlineDo struct{ gen.DO }
 
-// SELECT 1 FROM @@table a WHERE EXISTS (select * from @@table where a.`account_id`=@accountId)
-func (a accountOnlineDo) ExistsByAccountId(accountId string) (result gen.ResultInfo, err error) {
+// ExistsByAccountId SELECT EXISTS (SELECT * FROM @@table WHERE `account_id`=@accountId) AS `ok`
+func (a accountOnlineDo) ExistsByAccountId(accountId string) (result map[string]interface{}, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder
 	params = append(params, accountId)
-	generateSQL.WriteString("SELECT 1 FROM account_online a WHERE EXISTS (select * from account_online where a.`account_id`=?) ")
+	generateSQL.WriteString("SELECT EXISTS (SELECT * FROM account_online WHERE `account_id`=?) AS `ok` ")
 
+	result = make(map[string]interface{})
 	var executeSQL *gorm.DB
 
-	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result)
+	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Take(result)
 	err = executeSQL.Error
 	return
 }

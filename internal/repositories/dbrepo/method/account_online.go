@@ -3,6 +3,6 @@ package method
 import "gorm.io/gen"
 
 type AccountOnline interface {
-	// SELECT 1 FROM @@table a WHERE EXISTS (select * from @@table where a.`account_id`=@accountId)
-	ExistsByAccountId(accountId string) (gen.ResultInfo, error)
+	// ExistsByAccountId SELECT EXISTS (SELECT * FROM @@table WHERE `account_id`=@accountId) AS `ok`
+	ExistsByAccountId(accountId string) (gen.M, error)
 }
