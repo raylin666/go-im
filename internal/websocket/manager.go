@@ -20,6 +20,7 @@ type Manager struct {
 	clientManager *ClientManager
 	events        map[string]EventDisposeFunc
 	eventRWMutex  sync.RWMutex
+	clientEvents  []string
 	cServer       *config.Server
 	resource      *data.Data
 	tools         *app.Tools
@@ -29,6 +30,7 @@ func NewManager(cServer *config.Server, resource *data.Data, tools *app.Tools, e
 	manager = &Manager{
 		clientManager: NewClientManager(),
 		events:        make(map[string]EventDisposeFunc),
+		clientEvents:  events.ClientWhiteEventNames(),
 		cServer:       cServer,
 		resource:      resource,
 		tools:         tools,

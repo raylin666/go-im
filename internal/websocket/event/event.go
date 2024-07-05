@@ -12,7 +12,6 @@ import (
 	"mt/internal/websocket"
 	"mt/internal/websocket/types"
 	"mt/pkg/repositories"
-	"strings"
 )
 
 // ProviderSet is events providers.
@@ -49,18 +48,6 @@ func (event *events) ClientWhiteEventNames() []string {
 		websocket.EventPing,
 		websocket.EventBind,
 	}
-}
-
-// InClientWhiteByEventName 事件是否支持客户端请求, 不在指定的事件客户端无法调用
-func (event *events) InClientWhiteByEventName(eventName string) (ok bool) {
-	for _, value := range event.ClientWhiteEventNames() {
-		if strings.Contains(value, eventName) {
-			ok = true
-			break
-		}
-	}
-
-	return
 }
 
 // NewPushMessage 给客户端推送新消息事件

@@ -10,6 +10,7 @@ import (
 	"mt/internal/websocket/types"
 	"mt/pkg/utils"
 	"runtime/debug"
+	"strings"
 	"time"
 )
 
@@ -229,8 +230,20 @@ func (c *Client) EventMessageHandler(ctx context.Context, message []byte, client
 	if value, ok := ManagerInstance().GetEventHandler(event); ok {
 		// 是否来自客户端请求, 指定一些事件消息不允许客户端发起
 		if clientReq {
-			// 返回错误给客户端
-			c.WriteMessage(ctx, []byte(fmt.Sprintf("事件消息处理: `%s` 事件不支持客户端调用!", event)))
+			isSupport := false
+			for _, eventValue := range ManagerInstance().clientEvents {
+				if strings.Contains(eventValue, event) {
+					isSupport = true
+					break
+				}
+			}
+
+			if !isSupport {
+				// 返回错误给客户端
+				c.WriteMessage(ctx, []byte(fmt.Sprintf("事件消息处理: `%s` 事件不支持客户端调用!", event)))
+
+				return
+			}
 		}
 
 		responseCode, responseMessage, responseData, responseSend = value(ctx, c, seq, requestData)
