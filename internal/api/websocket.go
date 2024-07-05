@@ -29,20 +29,14 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	// TODO 登录身份验证
 	accountToken := query.Get("account_token")
 	if accountToken == "" {
-		var e = defined.ErrorNotVisitAuth
-		_, _ = w.Write([]byte(e.Reason))
-		w.WriteHeader(int(e.Code))
-
+		h.writeError(w, defined.ErrorNotVisitAuth)
 		return
 	}
 
 	// TODO 解析TOKEN
 	jwtClaims, err := h.tools.JWT().ParseToken(accountToken)
 	if err != nil {
-		var e = defined.ErrorAuthenticationError
-		_, _ = w.Write([]byte(e.Reason))
-		w.WriteHeader(int(e.Code))
-
+		h.writeError(w, defined.ErrorAuthenticationError)
 		return
 	}
 
@@ -50,10 +44,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	accountQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).Account
 	account, err := accountQuery.WithContext(ctx).FirstByAccountId(jwtClaims.ID)
 	if err != nil {
-		var e = defined.ErrorAccountLoginError
-		_, _ = w.Write([]byte(e.Reason))
-		w.WriteHeader(int(e.Code))
-
+		h.writeError(w, defined.ErrorAccountLoginError)
 		return
 	}
 
@@ -77,10 +68,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	_, err = accountQuery.WithContext(ctx).Where(accountQuery.AccountId.Eq(account.AccountId)).UpdateSimple(assignExpr...)
 	if err != nil {
-		var e = defined.ErrorNotLoginError
-		_, _ = w.Write([]byte(e.Reason))
-		w.WriteHeader(int(e.Code))
-
+		h.writeError(w, defined.ErrorNotLoginError)
 		return
 	}
 
@@ -100,9 +88,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		}))
 	if err != nil {
 		var e = defined.ErrorWebsocketUpgraderError
-		_, _ = w.Write([]byte(e.Reason))
-		w.WriteHeader(int(e.Code))
-
+		h.writeError(w, e)
 		h.tools.Logger().UseWebSocket(ctx).Error("WebSocket 连接失败", zap.Error(e))
 		return
 	}

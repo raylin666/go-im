@@ -14,6 +14,11 @@ const (
 type Events interface {
 	// GetAll 获取所有事件对应处理器
 	GetAll() map[string]EventDisposeFunc
+	// ClientWhiteEventNames 客户端请求所支持的事件, 不在指定的事件客户端无法调用
+	ClientWhiteEventNames() []string
+	// InClientWhiteByEventName 事件是否支持客户端请求, 不在指定的事件客户端无法调用
+	InClientWhiteByEventName(eventName string) (ok bool)
+
 	// Ping 心跳检测
 	Ping(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}, send bool)
 	// Bind 客户端和账号信息绑定

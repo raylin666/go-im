@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"mt/internal/constant/defined"
 	"mt/internal/websocket/types"
+	"mt/pkg/utils"
 	"runtime/debug"
 	"time"
 )
@@ -101,7 +102,7 @@ func (c *Client) Read(ctx context.Context) {
 		Logger(ctx).Info("读取客户端消息成功", loggerFields...)
 
 		// 事件消息处理
-		c.EventMessageHandler(ctx, message)
+		c.EventMessageHandler(ctx, message, true)
 	}
 }
 
@@ -174,7 +175,7 @@ func (c *Client) WriteEventMessage(ctx context.Context, event string, seq string
 }
 
 // EventMessageHandler 事件消息处理, 对数据包进行合法校验、解析、事件消息分发及消息发送处理
-func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
+func (c *Client) EventMessageHandler(ctx context.Context, message []byte, clientReq bool) {
 	var loggerFields = c.loggerFields()
 
 	Logger(ctx).Info("进入事件消息处理", loggerFields...)
@@ -226,6 +227,12 @@ func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
 
 	// 采用 MAP 处理事件
 	if value, ok := ManagerInstance().GetEventHandler(event); ok {
+		// 是否来自客户端请求, 指定一些事件消息不允许客户端发起
+		if clientReq {
+			// 返回错误给客户端
+			c.WriteMessage(ctx, []byte(fmt.Sprintf("事件消息处理: `%s` 事件不支持客户端调用!", event)))
+		}
+
 		responseCode, responseMessage, responseData, responseSend = value(ctx, c, seq, requestData)
 		// 判断该消息事件是否需要推送给客户端
 		if responseSend == false {
@@ -233,10 +240,12 @@ func (c *Client) EventMessageHandler(ctx context.Context, message []byte) {
 			return
 		}
 	} else {
-		e := defined.ErrorCommandInvalidNotFound
-		responseCode = uint32(e.Code)
-		responseMessage = e.Message
-		Logger(ctx).Warn(fmt.Sprintf("事件消息处理: `%s` 事件不存在!", event), loggerFields...)
+		errMessage := fmt.Sprintf("事件消息处理: `%s` 事件不存在!", event)
+		responseCode, responseMessage = utils.ErrorMessage(defined.ErrorCommandInvalidNotFound)
+		Logger(ctx).Warn(errMessage, loggerFields...)
+
+		// 返回错误给客户端
+		c.WriteMessage(ctx, []byte(errMessage))
 	}
 
 	ok, err := c.WriteEventMessage(ctx, event, seq, responseCode, responseMessage, responseData)

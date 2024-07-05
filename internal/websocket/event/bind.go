@@ -25,7 +25,7 @@ func (event *events) Bind(ctx context.Context, client *websocket.Client, seq str
 	client.Account.Avatar = account.Avatar
 
 	// 推送账号信息消息事件
-	event.newPushMessage(ctx, client, websocket.EventAccountInfo, seq, nil)
+	event.NewPushMessage(ctx, client, websocket.EventAccountInfo, seq, nil)
 
 	return
 }

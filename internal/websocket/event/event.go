@@ -12,6 +12,7 @@ import (
 	"mt/internal/websocket"
 	"mt/internal/websocket/types"
 	"mt/pkg/repositories"
+	"strings"
 )
 
 // ProviderSet is events providers.
@@ -42,18 +43,28 @@ func (event *events) GetAll() map[string]websocket.EventDisposeFunc {
 	return event.relation
 }
 
-// logger 获取日志对象
-func (event *events) logger(ctx context.Context) *zap.Logger {
-	return event.tools.Logger().UseWebSocket(ctx)
+// ClientWhiteEventNames 客户端请求所支持的事件, 不在指定的事件客户端无法调用
+func (event *events) ClientWhiteEventNames() []string {
+	return []string{
+		websocket.EventPing,
+		websocket.EventBind,
+	}
 }
 
-// dbQuery 获取数据库查询对象
-func (event *events) dbQuery() *query.Query {
-	return dbrepo.NewDefaultDbQuery(event.repo.DbRepo())
+// InClientWhiteByEventName 事件是否支持客户端请求, 不在指定的事件客户端无法调用
+func (event *events) InClientWhiteByEventName(eventName string) (ok bool) {
+	for _, value := range event.ClientWhiteEventNames() {
+		if strings.Contains(value, eventName) {
+			ok = true
+			break
+		}
+	}
+
+	return
 }
 
-// newPushMessage 给客户端推送新消息事件
-func (event *events) newPushMessage(ctx context.Context, client *websocket.Client, eventName string, seq string, message []byte) bool {
+// NewPushMessage 给客户端推送新消息事件
+func (event *events) NewPushMessage(ctx context.Context, client *websocket.Client, eventName string, seq string, message []byte) bool {
 	var loggerFields = event.loggerFields(eventName, seq, message)
 	message, err := json.Marshal(&types.Request{Seq: seq, Event: eventName, Data: message})
 	if err != nil {
@@ -62,8 +73,18 @@ func (event *events) newPushMessage(ctx context.Context, client *websocket.Clien
 	}
 
 	event.logger(ctx).Info(fmt.Sprintf("将 `%s` 消息推送给客户端", eventName), loggerFields...)
-	client.EventMessageHandler(ctx, message)
+	client.EventMessageHandler(ctx, message, false)
 	return true
+}
+
+// logger 获取日志对象
+func (event *events) logger(ctx context.Context) *zap.Logger {
+	return event.tools.Logger().UseWebSocket(ctx)
+}
+
+// dbQuery 获取数据库查询对象
+func (event *events) dbQuery() *query.Query {
+	return dbrepo.NewDefaultDbQuery(event.repo.DbRepo())
 }
 
 // loggerFields 获取事件日志字段信息
