@@ -32,6 +32,16 @@ func NewClientManager() *ClientManager {
 	}
 }
 
+// InClient 客户端连接是否存在
+func (clientManager *ClientManager) InClient(client *Client) (ok bool) {
+	clientManager.ClientsLock.RLock()
+	defer clientManager.ClientsLock.RUnlock()
+
+	_, ok = clientManager.Clients[client]
+
+	return
+}
+
 // CreateClient 创建客户端连接
 func (clientManager *ClientManager) CreateClient(client *Client) {
 	clientManager.ClientsLock.Lock()
@@ -42,12 +52,156 @@ func (clientManager *ClientManager) CreateClient(client *Client) {
 
 // DeleteClient 删除客户端连接
 func (clientManager *ClientManager) DeleteClient(client *Client) {
+	if !clientManager.InClient(client) {
+
+		return
+	}
+
 	clientManager.ClientsLock.Lock()
 	defer clientManager.ClientsLock.Unlock()
+	delete(clientManager.Clients, client)
+}
 
-	if _, ok := clientManager.Clients[client]; ok {
-		delete(clientManager.Clients, client)
+// ClientsCount 获取连接客户端数量
+func (clientManager *ClientManager) ClientsCount() (clientsCount int) {
+	clientsCount = len(clientManager.Clients)
+
+	return
+}
+
+// GetClients 获取所有连接客户端
+func (clientManager *ClientManager) GetClients() (clients map[*Client]bool) {
+	clients = make(map[*Client]bool)
+
+	clientManager.ClientsRange(func(client *Client, value bool) (result bool) {
+		clients[client] = value
+
+		return true
+	})
+
+	return
+}
+
+// ClientsRange 遍历所有客户端, 返回客户端是否存在
+func (clientManager *ClientManager) ClientsRange(f func(client *Client, value bool) (result bool)) {
+	clientManager.ClientsLock.RLock()
+	defer clientManager.ClientsLock.RUnlock()
+
+	for key, value := range clientManager.Clients {
+		result := f(key, value)
+		if result == false {
+			return
+		}
 	}
+
+	return
+}
+
+// GetClientsCountByAccount 根据账号获取客户端数量
+func (clientManager *ClientManager) GetClientsCountByAccount(accountId string) (count int) {
+	count = 0
+	if !clientManager.HasAccount(accountId) {
+
+		return
+	}
+
+	for c := range clientManager.GetClients() {
+		if c.Account.ID != accountId {
+			continue
+		}
+
+		count++
+	}
+
+	return
+}
+
+// GetClientsByAccount 根据账号获取所有客户端
+func (clientManager *ClientManager) GetClientsByAccount(accountId string) (clients []*Client) {
+	clients = make([]*Client, 0)
+
+	if !clientManager.HasAccount(accountId) {
+
+		return
+	}
+
+	for c := range clientManager.GetClients() {
+		if c.Account.ID != accountId {
+			continue
+		}
+
+		clients = append(clients, c)
+	}
+
+	return
+}
+
+// HasAccount 账号是否存在
+func (clientManager *ClientManager) HasAccount(accountId string) (ok bool) {
+	clientManager.AccountsLock.RLock()
+	defer clientManager.AccountsLock.RUnlock()
+
+	_, ok = clientManager.Accounts[accountId]
+
+	return
+}
+
+// CreateAccount 创建账号 (同个账号多端登录时, 只存储第一个连接的账号在线信息)
+func (clientManager *ClientManager) CreateAccount(account *Account) {
+	if clientManager.HasAccount(account.ID) {
+
+		return
+	}
+
+	clientManager.AccountsLock.Lock()
+	defer clientManager.AccountsLock.Unlock()
+	clientManager.Accounts[account.ID] = account
+}
+
+// DeleteAccount 删除账号
+func (clientManager *ClientManager) DeleteAccount(accountId string) (result bool) {
+	clientManager.AccountsLock.Lock()
+	defer clientManager.AccountsLock.Unlock()
+
+	if _, ok := clientManager.Accounts[accountId]; ok {
+		delete(clientManager.Accounts, accountId)
+		result = true
+	}
+
+	return
+}
+
+// GetAccountsCount 获取所有账号数量
+func (clientManager *ClientManager) GetAccountsCount() (count int) {
+	count = len(clientManager.Accounts)
+
+	return
+}
+
+// GetAccountKeys 获取所有账号ID
+func (clientManager *ClientManager) GetAccountKeys() (keys []string) {
+	clientManager.AccountsLock.RLock()
+	defer clientManager.AccountsLock.RUnlock()
+
+	keys = make([]string, 0)
+	for key := range clientManager.Accounts {
+		keys = append(keys, key)
+	}
+
+	return
+}
+
+// GetAccounts 获取所有账号
+func (clientManager *ClientManager) GetAccounts() (accounts []string) {
+	clientManager.AccountsLock.RLock()
+	defer clientManager.AccountsLock.RUnlock()
+
+	accounts = make([]string, 0)
+	for _, account := range clientManager.Accounts {
+		accounts = append(accounts, account.ID)
+	}
+
+	return
 }
 
 // EventRegister 建立连接处理
@@ -81,6 +235,9 @@ func (clientManager *ClientManager) EventRegister(client *Client) {
 	// TODO 创建连接
 	clientManager.CreateClient(client)
 
+	// TODO 创建账号
+	clientManager.CreateAccount(client.Account)
+
 	Logger(client.Ctx).Info("客户端管理器 - 建立连接事件",
 		zap.String("address", client.Addr),
 		zap.Any("account", client.Account),
@@ -113,6 +270,11 @@ func (clientManager *ClientManager) EventUnRegister(client *Client) {
 
 	// TODO 删除连接
 	clientManager.DeleteClient(client)
+
+	// TODO 删除账号, 判断账号是否只有此连接; 如果是则删除, 否则不删除
+	if clientManager.GetClientsCountByAccount(client.Account.ID) <= 1 {
+		clientManager.DeleteAccount(client.Account.ID)
+	}
 
 	Logger(client.Ctx).Info("客户端管理器 - 断开连接事件",
 		zap.String("address", client.Addr),
