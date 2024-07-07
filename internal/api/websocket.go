@@ -3,9 +3,11 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"go.uber.org/zap"
 	"gorm.io/gen/field"
 	"mt/internal/constant/defined"
+	clientGrpc "mt/internal/grpc"
 	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
@@ -92,6 +94,15 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		h.tools.Logger().UseWebSocket(ctx).Error("WebSocket 连接失败", zap.Error(e))
 		return
 	}
+
+	grpcConn, err := grpc.DialInsecure(context.Background(), grpc.WithEndpoint("127.0.0.1:10011"))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	grpcClient := clientGrpc.NewMessageClient(grpcConn)
+	reply, err := grpcClient.GenerateToken(ctx, "91283746167")
+	fmt.Println(reply)
 
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 

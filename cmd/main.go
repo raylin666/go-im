@@ -4,16 +4,16 @@ import (
 	"flag"
 	"fmt"
 	"github.com/raylin666/go-utils/auth"
-	ut_logger "github.com/raylin666/go-utils/logger"
+	utLogger "github.com/raylin666/go-utils/logger"
 	"github.com/raylin666/go-utils/server/system"
 	"mt/internal/app"
-	pkg_logger "mt/pkg/logger"
+	pkgLogger "mt/pkg/logger"
 	"mt/pkg/utils"
 
 	"mt/config"
 
 	"github.com/go-kratos/kratos/v2"
-	kratos_config "github.com/go-kratos/kratos/v2/config"
+	kratosConfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 	"github.com/go-kratos/kratos/v2/transport/http"
@@ -54,8 +54,8 @@ func newApp(tools *app.Tools, gs *grpc.Server, hs *http.Server) *kratos.App {
 func main() {
 	flag.Parse()
 
-	c := kratos_config.New(
-		kratos_config.WithSource(
+	c := kratosConfig.New(
+		kratosConfig.WithSource(
 			file.NewSource(flagconf),
 		),
 	)
@@ -90,13 +90,13 @@ func main() {
 	var jwt = auth.NewJWT(bc.Jwt.App, bc.Jwt.Key, bc.Jwt.Secret)
 
 	// 初始化 Logger
-	logger, err := pkg_logger.NewJSONLogger(
+	logger, err := pkgLogger.NewJSONLogger(
 		// ut_logger.WithDisableConsole(),
-		ut_logger.WithField(ut_logger.AppKey, bc.App.Name),
-		ut_logger.WithField(ut_logger.EnvironmentKey, bc.Environment),
-		ut_logger.WithTimeLayout(bc.Datetime.CstLayout),
+		utLogger.WithField(utLogger.AppKey, bc.App.Name),
+		utLogger.WithField(utLogger.EnvironmentKey, bc.Environment),
+		utLogger.WithTimeLayout(bc.Datetime.CstLayout),
 		//	项目访问日志存放文件
-		ut_logger.WithPathFileRotation(fmt.Sprintf("%s/runtime/logs/%s.log", utils.ProjectPath(1), bc.App.Name), ut_logger.PathFileRotationOption{
+		utLogger.WithPathFileRotation(fmt.Sprintf("%s/runtime/logs/%s.log", utils.ProjectPath(1), bc.App.Name), utLogger.PathFileRotationOption{
 			MaxSize:    int(bc.Log.MaxSize),
 			MaxAge:     int(bc.Log.MaxAge),
 			MaxBackups: int(bc.Log.MaxBackups),
