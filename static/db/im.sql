@@ -31,3 +31,31 @@ CREATE TABLE `account_online` (
   PRIMARY KEY (`id`),
   KEY `un_accountid_logintime` (`account_id`,`login_time`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='账号在线表';
+
+CREATE TABLE `c2c_message` (
+   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+   `from_account_id` varchar(30) NOT NULL COMMENT '发送者账号ID',
+   `to_account_id` varchar(30) NOT NULL COMMENT '接收者账号ID',
+   `msg_type` varchar(30) NOT NULL COMMENT '消息类型',
+   `data` varchar(600) NOT NULL DEFAULT '' COMMENT '消息内容',
+   `status` tinyint(1) NOT NULL DEFAULT 1 COMMENT '消息状态 0:隐藏 1:显示',
+   `is_revoke` tinyint(1) NOT NULL DEFAULT 0 COMMENT '是否已撤回 0:否 1:是',
+   `revoke_time` datetime DEFAULT NULL COMMENT '消息撤回时间',
+   `send_time` datetime NOT NULL COMMENT '消息发送时间',
+   `from_delete_time` datetime DEFAULT NULL COMMENT '发送者删除消息时间',
+   `to_delete_time` datetime DEFAULT NULL COMMENT '接收者删除消息时间',
+   `created_at` datetime NOT NULL COMMENT '创建时间',
+   `updated_at` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+   `deleted_at` datetime DEFAULT NULL COMMENT '删除时间',
+   PRIMARY KEY (`id`),
+   KEY `un_from_to_account` (`from_account_id`, `to_account_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='C2C消息表';
+
+CREATE TABLE `c2c_offline_message` (
+   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'ID',
+   `from_account_id` varchar(30) NOT NULL COMMENT '发送者账号ID',
+   `to_account_id` varchar(30) NOT NULL COMMENT '接收者账号ID',
+   `message_id` bigint(20) NOT NULL COMMENT '消息ID, 无离线消息时值为0',
+   PRIMARY KEY (`id`),
+   KEY `uk_from_to_account` (`from_account_id`, `to_account_id`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='C2C离线消息表';

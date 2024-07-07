@@ -38,6 +38,8 @@ func (event *events) GetAll() map[string]websocket.EventDisposeFunc {
 	event.relation[websocket.EventBind] = event.Bind
 	// 获取账号信息
 	event.relation[websocket.EventAccountInfo] = event.AccountInfo
+	// 发送C2C消息
+	event.relation[websocket.EventSendC2CMessage] = event.SendC2CMessage
 
 	return event.relation
 }
@@ -47,6 +49,7 @@ func (event *events) ClientWhiteEventNames() []string {
 	return []string{
 		websocket.EventPing,
 		websocket.EventBind,
+		websocket.EventSendC2CMessage,
 	}
 }
 

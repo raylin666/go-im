@@ -28,7 +28,7 @@ import (
 // wireApp init kratos application.
 func wireApp(configServer *config.Server, configData *config.Data, configApp *config.App, configWebsocket *config.Websocket, tools *app.Tools) (*kratos.App, func(), error) {
 	dataRepo := data.NewDataRepo(tools, configData)
-	dataData, cleanup, err := data.NewData(tools, dataRepo)
+	dataData, cleanup, err := data.NewData(dataRepo, tools)
 	if err != nil {
 		return nil, nil, err
 	}

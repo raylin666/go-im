@@ -35,6 +35,20 @@ func HttpContentSubtype(contentType string) string {
 	return contentType[left+1 : right]
 }
 
+// LocalIP 获取当前服务器IP地址
+func LocalIP() (ip string) {
+	// net.InterfaceAddrs 也可以实现, 但是多网卡时不推荐, 故采用 UDP 方法获取服务器IP地址
+	// UDP 不需要关注是否送达, 只需要对应的 ip 和 port 正确, 即可获取到 IP 地址。
+	conn, err := net.Dial("udp", "8.8.8.8:53")
+	if err != nil {
+		return
+	}
+
+	addr := conn.LocalAddr().(*net.UDPAddr)
+	ip = strings.Split(addr.String(), ":")[0]
+	return
+}
+
 // ClientIP 获取客户端IP地址
 func ClientIP(r *http.Request) string {
 	var ip string

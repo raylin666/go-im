@@ -5,9 +5,10 @@ import (
 )
 
 const (
-	EventPing        = "ping"
-	EventBind        = "bind"
-	EventAccountInfo = "account_info"
+	EventPing           = "ping"
+	EventBind           = "bind"
+	EventAccountInfo    = "account_info"
+	EventSendC2CMessage = "send_c2c_message"
 )
 
 // Events 所有消息事件接口
@@ -23,6 +24,8 @@ type Events interface {
 	Bind(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}, send bool)
 	// AccountInfo 获取账号信息
 	AccountInfo(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}, send bool)
+	// SendC2CMessage 发送C2C消息
+	SendC2CMessage(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}, send bool)
 }
 
 type EventDisposeFunc func(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{}, send bool)

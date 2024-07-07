@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mt/config"
 	"mt/internal/app"
+	"mt/internal/lib"
 	"mt/pkg/repositories"
 
 	"github.com/google/wire"
@@ -29,15 +30,23 @@ type Data struct {
 }
 
 // NewData .
-func NewData(tools *app.Tools, repo repositories.DataRepo) (*Data, func(), error) {
+func NewData(repo repositories.DataRepo, tools *app.Tools) (*Data, func(), error) {
 	var ctx = context.Background()
+	var srvRegister = lib.NewSrvRegister(ctx, repo, tools)
+
 	cleanup := func() {
+		// 服务下线
+		srvRegister.UnRegister()
+		
 		// 资源关闭
 		repo.DB(repositories.DbConnectionDefaultName).Close()
 		tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s db.repo.", repositories.DbConnectionDefaultName))
 		repo.Redis(repositories.RedisConnectionDefaultName).Close()
 		tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s redis.repo.", repositories.RedisConnectionDefaultName))
 	}
+
+	// 服务注册
+	srvRegister.Register()
 
 	return &Data{
 		DbRepo:    repo.DbRepo(),
