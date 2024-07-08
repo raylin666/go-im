@@ -51,3 +51,35 @@ func NewClientPool(ctx context.Context, opts ...kratosGrpc.ClientOption) (Client
 		},
 	}, nil
 }
+
+var (
+	clientPools     map[string]ClientPool
+	clientPoolsLock sync.RWMutex
+)
+
+func GetClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOption) (ClientPool, error) {
+	if _, ok := clientPools[name]; ok {
+		return clientPools[name], nil
+	}
+
+	pool, err := NewClientPool(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	clientPoolsLock.Lock()
+	defer clientPoolsLock.Unlock()
+	clientPools[name] = pool
+	return pool, nil
+}
+
+func DelClientPool(ctx context.Context, name string) bool {
+	if _, ok := clientPools[name]; ok {
+		clientPoolsLock.Lock()
+		defer clientPoolsLock.Unlock()
+		delete(clientPools, name)
+		return true
+	}
+
+	return false
+}
