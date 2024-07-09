@@ -3,40 +3,40 @@ package grpc
 import (
 	"context"
 	kratosGrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/connectivity"
+	pool "github.com/jolestar/go-commons-pool/v2"
 	"sync"
 )
 
-type clientPool struct {
-	pool sync.Pool
-}
-
-type ClientPool interface {
-	Get() *grpc.ClientConn
-	Put(conn *grpc.ClientConn)
-}
-
-func (client *clientPool) Get() *grpc.ClientConn {
-	conn := client.pool.Get().(*grpc.ClientConn)
-	// 如果连接关闭或失败
-	if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
-		conn.Close()
-		conn = client.pool.New().(*grpc.ClientConn)
+/*
+	type clientPool struct {
+		pool sync.Pool
 	}
 
-	return conn
-}
-
-func (client *clientPool) Put(conn *grpc.ClientConn) {
-	if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
-		conn.Close()
-		conn = client.pool.New().(*grpc.ClientConn)
+	type ClientPool interface {
+		Get() *grpc.ClientConn
+		Put(conn *grpc.ClientConn)
 	}
 
-	client.pool.Put(conn)
-}
+	func (client *clientPool) Get() *grpc.ClientConn {
+		conn := client.pool.Get().(*grpc.ClientConn)
+		// 如果连接关闭或失败
+		if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
+			conn.Close()
+			conn = client.pool.New().(*grpc.ClientConn)
+		}
 
+		return conn
+	}
+
+	func (client *clientPool) Put(conn *grpc.ClientConn) {
+		if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
+			conn.Close()
+			conn = client.pool.New().(*grpc.ClientConn)
+		}
+
+		client.pool.Put(conn)
+	}
+*/
 func NewClientPool(ctx context.Context, opts ...kratosGrpc.ClientOption) (ClientPool, error) {
 	return &clientPool{
 		pool: sync.Pool{
@@ -62,15 +62,32 @@ func GetClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOp
 		return clientPools[name], nil
 	}
 
-	pool, err := NewClientPool(ctx, opts...)
-	if err != nil {
-		return nil, err
-	}
+	factory := pool.NewPooledObjectFactorySimple(func(ctx context.Context) (interface{}, error) {
+		return kratosGrpc.Dial(ctx, opts...)
+	})
 
 	clientPoolsLock.Lock()
 	defer clientPoolsLock.Unlock()
-	clientPools[name] = pool
-	return pool, nil
+
+	clientPools[name] = pool.NewObjectPool(ctx, factory, &pool.ObjectPoolConfig{
+		LIFO:                     false,
+		MaxTotal:                 0,
+		MaxIdle:                  0,
+		MinIdle:                  0,
+		TestOnCreate:             false,
+		TestOnBorrow:             false,
+		TestOnReturn:             false,
+		TestWhileIdle:            false,
+		BlockWhenExhausted:       false,
+		MinEvictableIdleTime:     0,
+		SoftMinEvictableIdleTime: 0,
+		NumTestsPerEvictionRun:   0,
+		EvictionPolicyName:       "",
+		TimeBetweenEvictionRuns:  0,
+		EvictionContext:          nil,
+	})
+
+	return clientPools[name], nil
 }
 
 func DelClientPool(ctx context.Context, name string) bool {
