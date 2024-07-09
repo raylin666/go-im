@@ -3,77 +3,34 @@ package grpc
 import (
 	"context"
 	kratosGrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	pool "github.com/jolestar/go-commons-pool/v2"
+	goPool "github.com/jolestar/go-commons-pool/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"sync"
 )
 
-/*
-	type clientPool struct {
-		pool sync.Pool
-	}
-
-	type ClientPool interface {
-		Get() *grpc.ClientConn
-		Put(conn *grpc.ClientConn)
-	}
-
-	func (client *clientPool) Get() *grpc.ClientConn {
-		conn := client.pool.Get().(*grpc.ClientConn)
-		// 如果连接关闭或失败
-		if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
-			conn.Close()
-			conn = client.pool.New().(*grpc.ClientConn)
-		}
-
-		return conn
-	}
-
-	func (client *clientPool) Put(conn *grpc.ClientConn) {
-		if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
-			conn.Close()
-			conn = client.pool.New().(*grpc.ClientConn)
-		}
-
-		client.pool.Put(conn)
-	}
-*/
-func NewClientPool(ctx context.Context, opts ...kratosGrpc.ClientOption) (ClientPool, error) {
-	return &clientPool{
-		pool: sync.Pool{
-			New: func() any {
-				conn, err := kratosGrpc.Dial(ctx, opts...)
-				if err != nil {
-					return nil
-				}
-
-				return conn
-			},
-		},
-	}, nil
-}
-
 var (
-	clientPools     map[string]ClientPool
+	clientPools     map[string]*goPool.ObjectPool
 	clientPoolsLock sync.RWMutex
 )
 
-func GetClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOption) (ClientPool, error) {
+func CreateClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOption) {
 	if _, ok := clientPools[name]; ok {
-		return clientPools[name], nil
+		return
 	}
 
-	factory := pool.NewPooledObjectFactorySimple(func(ctx context.Context) (interface{}, error) {
+	factory := goPool.NewPooledObjectFactorySimple(func(ctx context.Context) (interface{}, error) {
 		return kratosGrpc.Dial(ctx, opts...)
 	})
 
 	clientPoolsLock.Lock()
 	defer clientPoolsLock.Unlock()
 
-	clientPools[name] = pool.NewObjectPool(ctx, factory, &pool.ObjectPoolConfig{
+	clientPools[name] = goPool.NewObjectPool(ctx, factory, &goPool.ObjectPoolConfig{
 		LIFO:                     false,
-		MaxTotal:                 0,
-		MaxIdle:                  0,
-		MinIdle:                  0,
+		MaxTotal:                 100,
+		MaxIdle:                  10,
+		MinIdle:                  5,
 		TestOnCreate:             false,
 		TestOnBorrow:             false,
 		TestOnReturn:             false,
@@ -81,22 +38,83 @@ func GetClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOp
 		BlockWhenExhausted:       false,
 		MinEvictableIdleTime:     0,
 		SoftMinEvictableIdleTime: 0,
-		NumTestsPerEvictionRun:   0,
+		NumTestsPerEvictionRun:   3,
 		EvictionPolicyName:       "",
 		TimeBetweenEvictionRuns:  0,
-		EvictionContext:          nil,
+		EvictionContext:          ctx,
 	})
-
-	return clientPools[name], nil
 }
 
-func DelClientPool(ctx context.Context, name string) bool {
+func DeleteClientPool(ctx context.Context, name string) bool {
 	if _, ok := clientPools[name]; ok {
 		clientPoolsLock.Lock()
 		defer clientPoolsLock.Unlock()
+		clientPools[name].Close(ctx)
 		delete(clientPools, name)
 		return true
 	}
 
 	return false
+}
+
+type pool struct {
+	ctx  context.Context
+	name string
+}
+
+type Pool interface {
+	Get() *grpc.ClientConn
+	Put(conn *grpc.ClientConn)
+}
+
+func NewPool(ctx context.Context, name string) Pool {
+	return &pool{ctx: ctx, name: name}
+}
+
+func (pool *pool) Get() *grpc.ClientConn {
+	clientPoolsLock.RLock()
+	defer clientPoolsLock.RUnlock()
+
+	object, ok := clientPools[pool.name]
+	if !ok {
+		return nil
+	}
+
+	connFunc := func() *grpc.ClientConn {
+		objectValue, err := object.BorrowObject(pool.ctx)
+		if err != nil {
+			return nil
+		}
+
+		return objectValue.(*grpc.ClientConn)
+	}
+
+	conn := connFunc()
+
+	// 如果连接关闭或失败
+	if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
+		conn.Close()
+		_ = object.AddObject(pool.ctx)
+		conn = connFunc()
+	}
+
+	return conn
+}
+
+func (pool *pool) Put(conn *grpc.ClientConn) {
+	clientPoolsLock.RLock()
+	defer clientPoolsLock.RUnlock()
+
+	object, ok := clientPools[pool.name]
+	if !ok {
+		return
+	}
+
+	if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
+		conn.Close()
+		_ = object.AddObject(pool.ctx)
+		return
+	}
+
+	_ = object.ReturnObject(pool.ctx, conn)
 }
