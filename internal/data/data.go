@@ -37,7 +37,7 @@ func NewData(repo repositories.DataRepo, tools *app.Tools) (*Data, func(), error
 	cleanup := func() {
 		// 服务下线
 		srvRegister.UnRegister()
-		
+
 		// 资源关闭
 		repo.DB(repositories.DbConnectionDefaultName).Close()
 		tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s db.repo.", repositories.DbConnectionDefaultName))

@@ -35,6 +35,10 @@ func NewSrvRegister(ctx context.Context, repo repositories.DataRepo, tools *app.
 }
 
 func (srv *SrvRegister) Register() bool {
+	if srv.repo.RedisRepo().Count() <= 0 {
+		return false
+	}
+
 	redisClient := redisrepo.NewDefaultClient(srv.repo.RedisRepo())
 	isOk, _ := redisClient.Exists(srv.ctx, cacheImServerRegisterSet).Result()
 	if isOk > 0 && redisClient.SIsMember(srv.ctx, cacheImServerRegisterSet, srv.ip).Val() == true {
@@ -56,6 +60,10 @@ func (srv *SrvRegister) Register() bool {
 }
 
 func (srv *SrvRegister) UnRegister() bool {
+	if srv.repo.RedisRepo().Count() <= 0 {
+		return true
+	}
+
 	redisClient := redisrepo.NewDefaultClient(srv.repo.RedisRepo())
 	isOk, _ := redisClient.Exists(srv.ctx, cacheImServerRegisterSet).Result()
 	if isOk == 0 || redisClient.SIsMember(srv.ctx, cacheImServerRegisterSet, srv.ip).Val() == false {

@@ -3,17 +3,15 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/go-kratos/kratos/v2"
 	"github.com/raylin666/go-utils/auth"
 	utLogger "github.com/raylin666/go-utils/logger"
 	"github.com/raylin666/go-utils/server/system"
+	"mt/config"
 	"mt/internal/app"
 	pkgLogger "mt/pkg/logger"
 	"mt/pkg/utils"
-	"sync"
 
-	"mt/config"
-
-	"github.com/go-kratos/kratos/v2"
 	kratosConfig "github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -110,16 +108,6 @@ func main() {
 
 	// 创建公共工具实例
 	var tools = app.NewTools(logger, datetime, jwt)
-
-	pool := sync.Pool{
-		New: func() any {
-			return 1
-		},
-	}
-
-	fmt.Println(pool)
-
-	fmt.Println(pool.Get())
 
 	appMT, cleanup, err := wireApp(bc.Server, bc.Data, bc.App, bc.Websocket, tools)
 	if err != nil {
