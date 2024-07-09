@@ -2,25 +2,21 @@ package grpc
 
 import (
 	"context"
-	kratosGrpc "github.com/go-kratos/kratos/v2/transport/grpc"
-	"google.golang.org/grpc"
 	accountPb "mt/api/v1/account"
 )
 
 type AccountClient struct {
+	pool   Pool
 	client accountPb.ServiceClient
 }
 
-func NewAccountClient(ctx context.Context, endpoint string, conn *grpc.ClientConn) *AccountClient {
-	clientPool, err := GetClientPool(ctx, endpoint, kratosGrpc.WithEndpoint(endpoint))
-	if err != nil {
-		return nil
-	}
-
-	return &AccountClient{accountPb.NewServiceClient(clientPool.Get())}
+func NewAccountClient(ctx context.Context, endpoint string) *AccountClient {
+	var pool = NewPool(ctx, endpoint)
+	return &AccountClient{pool: pool, client: accountPb.NewServiceClient(pool.Get())}
 }
 
 func (c *AccountClient) GenerateToken(ctx context.Context, accountId string) (string, error) {
+	defer c.pool.Put(c.pool.Get())
 	reply, err := c.client.GenerateToken(ctx, &accountPb.GenerateTokenRequest{AccountId: accountId})
 	if err != nil {
 		return "", err
