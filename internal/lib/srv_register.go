@@ -81,3 +81,13 @@ func (srv *SrvRegister) UnRegister() bool {
 
 	return true
 }
+
+func (srv *SrvRegister) ClientAddress() (addrs []string) {
+	if srv.repo.RedisRepo().Count() <= 0 {
+		return
+	}
+
+	redisClient := redisrepo.NewDefaultClient(srv.repo.RedisRepo())
+	addrs, _ = redisClient.SMembers(srv.ctx, cacheImServerRegisterSet).Result()
+	return
+}
