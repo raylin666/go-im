@@ -14,9 +14,11 @@ var (
 	clientPoolsLock sync.RWMutex
 )
 
-func CreateClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOption) {
+func ClientPools() map[string]*goPool.ObjectPool { return clientPools }
+
+func CreateClientPool(ctx context.Context, name string, opts ...kratosGrpc.ClientOption) bool {
 	if _, ok := clientPools[name]; ok {
-		return
+		return false
 	}
 
 	factory := goPool.NewPooledObjectFactorySimple(func(ctx context.Context) (interface{}, error) {
@@ -43,6 +45,8 @@ func CreateClientPool(ctx context.Context, name string, opts ...kratosGrpc.Clien
 		TimeBetweenEvictionRuns:  0,
 		EvictionContext:          ctx,
 	})
+
+	return true
 }
 
 func DeleteClientPool(ctx context.Context, name string) bool {

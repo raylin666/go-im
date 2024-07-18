@@ -4,11 +4,15 @@ import (
 	"context"
 	"fmt"
 	kratosGrpc "github.com/go-kratos/kratos/v2/transport/grpc"
+	"math/rand"
 	"mt/config"
 	"mt/internal/app"
 	"mt/internal/grpc"
 	"mt/internal/lib"
+	"mt/pkg/logger"
 	"mt/pkg/repositories"
+	"mt/pkg/utils"
+	"sync"
 	"time"
 
 	"github.com/google/wire"
@@ -57,7 +61,7 @@ func NewData(repo repositories.DataRepo, tools *app.Tools) (*Data, func(), error
 	srvRegister.Register()
 
 	// 启动 GRPC 客户端连接池注册/销毁
-	go startTicketGrpcClientPool(ctx, srvRegister)
+	go startTicketGrpcClientPool(ctx, srvRegister, tools.Logger())
 
 	return &Data{
 		DbRepo:    repo.DbRepo(),
@@ -66,13 +70,41 @@ func NewData(repo repositories.DataRepo, tools *app.Tools) (*Data, func(), error
 }
 
 // startTicketGrpcClientPool 启动 GRPC 客户端连接池注册/销毁
-func startTicketGrpcClientPool(ctx context.Context, srvRegister *lib.SrvRegister) {
-	ticker := time.NewTicker(5 * time.Second)
+func startTicketGrpcClientPool(ctx context.Context, srvRegister *lib.SrvRegister, logger *logger.Logger) {
+	var (
+		clientPoolsLock sync.RWMutex
+
+		second = rand.Intn(5) + 2
+		ticker = time.NewTicker(time.Duration(second) * time.Second)
+	)
+
 	for {
 		select {
 		case <-ticker.C:
-			for _, address := range srvRegister.ClientAddress() {
-				grpc.CreateClientPool(ctx, address, kratosGrpc.WithEndpoint(address))
+			clientAddress := srvRegister.ClientAddress()
+
+			// TODO 移除已关闭的服务连接池
+			clientPoolsLock.RLock()
+			for poolName, _ := range grpc.ClientPools() {
+				if utils.InSliceByString(poolName, clientAddress) {
+					continue
+				}
+
+				if grpc.DeleteClientPool(ctx, poolName) {
+					logger.UseApp(ctx).Info(fmt.Sprintf("已成功移除已关闭的服务 `%s` GRPC 连接池", poolName))
+				}
+			}
+			clientPoolsLock.RUnlock()
+
+			// TODO 创建新启动的服务连接池
+			for _, address := range clientAddress {
+				if address == app.ServerIp {
+					continue
+				}
+
+				if grpc.CreateClientPool(ctx, address, kratosGrpc.WithEndpoint(address)) {
+					logger.UseApp(ctx).Info(fmt.Sprintf("已成功启动服务 `%s` GRPC 连接池", address))
+				}
 			}
 		}
 	}

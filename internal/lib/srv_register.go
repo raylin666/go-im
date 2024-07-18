@@ -7,7 +7,6 @@ import (
 	"mt/internal/app"
 	"mt/internal/repositories/redisrepo"
 	"mt/pkg/repositories"
-	"mt/pkg/utils"
 )
 
 /**
@@ -30,7 +29,7 @@ func NewSrvRegister(ctx context.Context, repo repositories.DataRepo, tools *app.
 		ctx:   ctx,
 		repo:  repo,
 		tools: tools,
-		ip:    utils.LocalIP(),
+		ip:    app.ServerIp,
 	}
 }
 
