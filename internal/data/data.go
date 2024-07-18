@@ -3,10 +3,13 @@ package data
 import (
 	"context"
 	"fmt"
+	kratosGrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	"mt/config"
 	"mt/internal/app"
+	"mt/internal/grpc"
 	"mt/internal/lib"
 	"mt/pkg/repositories"
+	"time"
 
 	"github.com/google/wire"
 )
@@ -39,17 +42,38 @@ func NewData(repo repositories.DataRepo, tools *app.Tools) (*Data, func(), error
 		srvRegister.UnRegister()
 
 		// 资源关闭
-		repo.DB(repositories.DbConnectionDefaultName).Close()
-		tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s db.repo.", repositories.DbConnectionDefaultName))
-		repo.Redis(repositories.RedisConnectionDefaultName).Close()
-		tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s redis.repo.", repositories.RedisConnectionDefaultName))
+		for dbName, dbRepo := range repo.DbRepo().All() {
+			_ = dbRepo.Close()
+			tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s db.repo.", dbName))
+		}
+
+		for redisName, redisRepo := range repo.RedisRepo().All() {
+			_ = redisRepo.Close()
+			tools.Logger().UseApp(ctx).Info(fmt.Sprintf("closing the data resource: %s db.repo.", redisName))
+		}
 	}
 
 	// 服务注册
 	srvRegister.Register()
 
+	// 启动 GRPC 客户端连接池注册/销毁
+	go startTicketGrpcClientPool(ctx, srvRegister)
+
 	return &Data{
 		DbRepo:    repo.DbRepo(),
 		RedisRepo: repo.RedisRepo(),
 	}, cleanup, nil
+}
+
+// startTicketGrpcClientPool 启动 GRPC 客户端连接池注册/销毁
+func startTicketGrpcClientPool(ctx context.Context, srvRegister *lib.SrvRegister) {
+	ticker := time.NewTicker(5 * time.Second)
+	for {
+		select {
+		case <-ticker.C:
+			for _, address := range srvRegister.ClientAddress() {
+				grpc.CreateClientPool(ctx, address, kratosGrpc.WithEndpoint(address))
+			}
+		}
+	}
 }

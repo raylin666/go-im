@@ -93,7 +93,7 @@ func (pool *pool) Get() *grpc.ClientConn {
 
 	// 如果连接关闭或失败
 	if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
-		conn.Close()
+		_ = conn.Close()
 		_ = object.AddObject(pool.ctx)
 		conn = connFunc()
 	}
@@ -111,7 +111,7 @@ func (pool *pool) Put(conn *grpc.ClientConn) {
 	}
 
 	if conn.GetState() == connectivity.Shutdown || conn.GetState() == connectivity.TransientFailure {
-		conn.Close()
+		_ = conn.Close()
 		_ = object.AddObject(pool.ctx)
 		return
 	}
