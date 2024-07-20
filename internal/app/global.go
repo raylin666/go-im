@@ -5,6 +5,6 @@ import (
 )
 
 var (
-	// ServerIp 当前服务地址
-	ServerIp = utils.LocalIP()
+	// LocalServerIp 当前服务地址
+	LocalServerIp = utils.LocalIP()
 )

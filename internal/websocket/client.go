@@ -64,11 +64,11 @@ func (c *Client) IsHeartbeatTimeout(currentTime time.Time) (timeout bool) {
 // loggerFields 获取连接日志字段信息
 func (c *Client) loggerFields() []zap.Field {
 	var addr = zap.String("address", c.Addr)
-	var accountId = zap.String("account_id", c.Account.ID)
+	var account = zap.Any("account", c.Account)
 	var firstTime = zap.Time("connect_time", c.ConnectTime)
 	var heartbeatTime = zap.Time("heartbeat_time", c.HeartbeatTime)
 
-	return []zap.Field{addr, accountId, firstTime, heartbeatTime}
+	return []zap.Field{addr, account, firstTime, heartbeatTime}
 }
 
 // Read 读取客户端消息

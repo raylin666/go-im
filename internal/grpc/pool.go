@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	clientPools     map[string]*goPool.ObjectPool
 	clientPoolsLock sync.RWMutex
+	clientPools     = make(map[string]*goPool.ObjectPool)
 )
 
 func ClientPools() map[string]*goPool.ObjectPool { return clientPools }
@@ -22,7 +22,7 @@ func CreateClientPool(ctx context.Context, name string, opts ...kratosGrpc.Clien
 	}
 
 	factory := goPool.NewPooledObjectFactorySimple(func(ctx context.Context) (interface{}, error) {
-		return kratosGrpc.Dial(ctx, opts...)
+		return Dial(ctx, name, opts...)
 	})
 
 	clientPoolsLock.Lock()
