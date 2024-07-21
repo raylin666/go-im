@@ -238,6 +238,9 @@ func (clientManager *ClientManager) EventRegister(client *Client) {
 	// TODO 创建账号
 	clientManager.CreateAccount(client.Account)
 
+	// TODO 创建账号分布式缓存数据
+	SetAccountOnline(client.Account.ID, client.Account)
+
 	Logger(client.Ctx).Info("客户端管理器 - 建立连接事件",
 		zap.String("address", client.Addr),
 		zap.Any("account", client.Account),
@@ -275,6 +278,9 @@ func (clientManager *ClientManager) EventUnRegister(client *Client) {
 	if clientManager.GetClientsCountByAccount(client.Account.ID) <= 1 {
 		clientManager.DeleteAccount(client.Account.ID)
 	}
+	
+	// TODO 删除账号分布式缓存数据
+	SetAccountOffline(client.Account.ID)
 
 	Logger(client.Ctx).Info("客户端管理器 - 断开连接事件",
 		zap.String("address", client.Addr),

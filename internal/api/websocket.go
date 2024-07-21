@@ -95,7 +95,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
-	client := websocket.NewClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar), conn)
+	client := websocket.NewClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin == 1), conn)
 
 	go client.Read(ctx)
 	go client.Write(ctx)

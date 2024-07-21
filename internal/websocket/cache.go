@@ -3,8 +3,10 @@ package websocket
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/go-redis/redis/v8"
 	"go.uber.org/zap"
+	"mt/internal/app"
 	"mt/internal/repositories/redisrepo"
 	"time"
 )
@@ -31,39 +33,56 @@ type AccountOnline struct {
 func getAccountsOnlineCacheKey() string { return cacheAccountsOnlineHash }
 
 // SetAccountOnline 设置在线账号存储缓存数据
-func SetAccountOnline(accountId string, account *AccountOnline) {
-	valueByte, err := json.Marshal(account)
-	if err != nil {
-		return
+func SetAccountOnline(accountId string, account *Account) {
+	var err error
+	var jsonString string
+	var accountOnline = AccountOnline{
+		Nickname: account.Nickname,
+		Avatar:   account.Avatar,
+		IsAdmin:  account.IsAdmin,
 	}
-
 	ctx := context.TODO()
 	cacheKey := getAccountsOnlineCacheKey()
 	redisClient := redisrepo.NewDefaultClient(RedisRepo())
-	redisClient.Watch(ctx, func(tx *redis.Tx) error {
-		tx.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
-			isOk, _ := pipeliner.Exists(ctx, cacheKey).Result()
-			if isOk <= 0 {
+	err = redisClient.Watch(ctx, func(tx *redis.Tx) error {
+		_, err = tx.TxPipelined(ctx, func(pipeliner redis.Pipeliner) error {
+			isOk, _ := pipeliner.HExists(ctx, cacheKey, accountId).Result()
+			fmt.Println(isOk)
+			if !isOk {
+				accountOnline.Clients = append(accountOnline.Clients, app.LocalServerIp)
+				valueByte, err := json.Marshal(accountOnline)
+				if err != nil {
+					return err
+				}
 
+				// 缓存数据不存在
+				_, err = pipeliner.HSet(ctx, cacheKey, accountId, string(valueByte)).Result()
+				if err != nil {
+					return err
+				}
+
+				pipeliner.Expire(ctx, cacheKey, cacheAccountsOnlineHashExpire*time.Second)
+
+				return nil
+			}
+			// 缓存数据已存在, 更新信息
+			jsonString, err = pipeliner.HGet(ctx, cacheKey, accountId).Result()
+			if err != nil {
+				return err
 			}
 
-			return nil
+			fmt.Println(jsonString)
+
+			return err
 		})
 
 		return nil
 	}, cacheKey)
 
-	isOk, _ := redisClient.Exists(ctx, cacheKey).Result()
-	jsonString := string(valueByte)
-	_, err = redisClient.HSet(ctx, cacheKey, accountId, jsonString).Result()
 	if err != nil {
-		Logger(ctx).Error("设置在线账号存储缓存数据失败", zap.String("cache_key", cacheKey), zap.String("data", jsonString), zap.Error(err))
+		Logger(ctx).Error("设置在线账号存储缓存事务处理失败", zap.String("cache_key", cacheKey), zap.String("data", jsonString), zap.Error(err))
 
 		return
-	}
-
-	if isOk == 0 {
-		redisClient.Expire(ctx, cacheKey, cacheAccountsOnlineHashExpire*time.Second)
 	}
 
 	return
@@ -78,6 +97,8 @@ func SetAccountOffline(accountId string) bool {
 	if isOk == 0 {
 		return false
 	}
+
+	// 当服务地址都不存在时, 删除缓存
 
 	return true
 }
