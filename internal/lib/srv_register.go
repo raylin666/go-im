@@ -67,10 +67,6 @@ func (srv *SrvRegister) Register() bool {
 }
 
 func (srv *SrvRegister) UnRegister() bool {
-	if srv.repo.RedisRepo().Count() <= 0 {
-		return true
-	}
-
 	redisClient := redisrepo.NewDefaultClient(srv.repo.RedisRepo())
 
 	lock := action.NewLock(srv.ctx, redisClient, "srv_unregister")
@@ -98,10 +94,6 @@ func (srv *SrvRegister) UnRegister() bool {
 }
 
 func (srv *SrvRegister) ClientAddress() (addrs []string) {
-	if srv.repo.RedisRepo().Count() <= 0 {
-		return
-	}
-
 	redisClient := redisrepo.NewDefaultClient(srv.repo.RedisRepo())
 	addrs, _ = redisClient.SMembers(srv.ctx, cacheImServerRegisterSet).Result()
 	return
