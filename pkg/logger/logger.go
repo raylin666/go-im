@@ -48,7 +48,7 @@ const (
 	LogApp       = "app"
 	LogSQL       = "sql"
 	LogRequest   = "request"
-	LogWebsocket = "websocket"
+	LogWebSocket = "websocket"
 )
 
 type Logger struct {

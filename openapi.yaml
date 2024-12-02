@@ -3,10 +3,94 @@
 
 openapi: 3.0.3
 info:
-    title: Heartbeat API
-    description: The Heartbeat service definition.
+    title: ""
     version: 0.0.1
 paths:
+    /api/account/create:
+        post:
+            tags:
+                - Service
+            description: 创建账号
+            operationId: Service_Create
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.CreateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.CreateResponse'
+    /api/account/delete/{accountId}:
+        delete:
+            tags:
+                - Service
+            description: 删除账号
+            operationId: Service_Delete
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/account/token/{accountId}:
+        post:
+            tags:
+                - Service
+            description: 生成TOKEN
+            operationId: Service_GenerateToken
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.GenerateTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.GenerateTokenResponse'
+    /api/account/update/{accountId}:
+        put:
+            tags:
+                - Service
+            description: 更新账号
+            operationId: Service_Update
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.UpdateRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.UpdateResponse'
     /heartbeat:
         get:
             tags:
@@ -27,5 +111,75 @@ components:
             properties:
                 message:
                     type: string
+        v1.account.CreateRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+        v1.account.CreateResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
+        v1.account.GenerateTokenRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                ttl:
+                    type: string
+        v1.account.GenerateTokenResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                token:
+                    type: string
+                tokenExpire:
+                    type: string
+                    format: date-time
+        v1.account.UpdateRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+        v1.account.UpdateResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+                createdAt:
+                    type: string
+                    format: date-time
 tags:
     - name: Heartbeat
+      description: The Heartbeat service definition.
+    - name: Service
+      description: The Service service definition.

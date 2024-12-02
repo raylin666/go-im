@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package v1.account;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "api/v1/account;account";
+
+// kratos proto client api/v1/account/service.proto
+
+// The Service service definition.
+service Service {
+  // 创建账号
+  rpc Create (CreateRequest) returns (CreateResponse) {
+    option (google.api.http) = {
+      post: "/api/account/create"
+      body: "*"
+    };
+  }
+
+  // 更新账号
+  rpc Update (UpdateRequest) returns (UpdateResponse) {
+    option (google.api.http) = {
+      put: "/api/account/update/{account_id}"
+      body: "*"
+    };
+  }
+
+  // 删除账号
+  rpc Delete (DeleteRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/account/delete/{account_id}"
+    };
+  }
+
+  // 生成TOKEN
+  rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/account/token/{account_id}"
+      body: "*"
+    };
+  }
+}
+
+message CreateRequest {
+  string account_id = 1 [(validate.rules).string = {
+    pattern: "^[a-zA-Z0-9]+$",
+    min_len: 1,
+    max_len: 30,
+  }];
+  string nickname = 2 [(validate.rules).string = {min_len: 1, max_len: 30}];
+  string avatar = 3 [(validate.rules).string.uri = true];
+  bool is_admin = 4;
+}
+
+message CreateResponse {
+  string account_id = 1;
+  string nickname = 2;
+  string avatar = 3;
+  bool is_admin = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message UpdateRequest {
+  string account_id = 1;
+  string nickname = 2 [(validate.rules).string = {min_len: 1, max_len: 30}];
+  string avatar = 3 [(validate.rules).string.uri = true];
+  bool is_admin = 4;
+}
+
+message UpdateResponse {
+  string account_id = 1;
+  string nickname = 2;
+  string avatar = 3;
+  bool is_admin = 4;
+  google.protobuf.Timestamp created_at = 5;
+}
+
+message DeleteRequest {
+  string account_id = 1;
+}
+
+message GenerateTokenRequest {
+  string account_id = 1;
+  int64 ttl = 2;
+}
+
+message GenerateTokenResponse {
+  string account_id = 1;
+  string token = 2;
+  google.protobuf.Timestamp token_expire = 3;
+}
