@@ -18,6 +18,20 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		query = r.URL.Query()
 	)
 
+	// TODO 登录身份验证
+	accountToken := query.Get("account_token")
+	if accountToken == "" {
+		h.writeError(w, defined.ErrorNotVisitAuth)
+		return
+	}
+
+	// TODO 解析TOKEN
+	jwtClaims, err := h.tools.JWT().ParseToken(accountToken)
+	if err != nil {
+		h.writeError(w, defined.ErrorNotLoginError)
+		return
+	}
+
 	// TODO HTTP 协议升级
 	upgraderResponseHeader := new(websocket.UpgraderResponseHeader)
 	upgraderResponseHeader.Name = h.config.App.Name
