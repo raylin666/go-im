@@ -45,9 +45,10 @@ func (l *Logger) Log(level log.Level, keyValues ...interface{}) error {
 }
 
 const (
-	LogApp     = "app"
-	LogSQL     = "sql"
-	LogRequest = "request"
+	LogApp       = "app"
+	LogSQL       = "sql"
+	LogRequest   = "request"
+	LogWebsocket = "websocket"
 )
 
 type Logger struct {
@@ -81,6 +82,14 @@ func (l *Logger) UseRequest(ctx context.Context) *zap.Logger {
 		traceId = md.Get(mdKeyTraceId)
 	}
 	return l.Logger.Named(LogRequest).With(zap.String(logKeyTraceId, traceId))
+}
+
+func (l *Logger) UseWebSocket(ctx context.Context) *zap.Logger {
+	var traceId string
+	if md, ok := metadata.FromServerContext(ctx); ok {
+		traceId = md.Get(mdKeyTraceId)
+	}
+	return l.Logger.Named(LogWebSocket).With(zap.String(logKeyTraceId, traceId))
 }
 
 type RequestLogFormat struct {

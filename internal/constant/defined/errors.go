@@ -18,5 +18,17 @@ var (
 	ErrorIdInvalidValueError    = api.ErrorIdInvalidValueError("无效ID值")
 	ErrorCommandInvalidNotFound = api.ErrorCommandInvalidNotFound("无效的执行指令")
 	ErrorNotLoginError          = api.ErrorNotLoginError("请先登录后再操作")
-	ErrorNotVisitAuth		    = api.ErrorNotVisitAuth("没有访问权限")
+	ErrorNotVisitAuth           = api.ErrorNotVisitAuth("没有访问权限")
+
+	ErrorWebsocketUpgraderError = api.ErrorWebsocketUpgraderError("WebSocket 协议升级失败")
+
+	ErrorGenerateTokenError = api.ErrorGenerateTokenError("生成TOKEN失败")
+	ErrorAccountNotFound    = api.ErrorAccountNotFound("账号不存在")
+	ErrorAccountLoginError  = api.ErrorAccountLoginError("账号登录错误")
+
+	ErrorToAccountNotFound           = api.ErrorToAccountNotFound("接收者账号不存在")
+	ErrorSendMessageTypeNotFound     = api.ErrorSendMessageTypeNotFound("发送消息类型错误")
+	IsSendMessageContentRequired     = api.ErrorSendMessageContentRequired("发送消息内容必填")
+	ErrorToAccountAndFromAccountSame = api.ErrorToAccountAndFromAccountSame("接收者账号不能和发送者账号一致")
+	ErrorSendMessageError            = api.ErrorSendMessageError("发送消息失败, 请重试")
 )

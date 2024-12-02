@@ -44,4 +44,25 @@ enum ErrorReason {
   NOT_LOGIN_ERROR = 203001 [(errors.code) = 401];
   // 没有访问权限
   NOT_VISIT_AUTH = 203002 [(errors.code) = 401];
+
+  // WebSocket 协议升级失败
+  WEBSOCKET_UPGRADER_ERROR = 204001 [(errors.code) = 400];
+
+  // 生成TOKEN失败
+  GENERATE_TOKEN_ERROR = 205001 [(errors.code) = 500];
+  // 账号不存在
+  ACCOUNT_NOT_FOUND = 205002 [(errors.code) = 400];
+  // 账号登录错误
+  ACCOUNT_LOGIN_ERROR = 205003 [(errors.code) = 400];
+
+  // 接收者账号不存在
+  TO_ACCOUNT_NOT_FOUND = 206001 [(errors.code) = 400];
+  // 发送消息类型错误
+  SEND_MESSAGE_TYPE_NOT_FOUND = 206002 [(errors.code) = 400];
+  // 发送消息内容必填
+  SEND_MESSAGE_CONTENT_REQUIRED = 206003 [(errors.code) = 400];
+  // 接收者账号不能和发送者账号一致
+  TO_ACCOUNT_AND_FROM_ACCOUNT_SAME = 206004 [(errors.code) = 400];
+  // 发送消息失败, 请重试
+  SEND_MESSAGE_ERROR = 206005 [(errors.code) = 400];
 }
