@@ -9,6 +9,7 @@ package main
 import (
 	"github.com/go-kratos/kratos/v2"
 	"mt/config"
+	"mt/internal/api"
 	"mt/internal/app"
 	"mt/internal/biz"
 	"mt/internal/data"
@@ -23,7 +24,7 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(configServer *config.Server, configData *config.Data, tools *app.Tools) (*kratos.App, func(), error) {
+func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configData *config.Data, tools *app.Tools) (*kratos.App, func(), error) {
 	dataRepo := data.NewDataRepo(tools, configData)
 	dataData, cleanup, err := data.NewData(tools, dataRepo)
 	if err != nil {
@@ -33,7 +34,8 @@ func wireApp(configServer *config.Server, configData *config.Data, tools *app.To
 	heartbeatUsecase := biz.NewHeartbeatUsecase(heartbeatRepo, tools)
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, tools)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, tools)
+	handler := api.NewHandler(bootstrap, tools, dataRepo)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
 		cleanup()
