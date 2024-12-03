@@ -193,6 +193,20 @@ func ErrorCommandInvalidNotFound(format string, args ...interface{}) *errors.Err
 	return errors.New(400, ErrorReason_COMMAND_INVALID_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
+// 请求参数错误
+func IsRequestParamsError(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_REQUEST_PARAMS_ERROR.String() && e.Code == 400
+}
+
+// 请求参数错误
+func ErrorRequestParamsError(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_REQUEST_PARAMS_ERROR.String(), fmt.Sprintf(format, args...))
+}
+
 // 请先登录后再操作
 func IsNotLoginError(err error) bool {
 	if err == nil {
