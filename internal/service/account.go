@@ -79,6 +79,31 @@ func (s *AccountService) Delete(ctx context.Context, req *pb.DeleteRequest) (*em
 	return nil, nil
 }
 
+// UpdateLogin 更新帐号登录信息
+func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginRequest) (*pb.UpdateLoginResponse, error) {
+	updateLoginRequest := &typeAccount.UpdateLoginRequest{
+		ClientIp: req.ClientIp,
+	}
+
+	updateLoginResponse, err := s.uc.UpdateLogin(ctx, req.GetAccountId(), updateLoginRequest)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.UpdateLoginResponse{
+		AccountId:      updateLoginResponse.AccountId,
+		Nickname:       updateLoginResponse.Nickname,
+		Avatar:         updateLoginResponse.Avatar,
+		IsAdmin:        updateLoginResponse.IsAdmin,
+		IsOnline:       updateLoginResponse.IsOnline,
+		LastLoginIp:    updateLoginResponse.LastLoginIp,
+		FirstLoginTime: timestamppb.New(updateLoginResponse.FirstLoginTime),
+		LastLoginTime:  timestamppb.New(updateLoginResponse.LastLoginTime),
+	}
+
+	return resp, nil
+}
+
 // GenerateToken 生成TOKEN
 func (s *AccountService) GenerateToken(ctx context.Context, req *pb.GenerateTokenRequest) (*pb.GenerateTokenResponse, error) {
 	var nowTime = time.Now()

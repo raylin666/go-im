@@ -17,6 +17,7 @@ type AccountRepo interface {
 	Create(ctx context.Context, data *typeAccount.CreateRequest) (*model.Account, error)
 	Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error)
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
+	UpdateLogin(ctx context.Context, accountId string, data *typeAccount.UpdateLoginRequest) (*model.Account, error)
 }
 
 type AccountUsecase struct {
@@ -72,6 +73,24 @@ func (uc *AccountUsecase) Delete(ctx context.Context, accountId string) (*typeAc
 	}
 
 	return &typeAccount.DeleteResponse{AccountId: m.AccountId}, nil
+}
+
+// UpdateLogin 更新帐号登录信息
+func (uc *AccountUsecase) UpdateLogin(ctx context.Context, accountId string, req *typeAccount.UpdateLoginRequest) (*typeAccount.UpdateLoginResponse, error) {
+	m, err := uc.repo.UpdateLogin(ctx, accountId, req)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &typeAccount.UpdateResponse{
+		AccountId: m.AccountId,
+		Nickname:  m.Nickname,
+		Avatar:    m.Avatar,
+		IsAdmin:   m.IsAdmin == 1,
+		CreatedAt: m.CreatedAt,
+	}
+
+	return resp, nil
 }
 
 // GenerateToken 生成TOKEN

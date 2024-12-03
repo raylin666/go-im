@@ -35,6 +35,21 @@ type DeleteResponse struct {
 	AccountId string `json:"account_id"`
 }
 
+type UpdateLoginRequest struct {
+	ClientIp *string `json:"client_ip"`
+}
+
+type UpdateLoginResponse struct {
+	AccountId      string    `json:"account_id"`
+	Nickname       string    `json:"nickname"`
+	Avatar         string    `json:"avatar"`
+	IsAdmin        bool      `json:"is_admin"`
+	IsOnline       bool      `json:"is_online"`
+	LastLoginIp    string    `json:"last_login_ip"`
+	FirstLoginTime time.Time `json:"first_login_time"`
+	LastLoginTime  time.Time `json:"last_login_time"`
+}
+
 type GenerateTokenResponse struct {
 	AccountId   string `json:"account_id"`
 	Token       string `json:"token"`
