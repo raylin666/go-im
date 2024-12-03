@@ -11,10 +11,16 @@ import (
 	logging "mt/internal/middleware/logger"
 	"mt/internal/middleware/validate"
 	"mt/internal/service"
+
+	accountPb "mt/api/v1/account"
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *config.Server, heartbeat *service.HeartbeatService, tools *app.Tools) *grpc.Server {
+func NewGRPCServer(
+	c *config.Server,
+	heartbeat *service.HeartbeatService,
+	account *service.AccountService,
+	tools *app.Tools) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -33,7 +39,11 @@ func NewGRPCServer(c *config.Server, heartbeat *service.HeartbeatService, tools 
 	if c.Grpc.Timeout != nil {
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
+
 	srv := grpc.NewServer(opts...)
+
 	v1.RegisterHeartbeatServer(srv, heartbeat)
+	accountPb.RegisterServiceServer(srv, account)
+
 	return srv
 }

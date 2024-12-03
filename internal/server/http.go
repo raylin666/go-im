@@ -6,6 +6,7 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/validate"
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"mt/api/v1"
+	accountPb "mt/api/v1/account"
 	"mt/config"
 	"mt/internal/api"
 	"mt/internal/app"
@@ -21,6 +22,7 @@ import (
 func NewHTTPServer(
 	c *config.Server,
 	heartbeat *service.HeartbeatService,
+	account *service.AccountService,
 	tools *app.Tools,
 	apiHandler *api.Handler,
 ) *http.Server {
@@ -51,6 +53,7 @@ func NewHTTPServer(
 	srv.HandlePrefix(apiHandler.Prefix, netHttp.Handler(apiHandler.Router()))
 
 	v1.RegisterHeartbeatHTTPServer(srv, heartbeat)
+	accountPb.RegisterServiceHTTPServer(srv, account)
 
 	return srv
 }

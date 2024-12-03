@@ -14,7 +14,8 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData,
 	NewDataRepo,
-	NewHeartbeatRepo)
+	NewHeartbeatRepo,
+	NewAccountRepo)
 
 func NewDataRepo(tools *app.Tools, data *config.Data) repositories.DataRepo {
 	return repositories.NewDataRepo(tools.Logger(), data)
