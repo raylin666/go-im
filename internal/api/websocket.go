@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"go.uber.org/zap"
 	"mt/internal/constant/defined"
 	"mt/internal/websocket"
@@ -52,4 +53,6 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		h.tools.Logger().UseWebSocket(ctx).Error("WebSocket 连接失败", zap.Error(e))
 		return
 	}
+
+	fmt.Println(timeNow, jwtClaims, conn)
 }

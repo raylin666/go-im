@@ -14,8 +14,8 @@ type Account struct {
 }
 
 type AccountRepo interface {
-	Create(ctx context.Context, data typeAccount.CreateData) (*model.Account, error)
-	Update(ctx context.Context, data typeAccount.UpdateData) (*model.Account, error)
+	Create(ctx context.Context, data *typeAccount.CreateRequest) (*model.Account, error)
+	Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error)
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
 }
 
@@ -30,17 +30,7 @@ func NewAccountUsecase(repo AccountRepo, tools *app.Tools) *AccountUsecase {
 
 // Create 创建账号
 func (uc *AccountUsecase) Create(ctx context.Context, req *typeAccount.CreateRequest) (*typeAccount.CreateResponse, error) {
-	var createData typeAccount.CreateData
-	createData.AccountId = req.AccountId
-	createData.Nickname = req.Nickname
-	createData.Avatar = req.Avatar
-
-	createData.IsAdmin = 0
-	if req.IsAdmin {
-		createData.IsAdmin = 1
-	}
-
-	m, err := uc.repo.Create(ctx, createData)
+	m, err := uc.repo.Create(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -58,17 +48,7 @@ func (uc *AccountUsecase) Create(ctx context.Context, req *typeAccount.CreateReq
 
 // Update 更新账号
 func (uc *AccountUsecase) Update(ctx context.Context, accountId string, req *typeAccount.UpdateRequest) (*typeAccount.UpdateResponse, error) {
-	var updateData typeAccount.UpdateData
-	updateData.AccountId = accountId
-	updateData.Nickname = req.Nickname
-	updateData.Avatar = req.Avatar
-
-	updateData.IsAdmin = 0
-	if req.IsAdmin {
-		updateData.IsAdmin = 1
-	}
-
-	m, err := uc.repo.Update(ctx, updateData)
+	m, err := uc.repo.Update(ctx, accountId, req)
 	if err != nil {
 		return nil, err
 	}

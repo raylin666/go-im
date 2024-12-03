@@ -27,13 +27,18 @@ func NewAccountRepo(data *Data, tools *app.Tools) biz.AccountRepo {
 }
 
 // Create 创建账号
-func (r *accountRepo) Create(ctx context.Context, data typeAccount.CreateData) (*model.Account, error) {
+func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateRequest) (*model.Account, error) {
 	account := &model.Account{
 		AccountId: data.AccountId,
 		Nickname:  data.Nickname,
 		Avatar:    data.Avatar,
-		IsAdmin:   data.IsAdmin,
+		IsAdmin:   0,
 	}
+
+	if data.IsAdmin {
+		account.IsAdmin = 1
+	}
+
 	account.CreatedAt = time.Now()
 
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
@@ -49,17 +54,22 @@ func (r *accountRepo) Create(ctx context.Context, data typeAccount.CreateData) (
 }
 
 // Update 更新账号
-func (r *accountRepo) Update(ctx context.Context, data typeAccount.UpdateData) (*model.Account, error) {
+func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error) {
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
-	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(data.AccountId)
+	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
 	if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 		return nil, defined.ErrorDataNotFound
 	}
 
 	account.Nickname = data.Nickname
 	account.Avatar = data.Avatar
-	account.IsAdmin = data.IsAdmin
-	if updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(data.AccountId)).Save(&account); updateDataErr != nil {
+	if data.IsAdmin {
+		account.IsAdmin = 1
+	} else {
+		account.IsAdmin = 0
+	}
+
+	if updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(accountId)).Save(&account); updateDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("更新账号错误", zap.Any("account", account), zap.Error(updateDataErr))
 		return nil, defined.ErrorDataUpdateError
 	}

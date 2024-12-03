@@ -17,13 +17,6 @@ type CreateResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type CreateData struct {
-	AccountId string `json:"account_id"`
-	Nickname  string `json:"nickname"`
-	Avatar    string `json:"avatar"`
-	IsAdmin   int8   `json:"is_admin"`
-}
-
 type UpdateRequest struct {
 	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar"`
@@ -36,13 +29,6 @@ type UpdateResponse struct {
 	Avatar    string    `json:"avatar"`
 	IsAdmin   bool      `json:"is_admin"`
 	CreatedAt time.Time `json:"created_at"`
-}
-
-type UpdateData struct {
-	AccountId string `json:"account_id"`
-	Nickname  string `json:"nickname"`
-	Avatar    string `json:"avatar"`
-	IsAdmin   int8   `json:"is_admin"`
 }
 
 type DeleteResponse struct {
