@@ -24,6 +24,7 @@ const OperationServiceCreate = "/v1.account.Service/Create"
 const OperationServiceDelete = "/v1.account.Service/Delete"
 const OperationServiceGenerateToken = "/v1.account.Service/GenerateToken"
 const OperationServiceUpdate = "/v1.account.Service/Update"
+const OperationServiceUpdateLogin = "/v1.account.Service/UpdateLogin"
 
 type ServiceHTTPServer interface {
 	// Create 创建账号
@@ -34,6 +35,8 @@ type ServiceHTTPServer interface {
 	GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error)
 	// Update 更新账号
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
+	// UpdateLogin 更新帐号登录信息
+	UpdateLogin(context.Context, *UpdateLoginRequest) (*UpdateLoginResponse, error)
 }
 
 func RegisterServiceHTTPServer(s *http.Server, srv ServiceHTTPServer) {
@@ -41,6 +44,7 @@ func RegisterServiceHTTPServer(s *http.Server, srv ServiceHTTPServer) {
 	r.POST("/api/account/create", _Service_Create0_HTTP_Handler(srv))
 	r.PUT("/api/account/update/{account_id}", _Service_Update0_HTTP_Handler(srv))
 	r.DELETE("/api/account/delete/{account_id}", _Service_Delete0_HTTP_Handler(srv))
+	r.PUT("/api/account/update_login/{account_id}", _Service_UpdateLogin0_HTTP_Handler(srv))
 	r.POST("/api/account/token/{account_id}", _Service_GenerateToken0_HTTP_Handler(srv))
 }
 
@@ -113,6 +117,31 @@ func _Service_Delete0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context)
 	}
 }
 
+func _Service_UpdateLogin0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateLoginRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationServiceUpdateLogin)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateLogin(ctx, req.(*UpdateLoginRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateLoginResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Service_GenerateToken0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GenerateTokenRequest
@@ -143,6 +172,7 @@ type ServiceHTTPClient interface {
 	Delete(ctx context.Context, req *DeleteRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	GenerateToken(ctx context.Context, req *GenerateTokenRequest, opts ...http.CallOption) (rsp *GenerateTokenResponse, err error)
 	Update(ctx context.Context, req *UpdateRequest, opts ...http.CallOption) (rsp *UpdateResponse, err error)
+	UpdateLogin(ctx context.Context, req *UpdateLoginRequest, opts ...http.CallOption) (rsp *UpdateLoginResponse, err error)
 }
 
 type ServiceHTTPClientImpl struct {
@@ -197,6 +227,19 @@ func (c *ServiceHTTPClientImpl) Update(ctx context.Context, in *UpdateRequest, o
 	pattern := "/api/account/update/{account_id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationServiceUpdate))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ServiceHTTPClientImpl) UpdateLogin(ctx context.Context, in *UpdateLoginRequest, opts ...http.CallOption) (*UpdateLoginResponse, error) {
+	var out UpdateLoginResponse
+	pattern := "/api/account/update_login/{account_id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationServiceUpdateLogin))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {

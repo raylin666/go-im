@@ -91,6 +91,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.account.UpdateResponse'
+    /api/account/update_login/{accountId}:
+        put:
+            tags:
+                - Service
+            description: 更新帐号登录信息
+            operationId: Service_UpdateLogin
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.UpdateLoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.UpdateLoginResponse'
     /heartbeat:
         get:
             tags:
@@ -151,6 +176,34 @@ components:
                 token:
                     type: string
                 tokenExpire:
+                    type: string
+                    format: date-time
+        v1.account.UpdateLoginRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                clientIp:
+                    type: string
+        v1.account.UpdateLoginResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+                isOnline:
+                    type: boolean
+                lastLoginIp:
+                    type: string
+                firstLoginTime:
+                    type: string
+                    format: date-time
+                lastLoginTime:
                     type: string
                     format: date-time
         v1.account.UpdateRequest:

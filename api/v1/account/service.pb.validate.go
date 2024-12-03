@@ -705,6 +705,297 @@ var _ interface {
 	ErrorName() string
 } = DeleteRequestValidationError{}
 
+// Validate checks the field values on UpdateLoginRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateLoginRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateLoginRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateLoginRequestMultiError, or nil if none found.
+func (m *UpdateLoginRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateLoginRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AccountId
+
+	if m.ClientIp != nil {
+
+		if ip := net.ParseIP(m.GetClientIp()); ip == nil {
+			err := UpdateLoginRequestValidationError{
+				field:  "ClientIp",
+				reason: "value must be a valid IP address",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return UpdateLoginRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateLoginRequestMultiError is an error wrapping multiple validation errors
+// returned by UpdateLoginRequest.ValidateAll() if the designated constraints
+// aren't met.
+type UpdateLoginRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateLoginRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateLoginRequestMultiError) AllErrors() []error { return m }
+
+// UpdateLoginRequestValidationError is the validation error returned by
+// UpdateLoginRequest.Validate if the designated constraints aren't met.
+type UpdateLoginRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateLoginRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateLoginRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateLoginRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateLoginRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateLoginRequestValidationError) ErrorName() string {
+	return "UpdateLoginRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateLoginRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateLoginRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateLoginRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateLoginRequestValidationError{}
+
+// Validate checks the field values on UpdateLoginResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateLoginResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on UpdateLoginResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateLoginResponseMultiError, or nil if none found.
+func (m *UpdateLoginResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *UpdateLoginResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AccountId
+
+	// no validation rules for Nickname
+
+	// no validation rules for Avatar
+
+	// no validation rules for IsAdmin
+
+	// no validation rules for IsOnline
+
+	// no validation rules for LastLoginIp
+
+	if all {
+		switch v := interface{}(m.GetFirstLoginTime()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateLoginResponseValidationError{
+					field:  "FirstLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateLoginResponseValidationError{
+					field:  "FirstLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetFirstLoginTime()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateLoginResponseValidationError{
+				field:  "FirstLoginTime",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetLastLoginTime()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UpdateLoginResponseValidationError{
+					field:  "LastLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UpdateLoginResponseValidationError{
+					field:  "LastLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetLastLoginTime()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UpdateLoginResponseValidationError{
+				field:  "LastLoginTime",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return UpdateLoginResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// UpdateLoginResponseMultiError is an error wrapping multiple validation
+// errors returned by UpdateLoginResponse.ValidateAll() if the designated
+// constraints aren't met.
+type UpdateLoginResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UpdateLoginResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UpdateLoginResponseMultiError) AllErrors() []error { return m }
+
+// UpdateLoginResponseValidationError is the validation error returned by
+// UpdateLoginResponse.Validate if the designated constraints aren't met.
+type UpdateLoginResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UpdateLoginResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UpdateLoginResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UpdateLoginResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UpdateLoginResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UpdateLoginResponseValidationError) ErrorName() string {
+	return "UpdateLoginResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e UpdateLoginResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUpdateLoginResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UpdateLoginResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UpdateLoginResponseValidationError{}
+
 // Validate checks the field values on GenerateTokenRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
