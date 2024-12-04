@@ -3,8 +3,8 @@ package service
 import (
 	"context"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"google.golang.org/protobuf/types/known/timestamppb"
 	pb "mt/api/v1/account"
+	"mt/internal/app"
 	"mt/internal/biz"
 	typeAccount "mt/internal/constant/types/account"
 	"time"
@@ -14,10 +14,12 @@ type AccountService struct {
 	pb.UnimplementedServiceServer
 
 	uc *biz.AccountUsecase
+
+	tools *app.Tools
 }
 
-func NewAccountService(uc *biz.AccountUsecase) *AccountService {
-	return &AccountService{uc: uc}
+func NewAccountService(uc *biz.AccountUsecase, tools *app.Tools) *AccountService {
+	return &AccountService{uc: uc, tools: tools}
 }
 
 // Create 创建账号
@@ -39,7 +41,7 @@ func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb
 		Nickname:  createResponse.Nickname,
 		Avatar:    createResponse.Avatar,
 		IsAdmin:   createResponse.IsAdmin,
-		CreatedAt: timestamppb.New(createResponse.CreatedAt),
+		CreatedAt: createResponse.CreatedAt.Unix(),
 	}
 
 	return resp, nil
@@ -63,7 +65,7 @@ func (s *AccountService) Update(ctx context.Context, req *pb.UpdateRequest) (*pb
 		Nickname:  updateResponse.Nickname,
 		Avatar:    updateResponse.Avatar,
 		IsAdmin:   updateResponse.IsAdmin,
-		CreatedAt: timestamppb.New(updateResponse.CreatedAt),
+		CreatedAt: updateResponse.CreatedAt.Unix(),
 	}
 
 	return resp, nil
@@ -87,26 +89,17 @@ func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*
 	}
 
 	resp := &pb.GetInfoResponse{
-		AccountId:   getInfoResponse.AccountId,
-		Nickname:    getInfoResponse.Nickname,
-		Avatar:      getInfoResponse.Avatar,
-		IsAdmin:     getInfoResponse.IsAdmin,
-		IsOnline:    getInfoResponse.IsOnline,
-		LastLoginIp: getInfoResponse.LastLoginIp,
-		CreatedAt:   timestamppb.New(getInfoResponse.CreatedAt),
-		UpdatedAt:   timestamppb.New(getInfoResponse.UpdatedAt),
-	}
-
-	if getInfoResponse.FirstLoginTime != nil {
-		resp.FirstLoginTime = timestamppb.New(*getInfoResponse.FirstLoginTime)
-	}
-
-	if getInfoResponse.LastLoginTime != nil {
-		resp.LastLoginTime = timestamppb.New(*getInfoResponse.LastLoginTime)
-	}
-
-	if getInfoResponse.DeletedAt != nil {
-		resp.DeletedAt = timestamppb.New(*getInfoResponse.DeletedAt)
+		AccountId:      getInfoResponse.AccountId,
+		Nickname:       getInfoResponse.Nickname,
+		Avatar:         getInfoResponse.Avatar,
+		IsAdmin:        getInfoResponse.IsAdmin,
+		IsOnline:       getInfoResponse.IsOnline,
+		LastLoginIp:    getInfoResponse.LastLoginIp,
+		FirstLoginTime: getInfoResponse.FirstLoginTime.Unix(),
+		LastLoginTime:  getInfoResponse.LastLoginTime.Unix(),
+		CreatedAt:      getInfoResponse.CreatedAt.Unix(),
+		UpdatedAt:      getInfoResponse.UpdatedAt.Unix(),
+		DeletedAt:      getInfoResponse.DeletedAt.Unix(),
 	}
 
 	return resp, nil
@@ -124,20 +117,14 @@ func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginReq
 	}
 
 	resp := &pb.UpdateLoginResponse{
-		AccountId:   updateLoginResponse.AccountId,
-		Nickname:    updateLoginResponse.Nickname,
-		Avatar:      updateLoginResponse.Avatar,
-		IsAdmin:     updateLoginResponse.IsAdmin,
-		IsOnline:    updateLoginResponse.IsOnline,
-		LastLoginIp: updateLoginResponse.LastLoginIp,
-	}
-
-	if updateLoginResponse.FirstLoginTime != nil {
-		resp.FirstLoginTime = timestamppb.New(*updateLoginResponse.FirstLoginTime)
-	}
-
-	if updateLoginResponse.LastLoginTime != nil {
-		resp.LastLoginTime = timestamppb.New(*updateLoginResponse.LastLoginTime)
+		AccountId:      updateLoginResponse.AccountId,
+		Nickname:       updateLoginResponse.Nickname,
+		Avatar:         updateLoginResponse.Avatar,
+		IsAdmin:        updateLoginResponse.IsAdmin,
+		IsOnline:       updateLoginResponse.IsOnline,
+		LastLoginIp:    updateLoginResponse.LastLoginIp,
+		FirstLoginTime: updateLoginResponse.LastLoginTime.Unix(),
+		LastLoginTime:  updateLoginResponse.LastLoginTime.Unix(),
 	}
 
 	return resp, nil
@@ -154,7 +141,7 @@ func (s *AccountService) GenerateToken(ctx context.Context, req *pb.GenerateToke
 	resp := &pb.GenerateTokenResponse{
 		AccountId:   generateTokenResponse.AccountId,
 		Token:       generateTokenResponse.Token,
-		TokenExpire: timestamppb.New(nowTime.Add(time.Duration(generateTokenResponse.TokenExpire) * time.Second)),
+		TokenExpire: nowTime.Add(time.Duration(generateTokenResponse.TokenExpire) * time.Second).Unix(),
 	}
 
 	return resp, nil

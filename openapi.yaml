@@ -179,7 +179,6 @@ components:
                     type: boolean
                 createdAt:
                     type: string
-                    format: date-time
         v1.account.GenerateTokenRequest:
             type: object
             properties:
@@ -196,7 +195,6 @@ components:
                     type: string
                 tokenExpire:
                     type: string
-                    format: date-time
         v1.account.GetInfoResponse:
             type: object
             properties:
@@ -214,19 +212,14 @@ components:
                     type: string
                 firstLoginTime:
                     type: string
-                    format: date-time
                 lastLoginTime:
                     type: string
-                    format: date-time
                 createdAt:
                     type: string
-                    format: date-time
                 updatedAt:
                     type: string
-                    format: date-time
                 deletedAt:
                     type: string
-                    format: date-time
         v1.account.UpdateLoginRequest:
             type: object
             properties:
@@ -251,10 +244,8 @@ components:
                     type: string
                 firstLoginTime:
                     type: string
-                    format: date-time
                 lastLoginTime:
                     type: string
-                    format: date-time
         v1.account.UpdateRequest:
             type: object
             properties:
@@ -279,7 +270,6 @@ components:
                     type: boolean
                 createdAt:
                     type: string
-                    format: date-time
 tags:
     - name: Heartbeat
       description: The Heartbeat service definition.

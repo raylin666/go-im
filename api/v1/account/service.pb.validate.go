@@ -223,34 +223,7 @@ func (m *CreateResponse) validate(all bool) error {
 
 	// no validation rules for IsAdmin
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CreateResponseValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CreateResponseValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CreateResponseValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
 	if len(errors) > 0 {
 		return CreateResponseMultiError(errors)
@@ -496,34 +469,7 @@ func (m *UpdateResponse) validate(all bool) error {
 
 	// no validation rules for IsAdmin
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UpdateResponseValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UpdateResponseValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateResponseValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
 	if len(errors) > 0 {
 		return UpdateResponseMultiError(errors)
@@ -841,150 +787,15 @@ func (m *GetInfoResponse) validate(all bool) error {
 
 	// no validation rules for LastLoginIp
 
-	if all {
-		switch v := interface{}(m.GetFirstLoginTime()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "FirstLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "FirstLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetFirstLoginTime()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetInfoResponseValidationError{
-				field:  "FirstLoginTime",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for FirstLoginTime
 
-	if all {
-		switch v := interface{}(m.GetLastLoginTime()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "LastLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "LastLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetLastLoginTime()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetInfoResponseValidationError{
-				field:  "LastLoginTime",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for LastLoginTime
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetInfoResponseValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
-	if all {
-		switch v := interface{}(m.GetUpdatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetInfoResponseValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for UpdatedAt
 
-	if all {
-		switch v := interface{}(m.GetDeletedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "DeletedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GetInfoResponseValidationError{
-					field:  "DeletedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetDeletedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GetInfoResponseValidationError{
-				field:  "DeletedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for DeletedAt
 
 	if len(errors) > 0 {
 		return GetInfoResponseMultiError(errors)
@@ -1088,19 +899,15 @@ func (m *UpdateLoginRequest) validate(all bool) error {
 
 	// no validation rules for AccountId
 
-	if m.ClientIp != nil {
-
-		if ip := net.ParseIP(m.GetClientIp()); ip == nil {
-			err := UpdateLoginRequestValidationError{
-				field:  "ClientIp",
-				reason: "value must be a valid IP address",
-			}
-			if !all {
-				return err
-			}
-			errors = append(errors, err)
+	if ip := net.ParseIP(m.GetClientIp()); ip == nil {
+		err := UpdateLoginRequestValidationError{
+			field:  "ClientIp",
+			reason: "value must be a valid IP address",
 		}
-
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
 	}
 
 	if len(errors) > 0 {
@@ -1217,63 +1024,9 @@ func (m *UpdateLoginResponse) validate(all bool) error {
 
 	// no validation rules for LastLoginIp
 
-	if all {
-		switch v := interface{}(m.GetFirstLoginTime()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UpdateLoginResponseValidationError{
-					field:  "FirstLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UpdateLoginResponseValidationError{
-					field:  "FirstLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetFirstLoginTime()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateLoginResponseValidationError{
-				field:  "FirstLoginTime",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for FirstLoginTime
 
-	if all {
-		switch v := interface{}(m.GetLastLoginTime()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UpdateLoginResponseValidationError{
-					field:  "LastLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UpdateLoginResponseValidationError{
-					field:  "LastLoginTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetLastLoginTime()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UpdateLoginResponseValidationError{
-				field:  "LastLoginTime",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for LastLoginTime
 
 	if len(errors) > 0 {
 		return UpdateLoginResponseMultiError(errors)
@@ -1487,34 +1240,7 @@ func (m *GenerateTokenResponse) validate(all bool) error {
 
 	// no validation rules for Token
 
-	if all {
-		switch v := interface{}(m.GetTokenExpire()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, GenerateTokenResponseValidationError{
-					field:  "TokenExpire",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, GenerateTokenResponseValidationError{
-					field:  "TokenExpire",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetTokenExpire()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return GenerateTokenResponseValidationError{
-				field:  "TokenExpire",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for TokenExpire
 
 	if len(errors) > 0 {
 		return GenerateTokenResponseMultiError(errors)

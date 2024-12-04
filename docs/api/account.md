@@ -15,13 +15,13 @@
 
 > 响应内容
 
-| 名称         | 类型       | 是否必须 | 示例                             | 描述                     |
-|------------|----------|------|--------------------------------|------------------------|
-| account_id | string   | 是    | 91283746167                    | 唯一标识, 账号ID             |
-| nickname   | string   | 是    | 小明                             | 账号昵称                   |
-| avatar     | string   | 是    | https://im.xxx.com/avatar.jpg  | 账号头像                   |
-| is_admin   | bool     | 是    | false                          | 是否管理员(后端推送消息可使用该该权限账号) |
-| created_at | datetime | 是    | 2024-06-08T14:26:23.022530506Z | 创建时间                   |
+| 名称         | 类型     | 是否必须 | 示例                            | 描述                     |
+|------------|--------|------|-------------------------------|------------------------|
+| account_id | string | 是    | 91283746167                   | 唯一标识, 账号ID             |
+| nickname   | string | 是    | 小明                            | 账号昵称                   |
+| avatar     | string | 是    | https://im.xxx.com/avatar.jpg | 账号头像                   |
+| is_admin   | bool   | 是    | false                         | 是否管理员(后端推送消息可使用该该权限账号) |
+| created_at | int    | 是    | 1733301584                    | 创建时间戳                  |
 
 ### 更新账号
 
@@ -39,13 +39,13 @@
 
 > 响应内容
 
-| 名称         | 类型       | 是否必须 | 示例                             | 描述                     |
-|------------|----------|------|--------------------------------|------------------------|
-| account_id | string   | 是    | 91283746167                    | 唯一标识, 账号ID             |
-| nickname   | string   | 是    | 小明                             | 账号昵称                   |
-| avatar     | string   | 是    | https://im.xxx.com/avatar.jpg  | 账号头像                   |
-| is_admin   | bool     | 是    | false                          | 是否管理员(后端推送消息可使用该该权限账号) |
-| created_at | datetime | 是    | 2024-06-08T14:26:23.022530506Z | 创建时间                   |
+| 名称         | 类型     | 是否必须 | 示例                            | 描述                     |
+|------------|--------|------|-------------------------------|------------------------|
+| account_id | string | 是    | 91283746167                   | 唯一标识, 账号ID             |
+| nickname   | string | 是    | 小明                            | 账号昵称                   |
+| avatar     | string | 是    | https://im.xxx.com/avatar.jpg | 账号头像                   |
+| is_admin   | bool   | 是    | false                         | 是否管理员(后端推送消息可使用该该权限账号) |
+| created_at | int    | 是    | 1733301584                    | 创建时间戳                  |
 
 ### 删除账号
 
@@ -69,13 +69,13 @@
 
 > 响应内容
 
-| 名称               | 类型       | 是否必须 | 示例                             | 描述                     |
-|------------------|----------|------|--------------------------------|------------------------|
-| account_id       | string   | 是    | 91283746167                    | 唯一标识, 账号ID             |
-| nickname         | string   | 是    | 小明                             | 账号昵称                   |
-| avatar           | string   | 是    | https://im.xxx.com/avatar.jpg  | 账号头像                   |
-| is_admin         | bool     | 是    | false                          | 是否管理员(后端推送消息可使用该该权限账号) |
-| is_online        | bool     | 是    | false                          | 是否在线                   |
-| last_login_ip    | string   | 是    | 127.0.0.1                      | 最后登录IP                 |
-| first_login_time | datetime | 是    | 2024-06-08T14:26:23.022530506Z | 首次登录时间                 |
-| last_login_time  | datetime | 是    | 2024-06-08T14:26:23.022530506Z | 最后登录时间                 |
+| 名称               | 类型     | 是否必须 | 示例                            | 描述                     |
+|------------------|--------|------|-------------------------------|------------------------|
+| account_id       | string | 是    | 91283746167                   | 唯一标识, 账号ID             |
+| nickname         | string | 是    | 小明                            | 账号昵称                   |
+| avatar           | string | 是    | https://im.xxx.com/avatar.jpg | 账号头像                   |
+| is_admin         | bool   | 是    | false                         | 是否管理员(后端推送消息可使用该该权限账号) |
+| is_online        | bool   | 是    | false                         | 是否在线                   |
+| last_login_ip    | string | 是    | 127.0.0.1                     | 最后登录IP                 |
+| first_login_time | int    | 是    | 1733301584                    | 首次登录时间戳                |
+| last_login_time  | int    | 是    | 1733301584                    | 最后登录时间戳                |

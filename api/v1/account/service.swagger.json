@@ -296,7 +296,7 @@
         },
         "created_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         }
       }
     },
@@ -311,7 +311,7 @@
         },
         "token_expire": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         }
       }
     },
@@ -338,23 +338,23 @@
         },
         "first_login_time": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         },
         "last_login_time": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         },
         "created_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         },
         "updated_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         },
         "deleted_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         }
       }
     },
@@ -381,11 +381,11 @@
         },
         "first_login_time": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         },
         "last_login_time": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         }
       }
     },
@@ -406,7 +406,7 @@
         },
         "created_at": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64"
         }
       }
     },

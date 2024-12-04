@@ -52,7 +52,7 @@ type GetInfoResponse struct {
 }
 
 type UpdateLoginRequest struct {
-	ClientIp *string `json:"client_ip"`
+	ClientIp string `json:"client_ip"`
 }
 
 type UpdateLoginResponse struct {

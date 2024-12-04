@@ -66,6 +66,7 @@ func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAc
 		return nil, defined.ErrorDataSelectError
 	}
 
+	originAccount := account
 	account.Nickname = data.Nickname
 	account.Avatar = data.Avatar
 	if data.IsAdmin {
@@ -75,7 +76,7 @@ func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAc
 	}
 
 	if updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(accountId)).Save(&account); updateDataErr != nil {
-		r.tools.Logger().UseSQL(ctx).Error("更新账号错误", zap.Any("account", account), zap.Error(updateDataErr))
+		r.tools.Logger().UseSQL(ctx).Error("更新账号错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Error(updateDataErr))
 		return nil, defined.ErrorDataUpdateError
 	}
 
@@ -115,7 +116,7 @@ func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Acc
 // UpdateLogin 更新帐号登录信息
 func (r *accountRepo) UpdateLogin(ctx context.Context, accountId string, data *typeAccount.UpdateLoginRequest) (*model.Account, error) {
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
-	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
+	originAccount, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 			return nil, defined.ErrorDataNotFound
@@ -124,26 +125,38 @@ func (r *accountRepo) UpdateLogin(ctx context.Context, accountId string, data *t
 		return nil, defined.ErrorDataSelectError
 	}
 
-	timeNow := time.Now()
+	var (
+		timeNow          = time.Now()
+		isOnline    int8 = 1
+		lastLoginIp      = data.ClientIp
+	)
+
+	account := originAccount
+	account.IsOnline = isOnline
+	account.LastLoginTime = &timeNow
+	account.LastLoginIp = lastLoginIp
+	account.UpdatedAt = timeNow
+
 	assignExpr := []field.AssignExpr{
-		q.IsOnline.Value(1),
+		q.IsOnline.Value(isOnline),
 		q.LastLoginTime.Value(timeNow),
-		q.LastLoginIp.Value(*data.ClientIp),
+		q.LastLoginIp.Value(lastLoginIp),
 		q.UpdatedAt.Value(timeNow),
 	}
 
 	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo).AccountOnline
-	if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(account.AccountId); err == nil {
+	if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(originAccount.AccountId); err == nil {
 		if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
 			existsValue, existsValueOk := existsResult.(int64)
 			if existsValueOk && existsValue == 0 {
+				account.FirstLoginTime = &timeNow
 				assignExpr = append(assignExpr, q.FirstLoginTime.Value(timeNow))
 			}
 		}
 	}
 
-	if _, updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(account.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
-		r.tools.Logger().UseSQL(ctx).Error("更新账号登录信息错误", zap.Any("account", account), zap.Error(updateDataErr))
+	if _, updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
+		r.tools.Logger().UseSQL(ctx).Error("更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Error(updateDataErr))
 		return nil, defined.ErrorDataUpdateError
 	}
 

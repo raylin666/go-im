@@ -35,7 +35,7 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
 	accountRepo := data.NewAccountRepo(dataData, tools)
 	accountUsecase := biz.NewAccountUsecase(accountRepo, tools)
-	accountService := service.NewAccountService(accountUsecase)
+	accountService := service.NewAccountService(accountUsecase, tools)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
 	handler := api.NewHandler(bootstrap, tools, dataRepo)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
