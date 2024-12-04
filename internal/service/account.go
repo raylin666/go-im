@@ -105,7 +105,7 @@ func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*
 	return resp, nil
 }
 
-// UpdateLogin 更新帐号登录信息
+// UpdateLogin 更新帐号登录状态
 func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginRequest) (*pb.UpdateLoginResponse, error) {
 	updateLoginRequest := &typeAccount.UpdateLoginRequest{
 		ClientIp: req.ClientIp,

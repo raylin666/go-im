@@ -42,7 +42,7 @@ service Service {
     };
   }
 
-  // 更新帐号登录信息
+  // 更新帐号登录状态
   rpc UpdateLogin (UpdateLoginRequest) returns (UpdateLoginResponse) {
     option (google.api.http) = {
       put: "/api/account/update_login/{account_id}"

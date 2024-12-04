@@ -113,7 +113,7 @@ func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Acc
 	return &account, nil
 }
 
-// UpdateLogin 更新帐号登录信息
+// UpdateLogin 更新帐号登录状态
 func (r *accountRepo) UpdateLogin(ctx context.Context, accountId string, data *typeAccount.UpdateLoginRequest) (*model.Account, error) {
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
 	originAccount, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)

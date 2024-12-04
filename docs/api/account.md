@@ -55,7 +55,7 @@
 
 > 响应内容: HTTP 状态码为 `200` 即为删除成功
 
-### 更新帐号登录信息
+### 更新帐号登录状态
 
 > 请求地址: `/api/account/update_login/{account_id}`
 

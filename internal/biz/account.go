@@ -100,7 +100,7 @@ func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeA
 	return resp, nil
 }
 
-// UpdateLogin 更新帐号登录信息
+// UpdateLogin 更新帐号登录状态
 func (uc *AccountUsecase) UpdateLogin(ctx context.Context, accountId string, req *typeAccount.UpdateLoginRequest) (*typeAccount.UpdateLoginResponse, error) {
 	m, err := uc.repo.UpdateLogin(ctx, accountId, req)
 	if err != nil {
