@@ -123,7 +123,7 @@ func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginReq
 		IsAdmin:        updateLoginResponse.IsAdmin,
 		IsOnline:       updateLoginResponse.IsOnline,
 		LastLoginIp:    updateLoginResponse.LastLoginIp,
-		FirstLoginTime: updateLoginResponse.LastLoginTime.Unix(),
+		FirstLoginTime: updateLoginResponse.FirstLoginTime.Unix(),
 		LastLoginTime:  updateLoginResponse.LastLoginTime.Unix(),
 	}
 

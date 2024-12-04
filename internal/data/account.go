@@ -144,13 +144,15 @@ func (r *accountRepo) UpdateLogin(ctx context.Context, accountId string, data *t
 		q.UpdatedAt.Value(timeNow),
 	}
 
-	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo).AccountOnline
-	if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(originAccount.AccountId); err == nil {
-		if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
-			existsValue, existsValueOk := existsResult.(int64)
-			if existsValueOk && existsValue == 0 {
-				account.FirstLoginTime = &timeNow
-				assignExpr = append(assignExpr, q.FirstLoginTime.Value(timeNow))
+	if originAccount.FirstLoginTime == nil {
+		accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo).AccountOnline
+		if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(originAccount.AccountId); err == nil {
+			if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
+				existsValue, existsValueOk := existsResult.(int64)
+				if existsValueOk && existsValue == 0 {
+					account.FirstLoginTime = &timeNow
+					assignExpr = append(assignExpr, q.FirstLoginTime.Value(timeNow))
+				}
 			}
 		}
 	}
