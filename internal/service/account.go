@@ -79,6 +79,39 @@ func (s *AccountService) Delete(ctx context.Context, req *pb.DeleteRequest) (*em
 	return nil, nil
 }
 
+// GetInfo 获取账号信息
+func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*pb.GetInfoResponse, error) {
+	getInfoResponse, err := s.uc.GetInfo(ctx, req.GetAccountId())
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &pb.GetInfoResponse{
+		AccountId:   getInfoResponse.AccountId,
+		Nickname:    getInfoResponse.Nickname,
+		Avatar:      getInfoResponse.Avatar,
+		IsAdmin:     getInfoResponse.IsAdmin,
+		IsOnline:    getInfoResponse.IsOnline,
+		LastLoginIp: getInfoResponse.LastLoginIp,
+		CreatedAt:   timestamppb.New(getInfoResponse.CreatedAt),
+		UpdatedAt:   timestamppb.New(getInfoResponse.UpdatedAt),
+	}
+
+	if getInfoResponse.FirstLoginTime != nil {
+		resp.FirstLoginTime = timestamppb.New(*getInfoResponse.FirstLoginTime)
+	}
+
+	if getInfoResponse.LastLoginTime != nil {
+		resp.LastLoginTime = timestamppb.New(*getInfoResponse.LastLoginTime)
+	}
+
+	if getInfoResponse.DeletedAt != nil {
+		resp.DeletedAt = timestamppb.New(*getInfoResponse.DeletedAt)
+	}
+
+	return resp, nil
+}
+
 // UpdateLogin 更新帐号登录信息
 func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginRequest) (*pb.UpdateLoginResponse, error) {
 	updateLoginRequest := &typeAccount.UpdateLoginRequest{
@@ -91,14 +124,20 @@ func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginReq
 	}
 
 	resp := &pb.UpdateLoginResponse{
-		AccountId:      updateLoginResponse.AccountId,
-		Nickname:       updateLoginResponse.Nickname,
-		Avatar:         updateLoginResponse.Avatar,
-		IsAdmin:        updateLoginResponse.IsAdmin,
-		IsOnline:       updateLoginResponse.IsOnline,
-		LastLoginIp:    updateLoginResponse.LastLoginIp,
-		FirstLoginTime: timestamppb.New(updateLoginResponse.FirstLoginTime),
-		LastLoginTime:  timestamppb.New(updateLoginResponse.LastLoginTime),
+		AccountId:   updateLoginResponse.AccountId,
+		Nickname:    updateLoginResponse.Nickname,
+		Avatar:      updateLoginResponse.Avatar,
+		IsAdmin:     updateLoginResponse.IsAdmin,
+		IsOnline:    updateLoginResponse.IsOnline,
+		LastLoginIp: updateLoginResponse.LastLoginIp,
+	}
+
+	if updateLoginResponse.FirstLoginTime != nil {
+		resp.FirstLoginTime = timestamppb.New(*updateLoginResponse.FirstLoginTime)
+	}
+
+	if updateLoginResponse.LastLoginTime != nil {
+		resp.LastLoginTime = timestamppb.New(*updateLoginResponse.LastLoginTime)
 	}
 
 	return resp, nil

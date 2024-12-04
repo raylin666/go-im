@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"go.uber.org/zap"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"mt/internal/app"
 	"mt/internal/biz"
@@ -57,8 +58,12 @@ func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateReques
 func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error) {
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
 	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
-	if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-		return nil, defined.ErrorDataNotFound
+	if dataExistErr != nil {
+		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+			return nil, defined.ErrorDataNotFound
+		}
+
+		return nil, defined.ErrorDataSelectError
 	}
 
 	account.Nickname = data.Nickname
@@ -87,6 +92,59 @@ func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Acco
 	if result, deleteDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(accountId)).Delete(&account); deleteDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("删除账号错误", zap.Any("account_id", accountId), zap.Any("result", result), zap.Error(deleteDataErr))
 		return nil, defined.ErrorDataDeleteError
+	}
+
+	return &account, nil
+}
+
+// GetInfo 获取账号信息
+func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Account, error) {
+	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
+	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
+	if dataExistErr != nil {
+		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+			return nil, defined.ErrorDataNotFound
+		}
+
+		return nil, defined.ErrorDataSelectError
+	}
+
+	return &account, nil
+}
+
+// UpdateLogin 更新帐号登录信息
+func (r *accountRepo) UpdateLogin(ctx context.Context, accountId string, data *typeAccount.UpdateLoginRequest) (*model.Account, error) {
+	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo).Account
+	account, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
+	if dataExistErr != nil {
+		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+			return nil, defined.ErrorDataNotFound
+		}
+
+		return nil, defined.ErrorDataSelectError
+	}
+
+	timeNow := time.Now()
+	assignExpr := []field.AssignExpr{
+		q.IsOnline.Value(1),
+		q.LastLoginTime.Value(timeNow),
+		q.LastLoginIp.Value(*data.ClientIp),
+		q.UpdatedAt.Value(timeNow),
+	}
+
+	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo).AccountOnline
+	if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(account.AccountId); err == nil {
+		if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
+			existsValue, existsValueOk := existsResult.(int64)
+			if existsValueOk && existsValue == 0 {
+				assignExpr = append(assignExpr, q.FirstLoginTime.Value(timeNow))
+			}
+		}
+	}
+
+	if _, updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(account.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
+		r.tools.Logger().UseSQL(ctx).Error("更新账号登录信息错误", zap.Any("account", account), zap.Error(updateDataErr))
+		return nil, defined.ErrorDataUpdateError
 	}
 
 	return &account, nil

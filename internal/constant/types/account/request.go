@@ -1,6 +1,8 @@
 package account
 
-import "time"
+import (
+	"time"
+)
 
 type CreateRequest struct {
 	AccountId string `json:"account_id"`
@@ -35,19 +37,33 @@ type DeleteResponse struct {
 	AccountId string `json:"account_id"`
 }
 
+type GetInfoResponse struct {
+	AccountId      string     `json:"account_id"`
+	Nickname       string     `json:"nickname"`
+	Avatar         string     `json:"avatar"`
+	IsAdmin        bool       `json:"is_admin"`
+	IsOnline       bool       `json:"is_online"`
+	LastLoginIp    string     `json:"last_login_ip"`
+	FirstLoginTime *time.Time `json:"first_login_time"`
+	LastLoginTime  *time.Time `json:"last_login_time"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+	DeletedAt      *time.Time `json:"deleted_at"`
+}
+
 type UpdateLoginRequest struct {
 	ClientIp *string `json:"client_ip"`
 }
 
 type UpdateLoginResponse struct {
-	AccountId      string    `json:"account_id"`
-	Nickname       string    `json:"nickname"`
-	Avatar         string    `json:"avatar"`
-	IsAdmin        bool      `json:"is_admin"`
-	IsOnline       bool      `json:"is_online"`
-	LastLoginIp    string    `json:"last_login_ip"`
-	FirstLoginTime time.Time `json:"first_login_time"`
-	LastLoginTime  time.Time `json:"last_login_time"`
+	AccountId      string     `json:"account_id"`
+	Nickname       string     `json:"nickname"`
+	Avatar         string     `json:"avatar"`
+	IsAdmin        bool       `json:"is_admin"`
+	IsOnline       bool       `json:"is_online"`
+	LastLoginIp    string     `json:"last_login_ip"`
+	FirstLoginTime *time.Time `json:"first_login_time"`
+	LastLoginTime  *time.Time `json:"last_login_time"`
 }
 
 type GenerateTokenResponse struct {

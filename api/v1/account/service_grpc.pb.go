@@ -23,6 +23,7 @@ const (
 	Service_Create_FullMethodName        = "/v1.account.Service/Create"
 	Service_Update_FullMethodName        = "/v1.account.Service/Update"
 	Service_Delete_FullMethodName        = "/v1.account.Service/Delete"
+	Service_GetInfo_FullMethodName       = "/v1.account.Service/GetInfo"
 	Service_UpdateLogin_FullMethodName   = "/v1.account.Service/UpdateLogin"
 	Service_GenerateToken_FullMethodName = "/v1.account.Service/GenerateToken"
 )
@@ -39,6 +40,8 @@ type ServiceClient interface {
 	Update(ctx context.Context, in *UpdateRequest, opts ...grpc.CallOption) (*UpdateResponse, error)
 	// 删除账号
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// 获取账号信息
+	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
 	// 更新帐号登录信息
 	UpdateLogin(ctx context.Context, in *UpdateLoginRequest, opts ...grpc.CallOption) (*UpdateLoginResponse, error)
 	// 生成TOKEN
@@ -83,6 +86,16 @@ func (c *serviceClient) Delete(ctx context.Context, in *DeleteRequest, opts ...g
 	return out, nil
 }
 
+func (c *serviceClient) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetInfoResponse)
+	err := c.cc.Invoke(ctx, Service_GetInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) UpdateLogin(ctx context.Context, in *UpdateLoginRequest, opts ...grpc.CallOption) (*UpdateLoginResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateLoginResponse)
@@ -115,6 +128,8 @@ type ServiceServer interface {
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	// 删除账号
 	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
+	// 获取账号信息
+	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 	// 更新帐号登录信息
 	UpdateLogin(context.Context, *UpdateLoginRequest) (*UpdateLoginResponse, error)
 	// 生成TOKEN
@@ -137,6 +152,9 @@ func (UnimplementedServiceServer) Update(context.Context, *UpdateRequest) (*Upda
 }
 func (UnimplementedServiceServer) Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Delete not implemented")
+}
+func (UnimplementedServiceServer) GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfo not implemented")
 }
 func (UnimplementedServiceServer) UpdateLogin(context.Context, *UpdateLoginRequest) (*UpdateLoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateLogin not implemented")
@@ -219,6 +237,24 @@ func _Service_Delete_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_GetInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Service_GetInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetInfo(ctx, req.(*GetInfoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_UpdateLogin_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateLoginRequest)
 	if err := dec(in); err != nil {
@@ -273,6 +309,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Delete",
 			Handler:    _Service_Delete_Handler,
+		},
+		{
+			MethodName: "GetInfo",
+			Handler:    _Service_GetInfo_Handler,
 		},
 		{
 			MethodName: "UpdateLogin",

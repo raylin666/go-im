@@ -36,7 +36,7 @@ func newAccount(db *gorm.DB, opts ...gen.DOOption) account {
 	_account.Nickname = field.NewString(tableName, "nickname")
 	_account.Avatar = field.NewString(tableName, "avatar")
 	_account.IsAdmin = field.NewInt8(tableName, "is_admin")
-	_account.Status = field.NewInt8(tableName, "status")
+	_account.IsOnline = field.NewInt8(tableName, "is_online")
 	_account.FirstLoginTime = field.NewTime(tableName, "first_login_time")
 	_account.LastLoginTime = field.NewTime(tableName, "last_login_time")
 	_account.LastLoginIp = field.NewString(tableName, "last_login_ip")
@@ -58,7 +58,7 @@ type account struct {
 	Nickname       field.String
 	Avatar         field.String
 	IsAdmin        field.Int8
-	Status         field.Int8
+	IsOnline       field.Int8
 	FirstLoginTime field.Time
 	LastLoginTime  field.Time
 	LastLoginIp    field.String
@@ -86,7 +86,7 @@ func (a *account) updateTableName(table string) *account {
 	a.Nickname = field.NewString(table, "nickname")
 	a.Avatar = field.NewString(table, "avatar")
 	a.IsAdmin = field.NewInt8(table, "is_admin")
-	a.Status = field.NewInt8(table, "status")
+	a.IsOnline = field.NewInt8(table, "is_online")
 	a.FirstLoginTime = field.NewTime(table, "first_login_time")
 	a.LastLoginTime = field.NewTime(table, "last_login_time")
 	a.LastLoginIp = field.NewString(table, "last_login_ip")
@@ -121,7 +121,7 @@ func (a *account) fillFieldMap() {
 	a.fieldMap["nickname"] = a.Nickname
 	a.fieldMap["avatar"] = a.Avatar
 	a.fieldMap["is_admin"] = a.IsAdmin
-	a.fieldMap["status"] = a.Status
+	a.fieldMap["is_online"] = a.IsOnline
 	a.fieldMap["first_login_time"] = a.FirstLoginTime
 	a.fieldMap["last_login_time"] = a.LastLoginTime
 	a.fieldMap["last_login_ip"] = a.LastLoginIp

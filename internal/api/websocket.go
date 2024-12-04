@@ -8,7 +8,6 @@ import (
 	"mt/internal/constant/defined"
 	"mt/internal/lib"
 	"mt/internal/repositories/dbrepo"
-	"mt/internal/repositories/dbrepo/model"
 	"mt/internal/websocket"
 	"mt/pkg/utils"
 	"net/http"
@@ -50,7 +49,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	// TODO 处理账号登录, 更新账号信息
 	var assignExpr = []field.AssignExpr{
-		accountQuery.Status.Value(model.AccountStatusOnline),
+		// accountQuery.Status.Value(model.AccountStatusOnline),
 		accountQuery.LastLoginTime.Value(timeNow),
 		accountQuery.LastLoginIp.Value(clientIp),
 		accountQuery.UpdatedAt.Value(timeNow),
@@ -95,8 +94,8 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
-	client := websocket.NewClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin == 1), conn)
+	// client := websocket.NewClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin == 1), conn)
 
-	go client.Read(ctx)
-	go client.Write(ctx)
+	// go client.Read(ctx)
+	// go client.Write(ctx)
 }

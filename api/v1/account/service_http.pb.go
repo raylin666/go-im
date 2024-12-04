@@ -23,6 +23,7 @@ const _ = http.SupportPackageIsVersion1
 const OperationServiceCreate = "/v1.account.Service/Create"
 const OperationServiceDelete = "/v1.account.Service/Delete"
 const OperationServiceGenerateToken = "/v1.account.Service/GenerateToken"
+const OperationServiceGetInfo = "/v1.account.Service/GetInfo"
 const OperationServiceUpdate = "/v1.account.Service/Update"
 const OperationServiceUpdateLogin = "/v1.account.Service/UpdateLogin"
 
@@ -33,6 +34,8 @@ type ServiceHTTPServer interface {
 	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
 	// GenerateToken 生成TOKEN
 	GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error)
+	// GetInfo 获取账号信息
+	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 	// Update 更新账号
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 	// UpdateLogin 更新帐号登录信息
@@ -44,6 +47,7 @@ func RegisterServiceHTTPServer(s *http.Server, srv ServiceHTTPServer) {
 	r.POST("/api/account/create", _Service_Create0_HTTP_Handler(srv))
 	r.PUT("/api/account/update/{account_id}", _Service_Update0_HTTP_Handler(srv))
 	r.DELETE("/api/account/delete/{account_id}", _Service_Delete0_HTTP_Handler(srv))
+	r.GET("/api/account/info/{account_id}", _Service_GetInfo0_HTTP_Handler(srv))
 	r.PUT("/api/account/update_login/{account_id}", _Service_UpdateLogin0_HTTP_Handler(srv))
 	r.POST("/api/account/token/{account_id}", _Service_GenerateToken0_HTTP_Handler(srv))
 }
@@ -117,6 +121,28 @@ func _Service_Delete0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context)
 	}
 }
 
+func _Service_GetInfo0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetInfoRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationServiceGetInfo)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetInfo(ctx, req.(*GetInfoRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetInfoResponse)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Service_UpdateLogin0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in UpdateLoginRequest
@@ -171,6 +197,7 @@ type ServiceHTTPClient interface {
 	Create(ctx context.Context, req *CreateRequest, opts ...http.CallOption) (rsp *CreateResponse, err error)
 	Delete(ctx context.Context, req *DeleteRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	GenerateToken(ctx context.Context, req *GenerateTokenRequest, opts ...http.CallOption) (rsp *GenerateTokenResponse, err error)
+	GetInfo(ctx context.Context, req *GetInfoRequest, opts ...http.CallOption) (rsp *GetInfoResponse, err error)
 	Update(ctx context.Context, req *UpdateRequest, opts ...http.CallOption) (rsp *UpdateResponse, err error)
 	UpdateLogin(ctx context.Context, req *UpdateLoginRequest, opts ...http.CallOption) (rsp *UpdateLoginResponse, err error)
 }
@@ -216,6 +243,19 @@ func (c *ServiceHTTPClientImpl) GenerateToken(ctx context.Context, in *GenerateT
 	opts = append(opts, http.Operation(OperationServiceGenerateToken))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ServiceHTTPClientImpl) GetInfo(ctx context.Context, in *GetInfoRequest, opts ...http.CallOption) (*GetInfoResponse, error) {
+	var out GetInfoResponse
+	pattern := "/api/account/info/{account_id}"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationServiceGetInfo))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

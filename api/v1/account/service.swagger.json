@@ -81,6 +81,37 @@
         ]
       }
     },
+    "/api/account/info/{account_id}": {
+      "get": {
+        "summary": "获取账号信息",
+        "operationId": "Service_GetInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountGetInfoResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/api/account/token/{account_id}": {
       "post": {
         "summary": "生成TOKEN",
@@ -279,6 +310,49 @@
           "type": "string"
         },
         "token_expire": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "accountGetInfoResponse": {
+      "type": "object",
+      "properties": {
+        "account_id": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "is_admin": {
+          "type": "boolean"
+        },
+        "is_online": {
+          "type": "boolean"
+        },
+        "last_login_ip": {
+          "type": "string"
+        },
+        "first_login_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "last_login_time": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "deleted_at": {
           "type": "string",
           "format": "date-time"
         }

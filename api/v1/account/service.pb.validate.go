@@ -705,6 +705,365 @@ var _ interface {
 	ErrorName() string
 } = DeleteRequestValidationError{}
 
+// Validate checks the field values on GetInfoRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *GetInfoRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetInfoRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in GetInfoRequestMultiError,
+// or nil if none found.
+func (m *GetInfoRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetInfoRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AccountId
+
+	if len(errors) > 0 {
+		return GetInfoRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetInfoRequestMultiError is an error wrapping multiple validation errors
+// returned by GetInfoRequest.ValidateAll() if the designated constraints
+// aren't met.
+type GetInfoRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetInfoRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetInfoRequestMultiError) AllErrors() []error { return m }
+
+// GetInfoRequestValidationError is the validation error returned by
+// GetInfoRequest.Validate if the designated constraints aren't met.
+type GetInfoRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetInfoRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetInfoRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetInfoRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetInfoRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetInfoRequestValidationError) ErrorName() string { return "GetInfoRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetInfoRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetInfoRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetInfoRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetInfoRequestValidationError{}
+
+// Validate checks the field values on GetInfoResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *GetInfoResponse) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetInfoResponse with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetInfoResponseMultiError, or nil if none found.
+func (m *GetInfoResponse) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetInfoResponse) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for AccountId
+
+	// no validation rules for Nickname
+
+	// no validation rules for Avatar
+
+	// no validation rules for IsAdmin
+
+	// no validation rules for IsOnline
+
+	// no validation rules for LastLoginIp
+
+	if all {
+		switch v := interface{}(m.GetFirstLoginTime()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "FirstLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "FirstLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetFirstLoginTime()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetInfoResponseValidationError{
+				field:  "FirstLoginTime",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetLastLoginTime()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "LastLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "LastLoginTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetLastLoginTime()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetInfoResponseValidationError{
+				field:  "LastLoginTime",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetCreatedAt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "CreatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "CreatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetInfoResponseValidationError{
+				field:  "CreatedAt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetUpdatedAt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "UpdatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "UpdatedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetInfoResponseValidationError{
+				field:  "UpdatedAt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetDeletedAt()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "DeletedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, GetInfoResponseValidationError{
+					field:  "DeletedAt",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetDeletedAt()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return GetInfoResponseValidationError{
+				field:  "DeletedAt",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return GetInfoResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetInfoResponseMultiError is an error wrapping multiple validation errors
+// returned by GetInfoResponse.ValidateAll() if the designated constraints
+// aren't met.
+type GetInfoResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetInfoResponseMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetInfoResponseMultiError) AllErrors() []error { return m }
+
+// GetInfoResponseValidationError is the validation error returned by
+// GetInfoResponse.Validate if the designated constraints aren't met.
+type GetInfoResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetInfoResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetInfoResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetInfoResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetInfoResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetInfoResponseValidationError) ErrorName() string { return "GetInfoResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetInfoResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetInfoResponse.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetInfoResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetInfoResponseValidationError{}
+
 // Validate checks the field values on UpdateLoginRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

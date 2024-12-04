@@ -17,6 +17,7 @@ type AccountRepo interface {
 	Create(ctx context.Context, data *typeAccount.CreateRequest) (*model.Account, error)
 	Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error)
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
+	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
 	UpdateLogin(ctx context.Context, accountId string, data *typeAccount.UpdateLoginRequest) (*model.Account, error)
 }
 
@@ -75,6 +76,30 @@ func (uc *AccountUsecase) Delete(ctx context.Context, accountId string) (*typeAc
 	return &typeAccount.DeleteResponse{AccountId: m.AccountId}, nil
 }
 
+// GetInfo 获取账号信息
+func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeAccount.GetInfoResponse, error) {
+	m, err := uc.repo.GetInfo(ctx, accountId)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &typeAccount.GetInfoResponse{
+		AccountId:      m.AccountId,
+		Nickname:       m.Nickname,
+		Avatar:         m.Avatar,
+		IsAdmin:        m.IsAdmin == 1,
+		IsOnline:       m.IsOnline == 1,
+		LastLoginIp:    m.LastLoginIp,
+		FirstLoginTime: m.FirstLoginTime,
+		LastLoginTime:  m.LastLoginTime,
+		CreatedAt:      m.CreatedAt,
+		UpdatedAt:      m.UpdatedAt,
+		DeletedAt:      &m.DeletedAt.Time,
+	}
+
+	return resp, nil
+}
+
 // UpdateLogin 更新帐号登录信息
 func (uc *AccountUsecase) UpdateLogin(ctx context.Context, accountId string, req *typeAccount.UpdateLoginRequest) (*typeAccount.UpdateLoginResponse, error) {
 	m, err := uc.repo.UpdateLogin(ctx, accountId, req)
@@ -82,12 +107,15 @@ func (uc *AccountUsecase) UpdateLogin(ctx context.Context, accountId string, req
 		return nil, err
 	}
 
-	resp := &typeAccount.UpdateResponse{
-		AccountId: m.AccountId,
-		Nickname:  m.Nickname,
-		Avatar:    m.Avatar,
-		IsAdmin:   m.IsAdmin == 1,
-		CreatedAt: m.CreatedAt,
+	resp := &typeAccount.UpdateLoginResponse{
+		AccountId:      m.AccountId,
+		Nickname:       m.Nickname,
+		Avatar:         m.Avatar,
+		IsAdmin:        m.IsAdmin == 1,
+		IsOnline:       m.IsOnline == 1,
+		LastLoginIp:    m.LastLoginIp,
+		FirstLoginTime: m.FirstLoginTime,
+		LastLoginTime:  m.LastLoginTime,
 	}
 
 	return resp, nil

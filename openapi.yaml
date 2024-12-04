@@ -41,6 +41,25 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /api/account/info/{accountId}:
+        get:
+            tags:
+                - Service
+            description: 获取账号信息
+            operationId: Service_GetInfo
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.GetInfoResponse'
     /api/account/token/{accountId}:
         post:
             tags:
@@ -176,6 +195,36 @@ components:
                 token:
                     type: string
                 tokenExpire:
+                    type: string
+                    format: date-time
+        v1.account.GetInfoResponse:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                nickname:
+                    type: string
+                avatar:
+                    type: string
+                isAdmin:
+                    type: boolean
+                isOnline:
+                    type: boolean
+                lastLoginIp:
+                    type: string
+                firstLoginTime:
+                    type: string
+                    format: date-time
+                lastLoginTime:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+                deletedAt:
                     type: string
                     format: date-time
         v1.account.UpdateLoginRequest:
