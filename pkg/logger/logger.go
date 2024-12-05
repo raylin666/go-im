@@ -50,6 +50,7 @@ const (
 	LogRequest   = "request"
 	LogWebSocket = "websocket"
 	LogAccount   = "account"
+	LogGrpc      = "grpc"
 )
 
 type Logger struct {
@@ -91,6 +92,14 @@ func (l *Logger) UseWebSocket(ctx context.Context) *zap.Logger {
 		traceId = md.Get(mdKeyTraceId)
 	}
 	return l.Logger.Named(LogWebSocket).With(zap.String(logKeyTraceId, traceId))
+}
+
+func (l *Logger) UseGrpc(ctx context.Context) *zap.Logger {
+	var traceId string
+	if md, ok := metadata.FromServerContext(ctx); ok {
+		traceId = md.Get(mdKeyTraceId)
+	}
+	return l.Logger.Named(LogGrpc).With(zap.String(logKeyTraceId, traceId))
 }
 
 func (l *Logger) UseAccount(ctx context.Context) *zap.Logger {

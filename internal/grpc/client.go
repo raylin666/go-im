@@ -15,6 +15,7 @@ const (
 )
 
 type GrpcClient struct {
+	ctx    context.Context
 	logger *logger.Logger
 
 	Connects []*grpc.ClientConn
@@ -22,28 +23,29 @@ type GrpcClient struct {
 	Account accountPb.ServiceClient
 }
 
-func NewGrpcClient(tools *app.Tools) (grpc *GrpcClient, err error) {
-	grpc = &GrpcClient{logger: tools.Logger()}
-	err = grpc.connect()
-	if err != nil {
-		return nil, err
+func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err error) {
+	client = &GrpcClient{ctx: context.TODO(), logger: tools.Logger()}
+
+	cleanup = func() {
+		client.close()
+		tools.Logger().UseGrpc(client.ctx).Info("closing the grpc clients successfully.")
 	}
 
-	return grpc, nil
+	err = client.connect()
+
+	return client, cleanup, err
 }
 
 func (client *GrpcClient) connect() error {
-	var ctx = context.TODO()
-
 	// 帐号服务客户端
-	accountClientConn, err := dial(ctx, accountGrpcClientEndpoint)
+	accountClientConn, err := dial(client.ctx, accountGrpcClientEndpoint)
 	if err != nil {
-		client.logger.UseApp(ctx).Error(fmt.Sprintf("The account service client `%s` connected error.", accountGrpcClientEndpoint), zap.Error(err))
+		client.logger.UseGrpc(client.ctx).Error(fmt.Sprintf("The account service client `%s` connected error.", accountGrpcClientEndpoint), zap.Error(err))
 		return err
 	}
 	client.Account = accountPb.NewServiceClient(accountClientConn)
 	client.Connects = append(client.Connects, accountClientConn)
-	client.logger.UseApp(ctx).Info(fmt.Sprintf("The account service client `%s` connected successfully.", accountGrpcClientEndpoint))
+	client.logger.UseGrpc(client.ctx).Info(fmt.Sprintf("The account service client `%s` connected successfully.", accountGrpcClientEndpoint))
 
 	return nil
 }
