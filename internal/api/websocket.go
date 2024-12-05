@@ -4,20 +4,16 @@ import (
 	"context"
 	"fmt"
 	"go.uber.org/zap"
-	"gorm.io/gen/field"
+	accountPb "mt/api/v1/account"
 	"mt/internal/constant/defined"
 	"mt/internal/lib"
-	"mt/internal/repositories/dbrepo"
 	"mt/internal/websocket"
 	"mt/pkg/utils"
 	"net/http"
-	"time"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var (
-		timeNow = time.Now()
-
 		ctx = lib.NewContextHttpRequest(context.Background(), r)
 
 		query = r.URL.Query()
@@ -39,35 +35,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO 账号校验
-	accountQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).Account
-	account, err := accountQuery.WithContext(ctx).FirstByAccountId(jwtClaims.ID)
+	account, err := h.grpcClient.Account.UpdateLogin(ctx, &accountPb.UpdateLoginRequest{AccountId: jwtClaims.ID, ClientIp: clientIp})
 	if err != nil {
 		h.writeError(w, defined.ErrorAccountLoginError)
-		return
-	}
-
-	// TODO 处理账号登录, 更新账号信息
-	var assignExpr = []field.AssignExpr{
-		// accountQuery.Status.Value(model.AccountStatusOnline),
-		accountQuery.LastLoginTime.Value(timeNow),
-		accountQuery.LastLoginIp.Value(clientIp),
-		accountQuery.UpdatedAt.Value(timeNow),
-	}
-
-	accountOnlineQuery := dbrepo.NewDefaultDbQuery(h.dbRepo).AccountOnline
-	if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(account.AccountId); err == nil {
-		if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
-			existsValue, existsValueOk := existsResult.(int64)
-			if existsValueOk && existsValue == 0 {
-				assignExpr = append(assignExpr, accountQuery.FirstLoginTime.Value(timeNow))
-			}
-		}
-	}
-
-	_, err = accountQuery.WithContext(ctx).Where(accountQuery.AccountId.Eq(account.AccountId)).UpdateSimple(assignExpr...)
-	if err != nil {
-		h.writeError(w, defined.ErrorNotLoginError)
 		return
 	}
 

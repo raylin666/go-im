@@ -15,10 +15,9 @@ const (
 )
 
 type GrpcClient struct {
-	ctx    context.Context
-	logger *logger.Logger
-
-	Connects []*grpc.ClientConn
+	ctx      context.Context
+	logger   *logger.Logger
+	connects []*grpc.ClientConn
 
 	Account accountPb.ServiceClient
 }
@@ -43,15 +42,15 @@ func (client *GrpcClient) connect() error {
 		client.logger.UseGrpc(client.ctx).Error(fmt.Sprintf("The account service client `%s` connected error.", accountGrpcClientEndpoint), zap.Error(err))
 		return err
 	}
+	client.connects = append(client.connects, accountClientConn)
 	client.Account = accountPb.NewServiceClient(accountClientConn)
-	client.Connects = append(client.Connects, accountClientConn)
 	client.logger.UseGrpc(client.ctx).Info(fmt.Sprintf("The account service client `%s` connected successfully.", accountGrpcClientEndpoint))
 
 	return nil
 }
 
 func (client *GrpcClient) close() {
-	for _, conn := range client.Connects {
+	for _, conn := range client.connects {
 		conn.Close()
 	}
 }
