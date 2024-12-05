@@ -13,6 +13,7 @@ import (
 	"mt/internal/app"
 	"mt/internal/biz"
 	"mt/internal/data"
+	"mt/internal/grpc"
 	"mt/internal/server"
 	"mt/internal/service"
 )
@@ -36,9 +37,14 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 	accountRepo := data.NewAccountRepo(dataData, tools)
 	accountUsecase := biz.NewAccountUsecase(accountRepo, tools)
 	accountService := service.NewAccountService(accountUsecase, tools)
-	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
+	grpcClient, err := grpc.NewGrpcClient(tools)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, grpcClient, tools)
 	handler := api.NewHandler(bootstrap, tools, dataRepo)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, grpcClient, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
 		cleanup()

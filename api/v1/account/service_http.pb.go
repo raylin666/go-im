@@ -38,7 +38,7 @@ type ServiceHTTPServer interface {
 	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 	// Update 更新账号
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
-	// UpdateLogin 更新帐号登录信息
+	// UpdateLogin 更新帐号登录状态
 	UpdateLogin(context.Context, *UpdateLoginRequest) (*UpdateLoginResponse, error)
 }
 

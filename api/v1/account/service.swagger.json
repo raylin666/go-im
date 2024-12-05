@@ -192,7 +192,7 @@
     },
     "/api/account/update_login/{account_id}": {
       "put": {
-        "summary": "更新帐号登录信息",
+        "summary": "更新帐号登录状态",
         "operationId": "Service_UpdateLogin",
         "responses": {
           "200": {

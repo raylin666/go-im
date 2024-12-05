@@ -114,7 +114,7 @@ paths:
         put:
             tags:
                 - Service
-            description: 更新帐号登录信息
+            description: 更新帐号登录状态
             operationId: Service_UpdateLogin
             parameters:
                 - name: accountId

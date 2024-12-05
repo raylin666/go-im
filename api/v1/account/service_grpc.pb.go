@@ -42,7 +42,7 @@ type ServiceClient interface {
 	Delete(ctx context.Context, in *DeleteRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 获取账号信息
 	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
-	// 更新帐号登录信息
+	// 更新帐号登录状态
 	UpdateLogin(ctx context.Context, in *UpdateLoginRequest, opts ...grpc.CallOption) (*UpdateLoginResponse, error)
 	// 生成TOKEN
 	GenerateToken(ctx context.Context, in *GenerateTokenRequest, opts ...grpc.CallOption) (*GenerateTokenResponse, error)
@@ -130,7 +130,7 @@ type ServiceServer interface {
 	Delete(context.Context, *DeleteRequest) (*emptypb.Empty, error)
 	// 获取账号信息
 	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
-	// 更新帐号登录信息
+	// 更新帐号登录状态
 	UpdateLogin(context.Context, *UpdateLoginRequest) (*UpdateLoginResponse, error)
 	// 生成TOKEN
 	GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error)

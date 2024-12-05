@@ -13,6 +13,7 @@ import (
 	"mt/internal/app"
 	"mt/internal/biz"
 	"mt/internal/data"
+	"mt/internal/grpc"
 	"mt/internal/server"
 	"mt/internal/service"
 )
@@ -25,5 +26,6 @@ func wireApp(*config.Bootstrap, *config.Server, *config.Data, *app.Tools) (*krat
 		biz.ProviderSet,
 		service.ProviderSet,
 		api.ProviderSet,
+		grpc.ProviderSet,
 		newApp))
 }
