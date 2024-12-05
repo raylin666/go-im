@@ -26,15 +26,14 @@ import (
 
 // wireApp init kratos application.
 func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configData *config.Data, tools *app.Tools) (*kratos.App, func(), error) {
-	dataRepo := data.NewDataRepo(tools, configData)
-	dataData, cleanup, err := data.NewData(tools, dataRepo)
+	dataRepo, cleanup, err := data.NewData(configData, tools)
 	if err != nil {
 		return nil, nil, err
 	}
-	heartbeatRepo := data.NewHeartbeatRepo(dataData, tools)
+	heartbeatRepo := data.NewHeartbeatRepo(dataRepo, tools)
 	heartbeatUsecase := biz.NewHeartbeatUsecase(heartbeatRepo, tools)
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
-	accountRepo := data.NewAccountRepo(dataData, tools)
+	accountRepo := data.NewAccountRepo(dataRepo, tools)
 	accountUsecase := biz.NewAccountUsecase(accountRepo, tools)
 	accountService := service.NewAccountService(accountUsecase, tools)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
