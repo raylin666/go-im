@@ -10,7 +10,6 @@ import (
 	"mt/config"
 	"mt/internal/api"
 	"mt/internal/app"
-	interGrpc "mt/internal/grpc"
 	"mt/internal/middleware/auth"
 	"mt/internal/middleware/encode"
 	logging "mt/internal/middleware/logger"
@@ -24,7 +23,6 @@ func NewHTTPServer(
 	c *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
-	grpcClient *interGrpc.GrpcClient,
 	tools *app.Tools,
 	apiHandler *api.Handler,
 ) *http.Server {

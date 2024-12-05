@@ -7,7 +7,6 @@ import (
 	"mt/api/v1"
 	"mt/config"
 	"mt/internal/app"
-	interGrpc "mt/internal/grpc"
 	"mt/internal/middleware/auth"
 	logging "mt/internal/middleware/logger"
 	"mt/internal/middleware/validate"
@@ -21,7 +20,6 @@ func NewGRPCServer(
 	c *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
-	grpcClient *interGrpc.GrpcClient,
 	tools *app.Tools) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(

@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"mt/config"
 	"mt/internal/app"
+	"mt/internal/grpc"
 	"mt/pkg/repositories"
 )
 
@@ -14,22 +15,28 @@ import (
 var ProviderSet = wire.NewSet(NewHandler)
 
 type Handler struct {
-	r         *mux.Router
-	dbRepo    repositories.DbRepo
-	redisRepo repositories.RedisRepo
-	tools     *app.Tools
-	config    *config.Bootstrap
-	Prefix    string
+	r          *mux.Router
+	dbRepo     repositories.DbRepo
+	redisRepo  repositories.RedisRepo
+	grpcClient *grpc.GrpcClient
+	tools      *app.Tools
+	config     *config.Bootstrap
+	Prefix     string
 }
 
-func NewHandler(config *config.Bootstrap, tools *app.Tools, dataRepo repositories.DataRepo) *Handler {
+func NewHandler(
+	config *config.Bootstrap,
+	tools *app.Tools,
+	dataRepo repositories.DataRepo,
+	grpcClient *grpc.GrpcClient) *Handler {
 	return &Handler{
-		r:         mux.NewRouter(),
-		dbRepo:    dataRepo.DbRepo(),
-		redisRepo: dataRepo.RedisRepo(),
-		tools:     tools,
-		config:    config,
-		Prefix:    "/app/",
+		r:          mux.NewRouter(),
+		dbRepo:     dataRepo.DbRepo(),
+		redisRepo:  dataRepo.RedisRepo(),
+		grpcClient: grpcClient,
+		tools:      tools,
+		config:     config,
+		Prefix:     "/app/",
 	}
 }
 
