@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/raylin666/go-utils/server/system"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	accountPb "mt/api/v1/account"
@@ -10,20 +11,22 @@ import (
 	"mt/pkg/logger"
 )
 
-const (
-	accountGrpcClientEndpoint = "127.0.0.1:10011"
-)
-
 type GrpcClient struct {
-	ctx      context.Context
-	logger   *logger.Logger
+	ctx         context.Context
+	environment system.Environment
+	logger      *logger.Logger
+
 	connects []*grpc.ClientConn
 
 	Account accountPb.ServiceClient
 }
 
 func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err error) {
-	client = &GrpcClient{ctx: context.TODO(), logger: tools.Logger()}
+	client = &GrpcClient{
+		ctx:         context.TODO(),
+		environment: tools.Environment(),
+		logger:      tools.Logger(),
+	}
 
 	cleanup = func() {
 		client.close()
@@ -37,14 +40,15 @@ func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err er
 
 func (client *GrpcClient) connect() error {
 	// 帐号服务客户端
-	accountClientConn, err := dial(client.ctx, accountGrpcClientEndpoint)
+	accountEndpoint := client.getAccountEndpoint()
+	accountClientConn, err := dial(client.ctx, accountEndpoint)
 	if err != nil {
-		client.logger.UseGrpc(client.ctx).Error(fmt.Sprintf("The account service client `%s` connected error.", accountGrpcClientEndpoint), zap.Error(err))
+		client.logger.UseGrpc(client.ctx).Error(fmt.Sprintf("The account service client `%s` connected error.", accountEndpoint), zap.Error(err))
 		return err
 	}
 	client.connects = append(client.connects, accountClientConn)
 	client.Account = accountPb.NewServiceClient(accountClientConn)
-	client.logger.UseGrpc(client.ctx).Info(fmt.Sprintf("The account service client `%s` connected successfully.", accountGrpcClientEndpoint))
+	client.logger.UseGrpc(client.ctx).Info(fmt.Sprintf("The account service client `%s` connected successfully.", accountEndpoint))
 
 	return nil
 }
@@ -53,4 +57,21 @@ func (client *GrpcClient) close() {
 	for _, conn := range client.connects {
 		conn.Close()
 	}
+}
+
+// getAccountEndpoint 获取帐号服务地址
+func (client *GrpcClient) getAccountEndpoint() string {
+	if client.environment.IsProd() {
+		return ProdAccountGrpcClientEndpoint
+	}
+
+	if client.environment.IsPre() {
+		return PreAccountGrpcClientEndpoint
+	}
+
+	if client.environment.IsTest() {
+		return TestAccountGrpcClientEndpoint
+	}
+
+	return DevAccountGrpcClientEndpoint
 }
