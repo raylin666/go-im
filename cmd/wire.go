@@ -16,6 +16,7 @@ import (
 	"mt/internal/grpc"
 	"mt/internal/server"
 	"mt/internal/service"
+	"mt/internal/websocket"
 )
 
 // wireApp init kratos application.
@@ -27,5 +28,6 @@ func wireApp(*config.Bootstrap, *config.Server, *config.Data, *app.Tools) (*krat
 		service.ProviderSet,
 		api.ProviderSet,
 		grpc.ProviderSet,
+		websocket.ProviderSet,
 		newApp))
 }

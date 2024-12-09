@@ -16,6 +16,7 @@ import (
 	"mt/internal/grpc"
 	"mt/internal/server"
 	"mt/internal/service"
+	"mt/internal/websocket"
 )
 
 import (
@@ -42,7 +43,8 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 		cleanup()
 		return nil, nil, err
 	}
-	handler := api.NewHandler(bootstrap, tools, dataRepo, grpcClient)
+	management := websocket.NewManagement(dataRepo, tools)
+	handler := api.NewHandler(bootstrap, tools, dataRepo, grpcClient, management)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
