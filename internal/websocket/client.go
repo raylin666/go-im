@@ -1,7 +1,6 @@
 package websocket
 
 import (
-	"context"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 	"runtime/debug"
@@ -15,6 +14,7 @@ const (
 
 // Client 客户端连接
 type Client struct {
+	Manager       ClientManagerInterface
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
@@ -23,9 +23,10 @@ type Client struct {
 	Account       *Account        // 账号信息
 }
 
-func NewClient(account *Account, conn *websocket.Conn) (client *Client) {
+func NewClient(manager ClientManagerInterface, account *Account, conn *websocket.Conn) (client *Client) {
 	var currentTime = time.Now()
 	client = &Client{
+		Manager:       manager,
 		Addr:          conn.RemoteAddr().String(),
 		Conn:          conn,
 		Send:          make(chan []byte, 100), // 默认预创建容量为100的消息数据包
@@ -54,8 +55,8 @@ func (c *Client) IsHeartbeatTimeout(currentTime time.Time) (timeout bool) {
 }
 
 // Read 读取客户端消息
-func (c *Client) Read(ctx context.Context, wsManagement *Management) {
-	var logger = wsManagement.tools.Logger()
+func (c *Client) Read() {
+	var logger = c.Manager.Logger()
 	var loggerFields = []zap.Field{
 		zap.String("address", c.Addr),
 		zap.Any("account", c.Account),
@@ -96,8 +97,8 @@ func (c *Client) Read(ctx context.Context, wsManagement *Management) {
 }
 
 // Write 写入客户端消息
-func (c *Client) Write(ctx context.Context, wsManagement *Management) {
-	var logger = wsManagement.tools.Logger()
+func (c *Client) Write() {
+	var logger = c.Manager.Logger()
 	var loggerFields = []zap.Field{
 		zap.String("address", c.Addr),
 		zap.Any("account", c.Account),
@@ -114,7 +115,6 @@ func (c *Client) Write(ctx context.Context, wsManagement *Management) {
 
 	defer func() {
 		logger.Debug("写入客户端消息结束, 已关闭客户端连接", loggerFields...)
-		wsManagement.ClientManager.UnRegister <- c
 		c.Conn.Close()
 	}()
 

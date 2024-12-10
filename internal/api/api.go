@@ -16,14 +16,14 @@ import (
 var ProviderSet = wire.NewSet(NewHandler)
 
 type Handler struct {
-	r            *mux.Router
-	dbRepo       repositories.DbRepo
-	redisRepo    repositories.RedisRepo
-	grpcClient   *grpc.GrpcClient
-	wsManagement *websocket.Management
-	tools        *app.Tools
-	config       *config.Bootstrap
-	Prefix       string
+	r               *mux.Router
+	dbRepo          repositories.DbRepo
+	redisRepo       repositories.RedisRepo
+	grpcClient      *grpc.GrpcClient
+	wsClientManager *websocket.ClientManager
+	tools           *app.Tools
+	config          *config.Bootstrap
+	Prefix          string
 }
 
 func NewHandler(
@@ -31,16 +31,16 @@ func NewHandler(
 	tools *app.Tools,
 	dataRepo repositories.DataRepo,
 	grpcClient *grpc.GrpcClient,
-	wsManagement *websocket.Management) *Handler {
+	wsClientManager *websocket.ClientManager) *Handler {
 	return &Handler{
-		r:            mux.NewRouter(),
-		dbRepo:       dataRepo.DbRepo(),
-		redisRepo:    dataRepo.RedisRepo(),
-		grpcClient:   grpcClient,
-		wsManagement: wsManagement,
-		tools:        tools,
-		config:       config,
-		Prefix:       "/app/",
+		r:               mux.NewRouter(),
+		dbRepo:          dataRepo.DbRepo(),
+		redisRepo:       dataRepo.RedisRepo(),
+		grpcClient:      grpcClient,
+		wsClientManager: wsClientManager,
+		tools:           tools,
+		config:          config,
+		Prefix:          "/app/",
 	}
 }
 

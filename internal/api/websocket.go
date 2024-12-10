@@ -65,11 +65,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
-	// 创建客户端链接, 完成帐号链接信息存储
-	client := websocket.NewClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin), conn)
+	// 创建客户端连接, 完成帐号连接信息存储
+	client := h.wsClientManager.CreateClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin), conn)
 
-	go client.Read(ctx, h.wsManagement)
-	go client.Write(ctx, h.wsManagement)
-
-	h.wsManagement.ClientManager.Register <- client
+	// 监听客户端连接消息读写及事件处理
+	h.wsClientManager.ClientRegister(client)
 }
