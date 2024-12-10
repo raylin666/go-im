@@ -43,8 +43,8 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 		cleanup()
 		return nil, nil, err
 	}
-	management := websocket.NewManagement(dataRepo, tools)
-	handler := api.NewHandler(bootstrap, tools, dataRepo, grpcClient, management)
+	clientManager := websocket.NewClientManager(tools)
+	handler := api.NewHandler(bootstrap, tools, dataRepo, grpcClient, clientManager)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
