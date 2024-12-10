@@ -23,7 +23,7 @@ type ClientManagerInterface interface {
 
 // ClientManager 客户端连接管理
 type ClientManager struct {
-	tools        *app.Tools
+	Tools        *app.Tools
 	Clients      map[*Client]bool    // 全部客户端连接资源
 	ClientsLock  sync.RWMutex        // 客户端链接读写锁
 	Accounts     map[string]*Account // 全部账号
@@ -36,7 +36,7 @@ type ClientManager struct {
 // NewClientManager 初始化客户端连接管理
 func NewClientManager(tools *app.Tools) *ClientManager {
 	return &ClientManager{
-		tools:      tools,
+		Tools:      tools,
 		Clients:    make(map[*Client]bool),
 		Accounts:   make(map[string]*Account),
 		Register:   make(chan *Client, 1000),
@@ -48,7 +48,7 @@ func NewClientManager(tools *app.Tools) *ClientManager {
 func (manager *ClientManager) Logger() *logger.Logger {
 	//TODO implement me
 
-	return manager.tools.Logger()
+	return manager.Tools.Logger()
 }
 
 func (manager *ClientManager) CreateClient(account *Account, conn *websocket.Conn) (client *Client) {
