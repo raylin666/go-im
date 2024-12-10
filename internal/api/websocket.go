@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"fmt"
+	"github.com/go-kratos/kratos/v2/metadata"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	accountPb "mt/api/v1/account"
 	"mt/internal/constant/defined"
@@ -63,6 +65,15 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Println(metadata.FromServerContext(ctx))
+	if md, ok := metadata.FromServerContext(ctx); ok {
+		// 设置请求ID
+		if len(md.Get("x-md-trace-id")) <= 0 {
+			md.Set("x-md-trace-id", uuid.New().String())
+		}
+
+		fmt.Println(metadata.FromServerContext(ctx))
+	}
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
 	// 创建客户端连接, 完成帐号连接信息存储
