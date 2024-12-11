@@ -39,7 +39,7 @@ func NewClient(manager ClientManagerInterface, account *Account, conn *websocket
 	return
 }
 
-func (c *Client) Logger() *logger.Logger { return c.Manager.Logger() }
+func (c *Client) logger() *logger.Logger { return c.Manager.Logger() }
 
 // Heartbeat 更新连接心跳时间
 func (c *Client) Heartbeat(currentTime time.Time) {
@@ -69,7 +69,7 @@ func (c *Client) Read() {
 	defer func() {
 		if r := recover(); r != nil {
 			loggerFields = append(loggerFields, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
-			c.Logger().Error("读取客户端消息异常", loggerFields...)
+			c.logger().Error("读取客户端消息异常", loggerFields...)
 		}
 	}()
 
@@ -77,7 +77,7 @@ func (c *Client) Read() {
 		// 关闭接收及待发送消息
 		close(c.Send)
 
-		c.Logger().Debug("读取客户端消息结束, 已关闭数据接收", loggerFields...)
+		c.logger().Debug("读取客户端消息结束, 已关闭数据接收", loggerFields...)
 	}()
 
 	for {
@@ -85,13 +85,13 @@ func (c *Client) Read() {
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			loggerFields = append(loggerFields, zap.Error(err))
-			c.Logger().Error("读取客户端消息失败", loggerFields...)
+			c.logger().Error("读取客户端消息失败", loggerFields...)
 
 			return
 		}
 
 		loggerFields = append(loggerFields, zap.String("message", string(message)))
-		c.Logger().Info("读取客户端消息成功", loggerFields...)
+		c.logger().Info("读取客户端消息成功", loggerFields...)
 
 		// 事件消息处理
 		// c.EventMessageHandler(ctx, message, true)
@@ -110,12 +110,12 @@ func (c *Client) Write() {
 	defer func() {
 		if r := recover(); r != nil {
 			loggerFields = append(loggerFields, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
-			c.Logger().Error("写入客户端消息异常", loggerFields...)
+			c.logger().Error("写入客户端消息异常", loggerFields...)
 		}
 	}()
 
 	defer func() {
-		c.Logger().Debug("写入客户端消息结束, 已关闭客户端连接", loggerFields...)
+		c.logger().Debug("写入客户端消息结束, 已关闭客户端连接", loggerFields...)
 		c.Conn.Close()
 	}()
 
@@ -124,7 +124,7 @@ func (c *Client) Write() {
 		case message, ok := <-c.Send:
 			if !ok {
 				// 写入待发送客户端消息错误并关闭连接
-				c.Logger().Error("写入待发送客户端消息错误, 客户端连接将关闭", loggerFields...)
+				c.logger().Error("写入待发送客户端消息错误, 客户端连接将关闭", loggerFields...)
 
 				return
 			}

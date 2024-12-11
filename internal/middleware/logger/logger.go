@@ -48,6 +48,7 @@ func Server(log *pkgLogger.Logger) middleware.Middleware {
 				BusinessCode:      int(code),
 				BusinessMessage:   reason,
 				CostSeconds:       time.Since(startTime).Seconds(),
+				Desc:              "外部调用请求(Server)",
 			}, err)
 			return
 		}
@@ -91,6 +92,7 @@ func Client(log *pkgLogger.Logger) middleware.Middleware {
 				BusinessCode:      int(code),
 				BusinessMessage:   reason,
 				CostSeconds:       time.Since(startTime).Seconds(),
+				Desc:              "内部发起请求(Client)",
 			}, err)
 			return
 		}

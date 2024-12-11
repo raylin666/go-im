@@ -62,9 +62,12 @@ func (manager *ClientManager) CreateClient(account *Account, conn *websocket.Con
 func (manager *ClientManager) ClientRegister(client *Client) {
 	//TODO implement me
 
+	// 监听客户端消息, 不断读出客户端发送的消息数据包
 	go client.Read()
 
+	// 监听服务端消息, 不断写入服务端发送的消息数据包
 	go func() {
+		// 解绑客户端连接
 		defer manager.ClientUnRegister(client)
 
 		client.Write()

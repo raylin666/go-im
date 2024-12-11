@@ -127,6 +127,7 @@ type RequestLogFormat struct {
 	RequestTime       time.Time           `json:"request_time"`
 	ResponseTime      time.Time           `json:"response_time"`
 	CostSeconds       float64             `json:"cost_seconds"`
+	Desc              string              `json:"desc"`
 }
 
 // RequestLog 打印请求日志
