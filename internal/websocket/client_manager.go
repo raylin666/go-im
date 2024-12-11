@@ -34,8 +34,8 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(tools *app.Tools) *ClientManager {
-	return &ClientManager{
+func NewClientManager(tools *app.Tools) (manager *ClientManager) {
+	manager = &ClientManager{
 		Tools:      tools,
 		Clients:    make(map[*Client]bool),
 		Accounts:   make(map[string]*Account),
@@ -43,6 +43,11 @@ func NewClientManager(tools *app.Tools) *ClientManager {
 		UnRegister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
 	}
+
+	// 注册事件监听处理器
+	go manager.RegisterEventListenerHandler()
+
+	return
 }
 
 func (manager *ClientManager) Logger() *logger.Logger {
@@ -80,4 +85,38 @@ func (manager *ClientManager) ClientUnRegister(client *Client) {
 	//TODO implement me
 
 	manager.UnRegister <- client
+}
+
+// RegisterEventListenerHandler 注册事件监听处理器
+func (manager *ClientManager) RegisterEventListenerHandler() {
+	for {
+		select {
+		// TODO 建立客户端连接处理
+		case client := <-manager.Register:
+			manager.eventListenerHandlerToClientRegister(client)
+
+		// TODO 断开客户端连接处理
+		case client := <-manager.UnRegister:
+			manager.eventListenerHandlerToClientUnRegister(client)
+
+		// TODO 广播消息处理
+		case message := <-manager.Broadcast:
+			manager.eventListenerHandlerToMessageBroadcast(message)
+		}
+	}
+}
+
+// eventListenerHandlerToClientRegister 建立客户端连接处理
+func (manager *ClientManager) eventListenerHandlerToClientRegister(client *Client) {
+
+}
+
+// eventListenerHandlerToClientUnRegister 断开客户端连接处理
+func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Client) {
+
+}
+
+// eventListenerHandlerToMessageBroadcast 广播消息处理
+func (manager *ClientManager) eventListenerHandlerToMessageBroadcast(message []byte) {
+
 }

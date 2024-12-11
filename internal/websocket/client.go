@@ -77,7 +77,7 @@ func (c *Client) Read() {
 		// 关闭接收及待发送消息
 		close(c.Send)
 
-		c.logger().Debug("读取客户端消息结束, 已关闭数据接收", loggerFields...)
+		c.logger().Info("读取客户端消息结束, 已关闭数据接收", loggerFields...)
 	}()
 
 	for {
@@ -115,7 +115,8 @@ func (c *Client) Write() {
 	}()
 
 	defer func() {
-		c.logger().Debug("写入客户端消息结束, 已关闭客户端连接", loggerFields...)
+		c.logger().Info("写入客户端消息结束, 已关闭客户端连接", loggerFields...)
+
 		c.Conn.Close()
 	}()
 
