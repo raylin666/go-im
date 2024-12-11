@@ -41,7 +41,7 @@ func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err er
 func (client *GrpcClient) connect() error {
 	// 帐号服务客户端
 	accountEndpoint := client.getAccountEndpoint()
-	accountClientConn, err := dial(client.ctx, accountEndpoint)
+	accountClientConn, err := dial(client.ctx, accountEndpoint, client.logger)
 	if err != nil {
 		client.logger.UseGrpc(client.ctx).Error(fmt.Sprintf("The account service client `%s` connected error.", accountEndpoint), zap.Error(err))
 		return err
