@@ -10,13 +10,17 @@ import (
 	"mt/internal/constant/defined"
 	"mt/internal/lib"
 	"mt/internal/websocket"
+	"mt/pkg/logger"
 	"mt/pkg/utils"
 	"net/http"
 )
 
 func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	var (
-		ctx = lib.NewContextHttpRequest(context.Background(), r)
+		ctx = metadata.NewServerContext(
+			lib.NewContextHttpRequest(context.Background(), r),
+			metadata.New(map[string][]string{logger.XMdKeyTraceId: {uuid.New().String()}}),
+		)
 
 		query = r.URL.Query()
 
@@ -65,15 +69,6 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(metadata.FromServerContext(ctx))
-	if md, ok := metadata.FromServerContext(ctx); ok {
-		// 设置请求ID
-		if len(md.Get("x-md-trace-id")) <= 0 {
-			md.Set("x-md-trace-id", uuid.New().String())
-		}
-
-		fmt.Println(metadata.FromServerContext(ctx))
-	}
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
 	// 创建客户端连接, 完成帐号连接信息存储

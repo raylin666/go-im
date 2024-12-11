@@ -9,6 +9,7 @@ import (
 	"mt/internal/app"
 	"mt/internal/middleware/auth"
 	logging "mt/internal/middleware/logger"
+	"mt/internal/middleware/request"
 	"mt/internal/middleware/validate"
 	"mt/internal/service"
 
@@ -26,6 +27,7 @@ func NewGRPCServer(
 			recovery.Recovery(),
 			validate.Validator(),
 			metadata.Server(),
+			request.Trace(),
 			logging.Server(tools.Logger()),
 			auth.NewJWTAuthServer(tools.JWT()),
 		),
