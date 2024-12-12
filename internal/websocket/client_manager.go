@@ -50,12 +50,78 @@ func NewClientManager(tools *app.Tools) (manager *ClientManager) {
 	return
 }
 
+// addClient 将客户端连接加入至管理器
+func (manager *ClientManager) addClient(client *Client) {
+	manager.ClientsLock.Lock()
+	defer manager.ClientsLock.Unlock()
+
+	manager.Clients[client] = true
+}
+
+// hasClient 客户端连接是否存在于管理器
+func (manager *ClientManager) hasClient(client *Client) (ok bool) {
+	manager.ClientsLock.RLock()
+	defer manager.ClientsLock.RUnlock()
+
+	_, ok = manager.Clients[client]
+
+	return
+}
+
+// deleteClient 将客户端连接从管理器中删除
+func (manager *ClientManager) deleteClient(client *Client) {
+	if !manager.hasClient(client) {
+
+		return
+	}
+
+	manager.ClientsLock.Lock()
+	defer manager.ClientsLock.Unlock()
+	delete(manager.Clients, client)
+}
+
+// countClients 获取管理器中所有连接的客户端数量
+func (manager *ClientManager) countClients() (countClients int) {
+	countClients = len(manager.Clients)
+
+	return
+}
+
+// getClients 获取管理器中所有连接的客户端
+func (manager *ClientManager) getClients() (clients map[*Client]bool) {
+	clients = make(map[*Client]bool)
+
+	manager.rangeClients(func(client *Client, value bool) (result bool) {
+		clients[client] = value
+
+		return true
+	})
+
+	return
+}
+
+// rangeClients 遍历所有管理器中的客户端连接, 返回客户端连接是否存在
+func (manager *ClientManager) rangeClients(f func(client *Client, value bool) (result bool)) {
+	manager.ClientsLock.RLock()
+	defer manager.ClientsLock.RUnlock()
+
+	for key, value := range manager.Clients {
+		result := f(key, value)
+		if result == false {
+			return
+		}
+	}
+
+	return
+}
+
 func (manager *ClientManager) Logger() *logger.Logger {
 	//TODO implement me
 
 	return manager.Tools.Logger()
 }
 
+// CreateClient 创建客户端连接
 func (manager *ClientManager) CreateClient(account *Account, conn *websocket.Conn) (client *Client) {
 	//TODO implement me
 
@@ -64,6 +130,7 @@ func (manager *ClientManager) CreateClient(account *Account, conn *websocket.Con
 	return
 }
 
+// ClientRegister 建立客户端连接处理通道
 func (manager *ClientManager) ClientRegister(client *Client) {
 	//TODO implement me
 
@@ -81,6 +148,7 @@ func (manager *ClientManager) ClientRegister(client *Client) {
 	manager.Register <- client
 }
 
+// ClientUnRegister 断开客户端连接处理通道
 func (manager *ClientManager) ClientUnRegister(client *Client) {
 	//TODO implement me
 
@@ -108,12 +176,14 @@ func (manager *ClientManager) RegisterEventListenerHandler() {
 
 // eventListenerHandlerToClientRegister 建立客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientRegister(client *Client) {
-
+	// 将客户端连接加入至管理器
+	manager.addClient(client)
 }
 
 // eventListenerHandlerToClientUnRegister 断开客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Client) {
-
+	// 将客户端连接从管理器中删除
+	manager.deleteClient(client)
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理
