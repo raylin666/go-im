@@ -24,13 +24,13 @@ type ClientManagerInterface interface {
 // ClientManager 客户端连接管理
 type ClientManager struct {
 	Tools        *app.Tools
-	Clients      map[*Client]bool    // 全部客户端连接资源
-	ClientsLock  sync.RWMutex        // 客户端链接读写锁
-	Accounts     map[string]*Account // 全部账号
-	AccountsLock sync.RWMutex        // 账号读写锁
-	Register     chan *Client        // 建立客户端连接处理通道
-	UnRegister   chan *Client        // 断开客户端连接处理通道
-	Broadcast    chan []byte         // 广播消息-向全部成员发送数据
+	Clients      map[*Client]bool     // 全部客户端连接资源
+	ClientsLock  sync.RWMutex         // 客户端链接读写锁
+	Accounts     map[string][]*Client // 全部账号
+	AccountsLock sync.RWMutex         // 账号读写锁
+	Register     chan *Client         // 建立客户端连接处理通道
+	UnRegister   chan *Client         // 断开客户端连接处理通道
+	Broadcast    chan []byte          // 广播消息-向全部成员发送数据
 }
 
 // NewClientManager 初始化客户端连接管理
@@ -38,7 +38,7 @@ func NewClientManager(tools *app.Tools) (manager *ClientManager) {
 	manager = &ClientManager{
 		Tools:      tools,
 		Clients:    make(map[*Client]bool),
-		Accounts:   make(map[string]*Account),
+		Accounts:   make(map[string][]*Client),
 		Register:   make(chan *Client, 1000),
 		UnRegister: make(chan *Client, 1000),
 		Broadcast:  make(chan []byte, 1000),
@@ -101,18 +101,104 @@ func (manager *ClientManager) getClients() (clients map[*Client]bool) {
 }
 
 // rangeClients 遍历所有管理器中的客户端连接, 返回客户端连接是否存在
-func (manager *ClientManager) rangeClients(f func(client *Client, value bool) (result bool)) {
+func (manager *ClientManager) rangeClients(f func(client *Client, value bool) (ok bool)) {
 	manager.ClientsLock.RLock()
 	defer manager.ClientsLock.RUnlock()
 
 	for key, value := range manager.Clients {
-		result := f(key, value)
-		if result == false {
+		ok := f(key, value)
+		if ok == false {
 			return
 		}
 	}
 
 	return
+}
+
+// hasAccount 账号是否存在/在线
+func (manager *ClientManager) hasAccount(accountId string) (ok bool) {
+	manager.AccountsLock.RLock()
+	defer manager.AccountsLock.RUnlock()
+
+	_, ok = manager.Accounts[accountId]
+
+	return
+}
+
+// addAccount 添加账号在线客户端 (帐号支持多客户端连接)
+func (manager *ClientManager) addAccount(client *Client) {
+	if manager.hasClient(client) {
+
+		return
+	}
+
+	manager.AccountsLock.Lock()
+	defer manager.AccountsLock.Unlock()
+	manager.Accounts[client.Account.ID] = append(manager.Accounts[client.Account.ID], client)
+}
+
+// getAccount 获取帐号在线客户端 (帐号支持多客户端连接)
+func (manager *ClientManager) getAccount(accountId string) []*Client {
+	manager.AccountsLock.Lock()
+	defer manager.AccountsLock.Unlock()
+
+	if clients, ok := manager.Accounts[accountId]; ok {
+		return clients
+	}
+
+	return make([]*Client, 0)
+}
+
+// countAccount 获取帐号在线客户端数量 (帐号支持多客户端连接)
+func (manager *ClientManager) countAccount(accountId string) (countAccount int) {
+	if manager.hasAccount(accountId) == false {
+		return
+	}
+
+	return len(manager.getAccount(accountId))
+}
+
+// deleteAccount 删除账号在线客户端 (帐号支持多客户端连接)
+func (manager *ClientManager) deleteAccount(client *Client) (ok bool) {
+	accountId := client.Account.ID
+	if manager.hasAccount(accountId) == false {
+		return true
+	}
+
+	clients := manager.getAccount(accountId)
+	if len(clients) <= 0 {
+		manager.AccountsLock.Lock()
+		defer manager.AccountsLock.Unlock()
+		delete(manager.Accounts, accountId)
+		return true
+	}
+
+	var newClients []*Client
+	for _, c := range clients {
+		if c == client {
+			continue
+		}
+
+		newClients = append(newClients, c)
+	}
+
+	manager.AccountsLock.Lock()
+	defer manager.AccountsLock.Unlock()
+	if len(newClients) > 0 {
+		manager.Accounts[accountId] = newClients
+	} else {
+		delete(manager.Accounts, accountId)
+	}
+
+	return true
+}
+
+// countAccounts 获取所有在线帐号数量
+func (manager *ClientManager) countAccounts() (countAccounts int) {
+	manager.AccountsLock.Lock()
+	defer manager.AccountsLock.Unlock()
+
+	return len(manager.Accounts)
 }
 
 func (manager *ClientManager) Logger() *logger.Logger {
