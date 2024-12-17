@@ -193,11 +193,21 @@ func (manager *ClientManager) deleteAccount(client *Client) (ok bool) {
 	return true
 }
 
+// getAccountIds 获取所有在线帐号ID
+func (manager *ClientManager) getAccountIds() (keys []string) {
+	manager.AccountsLock.RLock()
+	defer manager.AccountsLock.RUnlock()
+
+	keys = make([]string, 0)
+	for key := range manager.Accounts {
+		keys = append(keys, key)
+	}
+
+	return
+}
+
 // countAccounts 获取所有在线帐号数量
 func (manager *ClientManager) countAccounts() (countAccounts int) {
-	manager.AccountsLock.Lock()
-	defer manager.AccountsLock.Unlock()
-
 	return len(manager.Accounts)
 }
 
