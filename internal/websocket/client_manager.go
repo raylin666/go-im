@@ -272,14 +272,20 @@ func (manager *ClientManager) RegisterEventListenerHandler() {
 
 // eventListenerHandlerToClientRegister 建立客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientRegister(client *Client) {
-	// 将客户端连接加入至管理器
+	// 将客户端连接添加至管理器
 	manager.addClient(client)
+
+	// 将客户端连接添加至在线帐号
+	manager.addAccount(client)
 }
 
 // eventListenerHandlerToClientUnRegister 断开客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Client) {
 	// 将客户端连接从管理器中删除
 	manager.deleteClient(client)
+
+	// 将客户端连接从在线帐号中移除
+	manager.deleteAccount(client)
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理
