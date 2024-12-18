@@ -108,7 +108,12 @@ func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*
 // Login 登录帐号
 func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	updateLoginRequest := &typeAccount.LoginRequest{
-		ClientIp: req.ClientIp,
+		ClientIp:   req.GetClientIp(),
+		ClientAddr: req.GetClientAddr(),
+		ServerAddr: req.GetServerAddr(),
+		DeviceId:   req.GetDeviceId(),
+		Os:         string(req.GetOs()),
+		System:     req.GetSystem(),
 	}
 
 	loginResponse, err := s.uc.Login(ctx, req.GetAccountId(), updateLoginRequest)

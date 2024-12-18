@@ -130,7 +130,23 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		timeNow          = time.Now()
 		isOnline    int8 = 1
 		lastLoginIp      = data.ClientIp
+
+		accountOnline = new(model.AccountOnline)
 	)
+
+	accountOnline.AccountId = accountId
+	accountOnline.LoginTime = timeNow
+	accountOnline.LoginIp = data.ClientIp
+	accountOnline.ClientAddr = data.ClientAddr
+	accountOnline.ServerAddr = data.ServerAddr
+	accountOnline.DeviceId = data.DeviceId
+	accountOnline.Os = data.Os
+	accountOnline.System = data.System
+
+	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).AccountOnline
+	if err := accountOnlineQuery.WithContext(ctx).Create(accountOnline); err != nil {
+		return nil, err
+	}
 
 	account := originAccount
 	account.IsOnline = isOnline
@@ -146,7 +162,6 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 	}
 
 	if originAccount.FirstLoginTime == nil {
-		accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).AccountOnline
 		if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(originAccount.AccountId); err == nil {
 			if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
 				existsValue, existsValueOk := existsResult.(int64)

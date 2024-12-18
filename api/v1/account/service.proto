@@ -118,10 +118,11 @@ message GetInfoResponse {
 message LoginRequest {
   string account_id = 1;
   string client_ip = 2 [(validate.rules).string.ip = true];
-  string server_addr = 3 [(validate.rules).string.ip = true];
-  string device_id = 4;
-  bytes os = 5 [(validate.rules).bytes = {in: ["web", "android", "ios"]}];
-  string system = 6;
+  string client_addr = 3 [(validate.rules).string.ip = true];
+  string server_addr = 4 [(validate.rules).string.ip = true];
+  string device_id = 5;
+  bytes os = 6 [(validate.rules).bytes = {in: ["web", "android", "ios"]}];
+  string system = 7;
 }
 
 message LoginResponse {

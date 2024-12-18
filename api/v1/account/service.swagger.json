@@ -246,6 +246,9 @@
         "client_ip": {
           "type": "string"
         },
+        "client_addr": {
+          "type": "string"
+        },
         "server_addr": {
           "type": "string"
         },

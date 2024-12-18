@@ -101,7 +101,7 @@ func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeA
 }
 
 // Login 登录帐号
-func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *typeAccount.LoginRequest) (*typeAccount.UpdateLoginResponse, error) {
+func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *typeAccount.LoginRequest) (*typeAccount.LoginResponse, error) {
 	m, err := uc.repo.Login(ctx, accountId, req)
 	if err != nil {
 		return nil, err

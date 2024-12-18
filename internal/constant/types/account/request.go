@@ -52,7 +52,12 @@ type GetInfoResponse struct {
 }
 
 type LoginRequest struct {
-	ClientIp string `json:"client_ip"`
+	ClientIp   string `json:"client_ip"`
+	ClientAddr string `json:"client_addr"`
+	ServerAddr string `json:"server_addr"`
+	DeviceId   string `json:"device_id"`
+	Os         string `json:"os"`
+	System     string `json:"system"`
 }
 
 type LoginResponse struct {

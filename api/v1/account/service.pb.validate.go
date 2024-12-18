@@ -910,6 +910,17 @@ func (m *LoginRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if ip := net.ParseIP(m.GetClientAddr()); ip == nil {
+		err := LoginRequestValidationError{
+			field:  "ClientAddr",
+			reason: "value must be a valid IP address",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
 	if ip := net.ParseIP(m.GetServerAddr()); ip == nil {
 		err := LoginRequestValidationError{
 			field:  "ServerAddr",

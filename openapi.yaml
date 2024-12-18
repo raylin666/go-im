@@ -227,6 +227,8 @@ components:
                     type: string
                 clientIp:
                     type: string
+                clientAddr:
+                    type: string
                 serverAddr:
                     type: string
                 deviceId:
