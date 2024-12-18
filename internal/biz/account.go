@@ -18,7 +18,7 @@ type AccountRepo interface {
 	Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error)
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
 	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
-	UpdateLogin(ctx context.Context, accountId string, data *typeAccount.UpdateLoginRequest) (*model.Account, error)
+	Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, error)
 }
 
 type AccountUsecase struct {
@@ -100,14 +100,14 @@ func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeA
 	return resp, nil
 }
 
-// UpdateLogin 更新帐号登录状态
-func (uc *AccountUsecase) UpdateLogin(ctx context.Context, accountId string, req *typeAccount.UpdateLoginRequest) (*typeAccount.UpdateLoginResponse, error) {
-	m, err := uc.repo.UpdateLogin(ctx, accountId, req)
+// Login 登录帐号
+func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *typeAccount.LoginRequest) (*typeAccount.UpdateLoginResponse, error) {
+	m, err := uc.repo.Login(ctx, accountId, req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &typeAccount.UpdateLoginResponse{
+	resp := &typeAccount.LoginResponse{
 		AccountId:      m.AccountId,
 		Nickname:       m.Nickname,
 		Avatar:         m.Avatar,

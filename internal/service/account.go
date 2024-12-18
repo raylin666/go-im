@@ -105,26 +105,26 @@ func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*
 	return resp, nil
 }
 
-// UpdateLogin 更新帐号登录状态
-func (s *AccountService) UpdateLogin(ctx context.Context, req *pb.UpdateLoginRequest) (*pb.UpdateLoginResponse, error) {
-	updateLoginRequest := &typeAccount.UpdateLoginRequest{
+// Login 登录帐号
+func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	updateLoginRequest := &typeAccount.LoginRequest{
 		ClientIp: req.ClientIp,
 	}
 
-	updateLoginResponse, err := s.uc.UpdateLogin(ctx, req.GetAccountId(), updateLoginRequest)
+	loginResponse, err := s.uc.Login(ctx, req.GetAccountId(), updateLoginRequest)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &pb.UpdateLoginResponse{
-		AccountId:      updateLoginResponse.AccountId,
-		Nickname:       updateLoginResponse.Nickname,
-		Avatar:         updateLoginResponse.Avatar,
-		IsAdmin:        updateLoginResponse.IsAdmin,
-		IsOnline:       updateLoginResponse.IsOnline,
-		LastLoginIp:    updateLoginResponse.LastLoginIp,
-		FirstLoginTime: updateLoginResponse.FirstLoginTime.Unix(),
-		LastLoginTime:  updateLoginResponse.LastLoginTime.Unix(),
+	resp := &pb.LoginResponse{
+		AccountId:      loginResponse.AccountId,
+		Nickname:       loginResponse.Nickname,
+		Avatar:         loginResponse.Avatar,
+		IsAdmin:        loginResponse.IsAdmin,
+		IsOnline:       loginResponse.IsOnline,
+		LastLoginIp:    loginResponse.LastLoginIp,
+		FirstLoginTime: loginResponse.FirstLoginTime.Unix(),
+		LastLoginTime:  loginResponse.LastLoginTime.Unix(),
 	}
 
 	return resp, nil

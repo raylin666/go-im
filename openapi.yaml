@@ -60,6 +60,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.account.GetInfoResponse'
+    /api/account/login/{accountId}:
+        put:
+            tags:
+                - Service
+            description: 登录帐号
+            operationId: Service_Login
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.account.LoginResponse'
     /api/account/token/{accountId}:
         post:
             tags:
@@ -110,31 +135,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.account.UpdateResponse'
-    /api/account/update_login/{accountId}:
-        put:
-            tags:
-                - Service
-            description: 更新帐号登录状态
-            operationId: Service_UpdateLogin
-            parameters:
-                - name: accountId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/v1.account.UpdateLoginRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/v1.account.UpdateLoginResponse'
     /heartbeat:
         get:
             tags:
@@ -220,14 +220,23 @@ components:
                     type: string
                 deletedAt:
                     type: string
-        v1.account.UpdateLoginRequest:
+        v1.account.LoginRequest:
             type: object
             properties:
                 accountId:
                     type: string
                 clientIp:
                     type: string
-        v1.account.UpdateLoginResponse:
+                serverAddr:
+                    type: string
+                deviceId:
+                    type: string
+                os:
+                    type: string
+                    format: bytes
+                system:
+                    type: string
+        v1.account.LoginResponse:
             type: object
             properties:
                 accountId:
@@ -245,6 +254,8 @@ components:
                 firstLoginTime:
                     type: string
                 lastLoginTime:
+                    type: string
+                onlineId:
                     type: string
         v1.account.UpdateRequest:
             type: object

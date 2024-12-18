@@ -51,11 +51,11 @@ type GetInfoResponse struct {
 	DeletedAt      *time.Time `json:"deleted_at"`
 }
 
-type UpdateLoginRequest struct {
+type LoginRequest struct {
 	ClientIp string `json:"client_ip"`
 }
 
-type UpdateLoginResponse struct {
+type LoginResponse struct {
 	AccountId      string     `json:"account_id"`
 	Nickname       string     `json:"nickname"`
 	Avatar         string     `json:"avatar"`
@@ -64,6 +64,7 @@ type UpdateLoginResponse struct {
 	LastLoginIp    string     `json:"last_login_ip"`
 	FirstLoginTime *time.Time `json:"first_login_time"`
 	LastLoginTime  *time.Time `json:"last_login_time"`
+	OnlineId       int        `json:"online_id"`
 }
 
 type GenerateTokenResponse struct {

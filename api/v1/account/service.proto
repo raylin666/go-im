@@ -50,14 +50,6 @@ service Service {
     };
   }
 
-  // 更新帐号登录状态
-  rpc UpdateLogin (UpdateLoginRequest) returns (UpdateLoginResponse) {
-    option (google.api.http) = {
-      put: "/api/account/update_login/{account_id}"
-      body: "*"
-    };
-  }
-
   // 生成TOKEN
   rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenResponse) {
     option (google.api.http) = {
@@ -126,11 +118,10 @@ message GetInfoResponse {
 message LoginRequest {
   string account_id = 1;
   string client_ip = 2 [(validate.rules).string.ip = true];
-  string connect_addr = 3 [(validate.rules).string.ip = true];
-  int32 client_id = 4;
-  string device_id = 5;
-  bytes os = 6 [(validate.rules).bytes = {in: ["web", "android", "ios"]}];
-  string system = 7;
+  string server_addr = 3 [(validate.rules).string.ip = true];
+  string device_id = 4;
+  bytes os = 5 [(validate.rules).bytes = {in: ["web", "android", "ios"]}];
+  string system = 6;
 }
 
 message LoginResponse {

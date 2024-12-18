@@ -875,22 +875,22 @@ var _ interface {
 	ErrorName() string
 } = GetInfoResponseValidationError{}
 
-// Validate checks the field values on UpdateLoginRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UpdateLoginRequest) Validate() error {
+// Validate checks the field values on LoginRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *LoginRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UpdateLoginRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// UpdateLoginRequestMultiError, or nil if none found.
-func (m *UpdateLoginRequest) ValidateAll() error {
+// ValidateAll checks the field values on LoginRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in LoginRequestMultiError, or
+// nil if none found.
+func (m *LoginRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UpdateLoginRequest) validate(all bool) error {
+func (m *LoginRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -900,7 +900,7 @@ func (m *UpdateLoginRequest) validate(all bool) error {
 	// no validation rules for AccountId
 
 	if ip := net.ParseIP(m.GetClientIp()); ip == nil {
-		err := UpdateLoginRequestValidationError{
+		err := LoginRequestValidationError{
 			field:  "ClientIp",
 			reason: "value must be a valid IP address",
 		}
@@ -910,20 +910,45 @@ func (m *UpdateLoginRequest) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	if ip := net.ParseIP(m.GetServerAddr()); ip == nil {
+		err := LoginRequestValidationError{
+			field:  "ServerAddr",
+			reason: "value must be a valid IP address",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for DeviceId
+
+	if _, ok := _LoginRequest_Os_InLookup[string(m.GetOs())]; !ok {
+		err := LoginRequestValidationError{
+			field:  "Os",
+			reason: "value must be in list [[119 101 98] [97 110 100 114 111 105 100] [105 111 115]]",
+		}
+		if !all {
+			return err
+		}
+		errors = append(errors, err)
+	}
+
+	// no validation rules for System
+
 	if len(errors) > 0 {
-		return UpdateLoginRequestMultiError(errors)
+		return LoginRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// UpdateLoginRequestMultiError is an error wrapping multiple validation errors
-// returned by UpdateLoginRequest.ValidateAll() if the designated constraints
-// aren't met.
-type UpdateLoginRequestMultiError []error
+// LoginRequestMultiError is an error wrapping multiple validation errors
+// returned by LoginRequest.ValidateAll() if the designated constraints aren't met.
+type LoginRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UpdateLoginRequestMultiError) Error() string {
+func (m LoginRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -932,11 +957,11 @@ func (m UpdateLoginRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UpdateLoginRequestMultiError) AllErrors() []error { return m }
+func (m LoginRequestMultiError) AllErrors() []error { return m }
 
-// UpdateLoginRequestValidationError is the validation error returned by
-// UpdateLoginRequest.Validate if the designated constraints aren't met.
-type UpdateLoginRequestValidationError struct {
+// LoginRequestValidationError is the validation error returned by
+// LoginRequest.Validate if the designated constraints aren't met.
+type LoginRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -944,24 +969,22 @@ type UpdateLoginRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e UpdateLoginRequestValidationError) Field() string { return e.field }
+func (e LoginRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UpdateLoginRequestValidationError) Reason() string { return e.reason }
+func (e LoginRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UpdateLoginRequestValidationError) Cause() error { return e.cause }
+func (e LoginRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UpdateLoginRequestValidationError) Key() bool { return e.key }
+func (e LoginRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UpdateLoginRequestValidationError) ErrorName() string {
-	return "UpdateLoginRequestValidationError"
-}
+func (e LoginRequestValidationError) ErrorName() string { return "LoginRequestValidationError" }
 
 // Error satisfies the builtin error interface
-func (e UpdateLoginRequestValidationError) Error() string {
+func (e LoginRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -973,14 +996,14 @@ func (e UpdateLoginRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUpdateLoginRequest.%s: %s%s",
+		"invalid %sLoginRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UpdateLoginRequestValidationError{}
+var _ error = LoginRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -988,24 +1011,30 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UpdateLoginRequestValidationError{}
+} = LoginRequestValidationError{}
 
-// Validate checks the field values on UpdateLoginResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UpdateLoginResponse) Validate() error {
+var _LoginRequest_Os_InLookup = map[string]struct{}{
+	"\x77\x65\x62":                 {},
+	"\x61\x6E\x64\x72\x6F\x69\x64": {},
+	"\x69\x6F\x73":                 {},
+}
+
+// Validate checks the field values on LoginResponse with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *LoginResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UpdateLoginResponse with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, the result is a list of violation errors wrapped in
-// UpdateLoginResponseMultiError, or nil if none found.
-func (m *UpdateLoginResponse) ValidateAll() error {
+// ValidateAll checks the field values on LoginResponse with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in LoginResponseMultiError, or
+// nil if none found.
+func (m *LoginResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UpdateLoginResponse) validate(all bool) error {
+func (m *LoginResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1028,20 +1057,22 @@ func (m *UpdateLoginResponse) validate(all bool) error {
 
 	// no validation rules for LastLoginTime
 
+	// no validation rules for OnlineId
+
 	if len(errors) > 0 {
-		return UpdateLoginResponseMultiError(errors)
+		return LoginResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// UpdateLoginResponseMultiError is an error wrapping multiple validation
-// errors returned by UpdateLoginResponse.ValidateAll() if the designated
-// constraints aren't met.
-type UpdateLoginResponseMultiError []error
+// LoginResponseMultiError is an error wrapping multiple validation errors
+// returned by LoginResponse.ValidateAll() if the designated constraints
+// aren't met.
+type LoginResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UpdateLoginResponseMultiError) Error() string {
+func (m LoginResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1050,11 +1081,11 @@ func (m UpdateLoginResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UpdateLoginResponseMultiError) AllErrors() []error { return m }
+func (m LoginResponseMultiError) AllErrors() []error { return m }
 
-// UpdateLoginResponseValidationError is the validation error returned by
-// UpdateLoginResponse.Validate if the designated constraints aren't met.
-type UpdateLoginResponseValidationError struct {
+// LoginResponseValidationError is the validation error returned by
+// LoginResponse.Validate if the designated constraints aren't met.
+type LoginResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1062,24 +1093,22 @@ type UpdateLoginResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e UpdateLoginResponseValidationError) Field() string { return e.field }
+func (e LoginResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UpdateLoginResponseValidationError) Reason() string { return e.reason }
+func (e LoginResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UpdateLoginResponseValidationError) Cause() error { return e.cause }
+func (e LoginResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UpdateLoginResponseValidationError) Key() bool { return e.key }
+func (e LoginResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UpdateLoginResponseValidationError) ErrorName() string {
-	return "UpdateLoginResponseValidationError"
-}
+func (e LoginResponseValidationError) ErrorName() string { return "LoginResponseValidationError" }
 
 // Error satisfies the builtin error interface
-func (e UpdateLoginResponseValidationError) Error() string {
+func (e LoginResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1091,14 +1120,14 @@ func (e UpdateLoginResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUpdateLoginResponse.%s: %s%s",
+		"invalid %sLoginResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UpdateLoginResponseValidationError{}
+var _ error = LoginResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -1106,7 +1135,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UpdateLoginResponseValidationError{}
+} = LoginResponseValidationError{}
 
 // Validate checks the field values on GenerateTokenRequest with the rules
 // defined in the proto definition for this message. If any rules are

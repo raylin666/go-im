@@ -35,7 +35,7 @@ func newAccountOnline(db *gorm.DB, opts ...gen.DOOption) accountOnline {
 	_accountOnline.LoginIp = field.NewString(tableName, "login_ip")
 	_accountOnline.LogoutIp = field.NewString(tableName, "logout_ip")
 	_accountOnline.ClientAddr = field.NewString(tableName, "client_addr")
-	_accountOnline.ClientId = field.NewInt(tableName, "client_id")
+	_accountOnline.ServerAddr = field.NewString(tableName, "server_addr")
 	_accountOnline.DeviceId = field.NewString(tableName, "device_id")
 	_accountOnline.Os = field.NewString(tableName, "os")
 	_accountOnline.System = field.NewString(tableName, "system")
@@ -56,7 +56,7 @@ type accountOnline struct {
 	LoginIp    field.String
 	LogoutIp   field.String
 	ClientAddr field.String
-	ClientId   field.Int
+	ServerAddr field.String
 	DeviceId   field.String
 	Os         field.String
 	System     field.String
@@ -83,7 +83,7 @@ func (a *accountOnline) updateTableName(table string) *accountOnline {
 	a.LoginIp = field.NewString(table, "login_ip")
 	a.LogoutIp = field.NewString(table, "logout_ip")
 	a.ClientAddr = field.NewString(table, "client_addr")
-	a.ClientId = field.NewInt(table, "client_id")
+	a.ServerAddr = field.NewString(table, "server_addr")
 	a.DeviceId = field.NewString(table, "device_id")
 	a.Os = field.NewString(table, "os")
 	a.System = field.NewString(table, "system")
@@ -119,7 +119,7 @@ func (a *accountOnline) fillFieldMap() {
 	a.fieldMap["login_ip"] = a.LoginIp
 	a.fieldMap["logout_ip"] = a.LogoutIp
 	a.fieldMap["client_addr"] = a.ClientAddr
-	a.fieldMap["client_id"] = a.ClientId
+	a.fieldMap["server_addr"] = a.ServerAddr
 	a.fieldMap["device_id"] = a.DeviceId
 	a.fieldMap["os"] = a.Os
 	a.fieldMap["system"] = a.System

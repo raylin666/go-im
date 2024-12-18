@@ -112,6 +112,45 @@
         ]
       }
     },
+    "/api/account/login/{account_id}": {
+      "put": {
+        "summary": "登录帐号",
+        "operationId": "Service_Login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/accountLoginResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceLoginBody"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/api/account/token/{account_id}": {
       "post": {
         "summary": "生成TOKEN",
@@ -189,45 +228,6 @@
           "Service"
         ]
       }
-    },
-    "/api/account/update_login/{account_id}": {
-      "put": {
-        "summary": "更新帐号登录状态",
-        "operationId": "Service_UpdateLogin",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/accountUpdateLoginResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "account_id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/ServiceUpdateLoginBody"
-            }
-          }
-        ],
-        "tags": [
-          "Service"
-        ]
-      }
     }
   },
   "definitions": {
@@ -237,6 +237,27 @@
         "ttl": {
           "type": "string",
           "format": "int64"
+        }
+      }
+    },
+    "ServiceLoginBody": {
+      "type": "object",
+      "properties": {
+        "client_ip": {
+          "type": "string"
+        },
+        "server_addr": {
+          "type": "string"
+        },
+        "device_id": {
+          "type": "string"
+        },
+        "os": {
+          "type": "string",
+          "format": "byte"
+        },
+        "system": {
+          "type": "string"
         }
       }
     },
@@ -251,14 +272,6 @@
         },
         "is_admin": {
           "type": "boolean"
-        }
-      }
-    },
-    "ServiceUpdateLoginBody": {
-      "type": "object",
-      "properties": {
-        "client_ip": {
-          "type": "string"
         }
       }
     },
@@ -358,7 +371,7 @@
         }
       }
     },
-    "accountUpdateLoginResponse": {
+    "accountLoginResponse": {
       "type": "object",
       "properties": {
         "account_id": {
@@ -384,6 +397,10 @@
           "format": "int64"
         },
         "last_login_time": {
+          "type": "string",
+          "format": "int64"
+        },
+        "online_id": {
           "type": "string",
           "format": "int64"
         }
