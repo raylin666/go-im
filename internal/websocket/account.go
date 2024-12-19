@@ -9,17 +9,12 @@ type Account struct {
 }
 
 // NewAccount 创建账号
-func NewAccount(id, nickname, avatar string, isAdmin bool) *Account {
+func NewAccount(id, nickname, avatar string, onlineId int, isAdmin bool) *Account {
 	return &Account{
 		ID:       id,
 		Nickname: nickname,
 		Avatar:   avatar,
 		IsAdmin:  isAdmin,
+		OnlineId: onlineId,
 	}
-}
-
-// WithOnlineId 添加账号在线ID
-func (account *Account) WithOnlineId(id int) *Account {
-	account.OnlineId = id
-	return account
 }

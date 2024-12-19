@@ -74,7 +74,6 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		Os:         []byte(r.Header.Get("os")),
 		System:     r.Header.Get("system"),
 	})
-	fmt.Println(account)
 	if err != nil {
 		var e = defined.ErrorAccountLoginError
 		http.Error(w, e.GetMessage(), int(e.GetCode()))
@@ -85,7 +84,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接完成: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
 	// TODO 创建客户端连接, 完成帐号连接信息存储
-	client := h.wsClientManager.CreateClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin), conn)
+	client := h.wsClientManager.CreateClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, int(account.OnlineId), account.IsAdmin), conn)
 
 	// TODO 监听客户端连接消息读写及事件处理
 	h.wsClientManager.ClientRegister(client)
