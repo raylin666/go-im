@@ -139,13 +139,13 @@ func (a account) replaceDB(db *gorm.DB) account {
 
 type accountDo struct{ gen.DO }
 
-// ExistsByAccountId SELECT EXISTS (SELECT * FROM @@table WHERE `account_id`=@accountId) AS `ok`
+// ExistsByAccountId SELECT EXISTS (SELECT * FROM @@table WHERE `account_id` = @accountId) AS `ok`
 func (a accountDo) ExistsByAccountId(accountId string) (result map[string]interface{}, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder
 	params = append(params, accountId)
-	generateSQL.WriteString("SELECT EXISTS (SELECT * FROM account WHERE `account_id`=?) AS `ok` ")
+	generateSQL.WriteString("SELECT EXISTS (SELECT * FROM account WHERE `account_id` = ?) AS `ok` ")
 
 	result = make(map[string]interface{})
 	var executeSQL *gorm.DB
@@ -155,13 +155,13 @@ func (a accountDo) ExistsByAccountId(accountId string) (result map[string]interf
 	return
 }
 
-// FirstByAccountId where("`account_id`=@accountId")
+// FirstByAccountId WHERE("`account_id` = @accountId")
 func (a accountDo) FirstByAccountId(accountId string) (result model.Account, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder
 	params = append(params, accountId)
-	generateSQL.WriteString("`account_id`=? ")
+	generateSQL.WriteString("`account_id` = ? ")
 
 	var executeSQL *gorm.DB
 

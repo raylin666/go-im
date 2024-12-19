@@ -130,6 +130,7 @@ func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 		LastLoginIp:    loginResponse.LastLoginIp,
 		FirstLoginTime: loginResponse.FirstLoginTime.Unix(),
 		LastLoginTime:  loginResponse.LastLoginTime.Unix(),
+		OnlineId:       int64(loginResponse.OnlineId),
 	}
 
 	return resp, nil

@@ -56,6 +56,8 @@ enum ErrorReason {
   ACCOUNT_NOT_FOUND = 205002 [(errors.code) = 400];
   // 账号登录错误
   ACCOUNT_LOGIN_ERROR = 205003 [(errors.code) = 400];
+  // 帐号已登录
+  ACCOUNT_IS_LOGIN = 203004 [(errors.code) = 400];
 
   // 接收者账号不存在
   TO_ACCOUNT_NOT_FOUND = 206001 [(errors.code) = 400];

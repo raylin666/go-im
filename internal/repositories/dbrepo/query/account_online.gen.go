@@ -6,6 +6,7 @@ package query
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -135,6 +136,23 @@ func (a accountOnline) replaceDB(db *gorm.DB) accountOnline {
 }
 
 type accountOnlineDo struct{ gen.DO }
+
+// CheckClientIsOnline SELECT EXISTS (SELECT * FROM @@table WHERE `client_addr`=@clientAddr AND `server_addr` = @serverAddr AND `logout_time` IS NULL) AS `ok`
+func (a accountOnlineDo) CheckClientIsOnline(clientAddr string, serverAddr string) (result map[string]interface{}, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, clientAddr)
+	params = append(params, serverAddr)
+	generateSQL.WriteString("SELECT EXISTS (SELECT * FROM account_online WHERE `client_addr`=? AND `server_addr` = ? AND `logout_time` IS NULL) AS `ok` ")
+
+	result = make(map[string]interface{})
+	var executeSQL *gorm.DB
+
+	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Take(result)
+	err = executeSQL.Error
+	return
+}
 
 func (a accountOnlineDo) Debug() *accountOnlineDo {
 	return a.withDO(a.DO.Debug())

@@ -291,6 +291,20 @@ func ErrorAccountLoginError(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_ACCOUNT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
 }
 
+// 帐号已登录
+func IsAccountIsLogin(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_ACCOUNT_IS_LOGIN.String() && e.Code == 400
+}
+
+// 帐号已登录
+func ErrorAccountIsLogin(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ACCOUNT_IS_LOGIN.String(), fmt.Sprintf(format, args...))
+}
+
 // 接收者账号不存在
 func IsToAccountNotFound(err error) bool {
 	if err == nil {

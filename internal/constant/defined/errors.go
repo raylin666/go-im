@@ -26,6 +26,7 @@ var (
 	ErrorGenerateTokenError = api.ErrorGenerateTokenError("生成TOKEN失败")
 	ErrorAccountNotFound    = api.ErrorAccountNotFound("账号不存在")
 	ErrorAccountLoginError  = api.ErrorAccountLoginError("账号登录错误")
+	ErrorAccountIsLogin     = api.ErrorAccountIsLogin("帐号已登录")
 
 	ErrorToAccountNotFound           = api.ErrorToAccountNotFound("接收者账号不存在")
 	ErrorSendMessageTypeNotFound     = api.ErrorSendMessageTypeNotFound("发送消息类型错误")

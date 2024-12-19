@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/metadata"
 	"github.com/google/uuid"
+	gorillaWebsocket "github.com/gorilla/websocket"
 	"go.uber.org/zap"
 	accountPb "mt/api/v1/account"
 	"mt/internal/constant/defined"
@@ -64,7 +65,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO 更新帐号登录信息
+	// TODO 登录帐号
 	account, err := h.grpcClient.Account.Login(ctx, &accountPb.LoginRequest{
 		AccountId:  jwtClaims.ID,
 		ClientIp:   clientIp,
@@ -74,9 +75,9 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		Os:         []byte(r.Header.Get("os")),
 		System:     r.Header.Get("system"),
 	})
+
 	if err != nil {
-		var e = defined.ErrorAccountLoginError
-		http.Error(w, e.GetMessage(), int(e.GetCode()))
+		conn.WriteMessage(gorillaWebsocket.TextMessage, []byte(fmt.Sprintf("%s: %s", defined.ErrorAccountLoginError.GetMessage(), err.Error())))
 		conn.Close()
 		return
 	}

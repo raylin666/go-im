@@ -126,6 +126,18 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		return nil, nil, defined.ErrorDataSelectError
 	}
 
+	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).AccountOnline
+
+	// 校验同客户端是否已登录
+	if checkClientAccountOnlineResult, err := accountOnlineQuery.WithContext(ctx).CheckClientIsOnline(data.ClientAddr, data.ServerAddr); err == nil {
+		if existsResult, existsResultOk := checkClientAccountOnlineResult["ok"]; existsResultOk {
+			existsValue, existsValueOk := existsResult.(int64)
+			if existsValueOk && existsValue > 0 {
+				return nil, nil, defined.ErrorAccountIsLogin
+			}
+		}
+	}
+
 	var (
 		timeNow          = time.Now()
 		isOnline    int8 = 1
@@ -142,7 +154,6 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 	accountOnline.DeviceId = data.DeviceId
 	accountOnline.Os = data.Os
 	accountOnline.System = data.System
-	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).AccountOnline
 	if err := accountOnlineQuery.WithContext(ctx).Create(accountOnline); err != nil {
 		r.tools.Logger().UseSQL(ctx).Error("登录账号写入在线表失败", zap.Any("account", originAccount), zap.Any("account_online", accountOnline), zap.Error(err))
 		return nil, nil, defined.ErrorAccountLoginError
