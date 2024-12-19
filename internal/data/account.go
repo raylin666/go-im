@@ -154,7 +154,6 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 	accountOnline.DeviceId = data.DeviceId
 	accountOnline.Os = data.Os
 	accountOnline.System = data.System
-
 	if err := accountOnlineQuery.WithContext(ctx).Create(accountOnline); err != nil {
 		r.tools.Logger().UseSQL(ctx).Error("登录账号写入在线表失败", zap.Any("account", originAccount), zap.Any("account_online", accountOnline), zap.Error(err))
 		return nil, nil, defined.ErrorAccountLoginError
