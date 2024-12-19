@@ -115,15 +115,15 @@ func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Acc
 }
 
 // Login 登录帐号
-func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, error) {
+func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, *model.AccountOnline, error) {
 	q := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).Account
 	originAccount, dataExistErr := q.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-			return nil, defined.ErrorDataNotFound
+			return nil, nil, defined.ErrorAccountNotFound
 		}
 
-		return nil, defined.ErrorDataSelectError
+		return nil, nil, defined.ErrorDataSelectError
 	}
 
 	var (
@@ -142,10 +142,10 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 	accountOnline.DeviceId = data.DeviceId
 	accountOnline.Os = data.Os
 	accountOnline.System = data.System
-
 	accountOnlineQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).AccountOnline
 	if err := accountOnlineQuery.WithContext(ctx).Create(accountOnline); err != nil {
-		return nil, err
+		r.tools.Logger().UseSQL(ctx).Error("登录账号写入在线表失败", zap.Any("account", originAccount), zap.Any("account_online", accountOnline), zap.Error(err))
+		return nil, nil, defined.ErrorAccountLoginError
 	}
 
 	account := originAccount
@@ -153,30 +153,21 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 	account.LastLoginTime = &timeNow
 	account.LastLoginIp = lastLoginIp
 	account.UpdatedAt = timeNow
-
 	assignExpr := []field.AssignExpr{
 		q.IsOnline.Value(isOnline),
 		q.LastLoginTime.Value(timeNow),
 		q.LastLoginIp.Value(lastLoginIp),
 		q.UpdatedAt.Value(timeNow),
 	}
-
 	if originAccount.FirstLoginTime == nil {
-		if accountOnlineExistsResult, err := accountOnlineQuery.WithContext(ctx).ExistsByAccountId(originAccount.AccountId); err == nil {
-			if existsResult, existsResultOk := accountOnlineExistsResult["ok"]; existsResultOk {
-				existsValue, existsValueOk := existsResult.(int64)
-				if existsValueOk && existsValue == 0 {
-					account.FirstLoginTime = &timeNow
-					assignExpr = append(assignExpr, q.FirstLoginTime.Value(timeNow))
-				}
-			}
-		}
+		account.FirstLoginTime = &timeNow
+		assignExpr = append(assignExpr, q.FirstLoginTime.Value(timeNow))
 	}
 
 	if _, updateDataErr := q.WithContext(ctx).Where(q.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
-		r.tools.Logger().UseSQL(ctx).Error("更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Error(updateDataErr))
-		return nil, defined.ErrorDataUpdateError
+		r.tools.Logger().UseSQL(ctx).Error("更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
+		return nil, nil, defined.ErrorDataUpdateError
 	}
 
-	return &account, nil
+	return &account, accountOnline, nil
 }

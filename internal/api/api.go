@@ -1,8 +1,6 @@
 package api
 
 import (
-	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/google/wire"
 	"github.com/gorilla/mux"
 	"mt/config"
@@ -52,11 +50,4 @@ func (h *Handler) Router() *mux.Router {
 	}
 
 	return h.r
-}
-
-// writeError 写入错误信息
-func (h *Handler) writeError(w http.ResponseWriter, err *errors.Error) {
-	_, _ = w.Write([]byte(err.Reason))
-	w.WriteHeader(int(err.Code))
-	return
 }

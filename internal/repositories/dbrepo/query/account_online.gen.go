@@ -6,7 +6,6 @@ package query
 
 import (
 	"context"
-	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -136,22 +135,6 @@ func (a accountOnline) replaceDB(db *gorm.DB) accountOnline {
 }
 
 type accountOnlineDo struct{ gen.DO }
-
-// ExistsByAccountId SELECT EXISTS (SELECT * FROM @@table WHERE `account_id`=@accountId) AS `ok`
-func (a accountOnlineDo) ExistsByAccountId(accountId string) (result map[string]interface{}, err error) {
-	var params []interface{}
-
-	var generateSQL strings.Builder
-	params = append(params, accountId)
-	generateSQL.WriteString("SELECT EXISTS (SELECT * FROM account_online WHERE `account_id`=?) AS `ok` ")
-
-	result = make(map[string]interface{})
-	var executeSQL *gorm.DB
-
-	executeSQL = a.UnderlyingDB().Raw(generateSQL.String(), params...).Take(result)
-	err = executeSQL.Error
-	return
-}
 
 func (a accountOnlineDo) Debug() *accountOnlineDo {
 	return a.withDO(a.DO.Debug())

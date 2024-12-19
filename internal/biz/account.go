@@ -18,7 +18,7 @@ type AccountRepo interface {
 	Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error)
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
 	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
-	Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, error)
+	Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, *model.AccountOnline, error)
 }
 
 type AccountUsecase struct {
@@ -32,17 +32,17 @@ func NewAccountUsecase(repo AccountRepo, tools *app.Tools) *AccountUsecase {
 
 // Create 创建账号
 func (uc *AccountUsecase) Create(ctx context.Context, req *typeAccount.CreateRequest) (*typeAccount.CreateResponse, error) {
-	m, err := uc.repo.Create(ctx, req)
+	account, err := uc.repo.Create(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &typeAccount.CreateResponse{
-		AccountId: m.AccountId,
-		Nickname:  m.Nickname,
-		Avatar:    m.Avatar,
-		IsAdmin:   m.IsAdmin == 1,
-		CreatedAt: m.CreatedAt,
+		AccountId: account.AccountId,
+		Nickname:  account.Nickname,
+		Avatar:    account.Avatar,
+		IsAdmin:   account.IsAdmin == 1,
+		CreatedAt: account.CreatedAt,
 	}
 
 	return resp, nil
@@ -50,17 +50,17 @@ func (uc *AccountUsecase) Create(ctx context.Context, req *typeAccount.CreateReq
 
 // Update 更新账号
 func (uc *AccountUsecase) Update(ctx context.Context, accountId string, req *typeAccount.UpdateRequest) (*typeAccount.UpdateResponse, error) {
-	m, err := uc.repo.Update(ctx, accountId, req)
+	account, err := uc.repo.Update(ctx, accountId, req)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &typeAccount.UpdateResponse{
-		AccountId: m.AccountId,
-		Nickname:  m.Nickname,
-		Avatar:    m.Avatar,
-		IsAdmin:   m.IsAdmin == 1,
-		CreatedAt: m.CreatedAt,
+		AccountId: account.AccountId,
+		Nickname:  account.Nickname,
+		Avatar:    account.Avatar,
+		IsAdmin:   account.IsAdmin == 1,
+		CreatedAt: account.CreatedAt,
 	}
 
 	return resp, nil
@@ -68,33 +68,33 @@ func (uc *AccountUsecase) Update(ctx context.Context, accountId string, req *typ
 
 // Delete 删除账号
 func (uc *AccountUsecase) Delete(ctx context.Context, accountId string) (*typeAccount.DeleteResponse, error) {
-	m, err := uc.repo.Delete(ctx, accountId)
+	account, err := uc.repo.Delete(ctx, accountId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &typeAccount.DeleteResponse{AccountId: m.AccountId}, nil
+	return &typeAccount.DeleteResponse{AccountId: account.AccountId}, nil
 }
 
 // GetInfo 获取账号信息
 func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeAccount.GetInfoResponse, error) {
-	m, err := uc.repo.GetInfo(ctx, accountId)
+	account, err := uc.repo.GetInfo(ctx, accountId)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &typeAccount.GetInfoResponse{
-		AccountId:      m.AccountId,
-		Nickname:       m.Nickname,
-		Avatar:         m.Avatar,
-		IsAdmin:        m.IsAdmin == 1,
-		IsOnline:       m.IsOnline == 1,
-		LastLoginIp:    m.LastLoginIp,
-		FirstLoginTime: m.FirstLoginTime,
-		LastLoginTime:  m.LastLoginTime,
-		CreatedAt:      m.CreatedAt,
-		UpdatedAt:      m.UpdatedAt,
-		DeletedAt:      &m.DeletedAt.Time,
+		AccountId:      account.AccountId,
+		Nickname:       account.Nickname,
+		Avatar:         account.Avatar,
+		IsAdmin:        account.IsAdmin == 1,
+		IsOnline:       account.IsOnline == 1,
+		LastLoginIp:    account.LastLoginIp,
+		FirstLoginTime: account.FirstLoginTime,
+		LastLoginTime:  account.LastLoginTime,
+		CreatedAt:      account.CreatedAt,
+		UpdatedAt:      account.UpdatedAt,
+		DeletedAt:      &account.DeletedAt.Time,
 	}
 
 	return resp, nil
@@ -102,20 +102,21 @@ func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeA
 
 // Login 登录帐号
 func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *typeAccount.LoginRequest) (*typeAccount.LoginResponse, error) {
-	m, err := uc.repo.Login(ctx, accountId, req)
+	account, accountOnline, err := uc.repo.Login(ctx, accountId, req)
 	if err != nil {
 		return nil, err
 	}
 
 	resp := &typeAccount.LoginResponse{
-		AccountId:      m.AccountId,
-		Nickname:       m.Nickname,
-		Avatar:         m.Avatar,
-		IsAdmin:        m.IsAdmin == 1,
-		IsOnline:       m.IsOnline == 1,
-		LastLoginIp:    m.LastLoginIp,
-		FirstLoginTime: m.FirstLoginTime,
-		LastLoginTime:  m.LastLoginTime,
+		AccountId:      account.AccountId,
+		Nickname:       account.Nickname,
+		Avatar:         account.Avatar,
+		IsAdmin:        account.IsAdmin == 1,
+		IsOnline:       account.IsOnline == 1,
+		LastLoginIp:    account.LastLoginIp,
+		FirstLoginTime: account.FirstLoginTime,
+		LastLoginTime:  account.LastLoginTime,
+		OnlineId:       accountOnline.ID,
 	}
 
 	return resp, nil

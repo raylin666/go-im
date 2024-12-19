@@ -30,21 +30,16 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	// TODO 登录身份验证
 	accountToken := query.Get("account_token")
 	if accountToken == "" {
-		h.writeError(w, defined.ErrorNotVisitAuth)
+		e := defined.ErrorNotVisitAuth
+		http.Error(w, e.GetMessage(), int(e.GetCode()))
 		return
 	}
 
 	// TODO 解析TOKEN
 	jwtClaims, err := h.tools.JWT().ParseToken(accountToken)
 	if err != nil {
-		h.writeError(w, defined.ErrorNotLoginError)
-		return
-	}
-
-	// 更新帐号登录信息
-	account, err := h.grpcClient.Account.UpdateLogin(ctx, &accountPb.UpdateLoginRequest{AccountId: jwtClaims.ID, ClientIp: clientIp})
-	if err != nil {
-		h.writeError(w, defined.ErrorAccountLoginError)
+		e := defined.ErrorNotLoginError
+		http.Error(w, e.GetMessage(), int(e.GetCode()))
 		return
 	}
 
@@ -64,16 +59,34 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		}))
 	if err != nil {
 		var e = defined.ErrorWebsocketUpgraderError
-		h.writeError(w, e)
-		h.tools.Logger().UseWebSocket(ctx).Error(fmt.Sprintf("WebSocket 建立连接失败: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account), zap.Error(err))
+		http.Error(w, e.GetMessage(), int(e.GetCode()))
+		h.tools.Logger().UseWebSocket(ctx).Error(fmt.Sprintf("WebSocket 建立连接失败: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account_id", jwtClaims.ID), zap.Error(err))
+		return
+	}
+
+	// TODO 更新帐号登录信息
+	account, err := h.grpcClient.Account.Login(ctx, &accountPb.LoginRequest{
+		AccountId:  jwtClaims.ID,
+		ClientIp:   clientIp,
+		ClientAddr: conn.LocalAddr().String(),
+		ServerAddr: conn.RemoteAddr().String(),
+		DeviceId:   r.Header.Get("device_id"),
+		Os:         []byte(r.Header.Get("os")),
+		System:     r.Header.Get("system"),
+	})
+	fmt.Println(account)
+	if err != nil {
+		var e = defined.ErrorAccountLoginError
+		http.Error(w, e.GetMessage(), int(e.GetCode()))
+		conn.Close()
 		return
 	}
 
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接完成: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
-	// 创建客户端连接, 完成帐号连接信息存储
+	// TODO 创建客户端连接, 完成帐号连接信息存储
 	client := h.wsClientManager.CreateClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, account.IsAdmin), conn)
 
-	// 监听客户端连接消息读写及事件处理
+	// TODO 监听客户端连接消息读写及事件处理
 	h.wsClientManager.ClientRegister(client)
 }
