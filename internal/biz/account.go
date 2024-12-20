@@ -125,7 +125,7 @@ func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *type
 // GenerateToken 生成TOKEN
 func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, ttl int64) (*typeAccount.GenerateTokenResponse, error) {
 	if accountId == "" {
-		return nil, defined.ErrorRequestParamsError
+		return nil, defined.ErrorRequestParams
 	}
 
 	// 默认Token为1天过期
@@ -135,7 +135,7 @@ func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, t
 
 	token, err := uc.tools.JWT().GenerateToken(accountId, time.Duration(ttl)*time.Second, auth.JWTClaimsOptions{})
 	if err != nil {
-		return nil, defined.ErrorGenerateTokenError
+		return nil, defined.ErrorGenerateToken
 	}
 
 	resp := &typeAccount.GenerateTokenResponse{

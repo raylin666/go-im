@@ -50,7 +50,7 @@ func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateReques
 	}
 	if createDataErr := dbQuery.Account.WithContext(ctx).Create(account); createDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("创建账号错误", zap.Any("account", account), zap.Error(createDataErr))
-		return nil, defined.ErrorDataAddError
+		return nil, defined.ErrorDataAdd
 	}
 
 	return account, nil
@@ -65,7 +65,7 @@ func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAc
 			return nil, defined.ErrorDataNotFound
 		}
 
-		return nil, defined.ErrorDataSelectError
+		return nil, defined.ErrorDataSelect
 	}
 
 	originAccount := account
@@ -79,7 +79,7 @@ func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAc
 
 	if updateDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(accountId)).Save(&account); updateDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("更新账号错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Error(updateDataErr))
-		return nil, defined.ErrorDataUpdateError
+		return nil, defined.ErrorDataUpdate
 	}
 
 	return &account, nil
@@ -94,7 +94,7 @@ func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Acco
 	}
 	if result, deleteDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(accountId)).Delete(&account); deleteDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("删除账号错误", zap.Any("account_id", accountId), zap.Any("result", result), zap.Error(deleteDataErr))
-		return nil, defined.ErrorDataDeleteError
+		return nil, defined.ErrorDataDelete
 	}
 
 	return &account, nil
@@ -109,7 +109,7 @@ func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Acc
 			return nil, defined.ErrorDataNotFound
 		}
 
-		return nil, defined.ErrorDataSelectError
+		return nil, defined.ErrorDataSelect
 	}
 
 	return &account, nil
@@ -125,7 +125,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 			return nil, nil, defined.ErrorAccountNotFound
 		}
 
-		return nil, nil, defined.ErrorDataSelectError
+		return nil, nil, defined.ErrorDataSelect
 	}
 
 	// 校验同客户端是否已登录
@@ -159,7 +159,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		accountOnline.System = data.System
 		if err := tx.AccountOnline.WithContext(ctx).Create(accountOnline); err != nil {
 			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 写入帐号在线表失败", zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(err))
-			return defined.ErrorDataAddError
+			return defined.ErrorDataAdd
 		}
 
 		account.IsOnline = isOnline
@@ -179,7 +179,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 
 		if _, updateDataErr := tx.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
 			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
-			return defined.ErrorDataUpdateError
+			return defined.ErrorDataUpdate
 		}
 
 		// 返回 nil 提交事务

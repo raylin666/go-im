@@ -11,62 +11,60 @@ enum ErrorReason {
   option (errors.default_code) = 500;
 
   // 未知错误
-  UNKNOWN_ERROR = 0;
+  UNKNOWN = 0;
 
   // 服务异常
-  SERVER_ERROR = 100001 [(errors.code) = 500];
+  SERVER = 100001 [(errors.code) = 500];
+  // 服务协议升级失败
+  SERVER_UPGRADER = 100002 [(errors.code) = 500];
 
   // 数据校验失败
-  DATA_VALIDATE_ERROR = 201001 [(errors.code) = 422];
+  DATA_VALIDATE = 201001 [(errors.code) = 422];
   // 数据查询失败
-  DATA_SELECT_ERROR = 201002 [(errors.code) = 400];
+  DATA_SELECT = 201002 [(errors.code) = 400];
   // 数据已存在
   DATA_ALREADY_EXISTS = 201003 [(errors.code) = 400];
   // 数据不存在
-  DATA_NOT_FOUND = 201004 [(errors.code) = 400];
+  DATA_NOT_FOUND = 201004 [(errors.code) = 404];
   // 新增数据失败
-  DATA_ADD_ERROR = 201005 [(errors.code) = 400];
+  DATA_ADD = 201005 [(errors.code) = 500];
   // 更新数据失败
-  DATA_UPDATE_ERROR = 201006 [(errors.code) = 400];
+  DATA_UPDATE = 201006 [(errors.code) = 500];
   // 数据删除失败
-  DATA_DELETE_ERROR = 201007 [(errors.code) = 400];
+  DATA_DELETE = 201007 [(errors.code) = 500];
   // 数据资源不存在
-  DATA_RESOURCE_NOT_FOUND = 201008 [(errors.code) = 400];
+  DATA_RESOURCE_NOT_FOUND = 201008 [(errors.code) = 404];
   // 数据属性更新失败
-  DATA_UPDATE_FIELD_ERROR = 201009 [(errors.code) = 400];
+  DATA_UPDATE_FIELD = 201009 [(errors.code) = 500];
 
   // 无效ID值
-  ID_INVALID_VALUE_ERROR = 202001 [(errors.code) = 400];
+  ID_INVALID_VALUE = 202001 [(errors.code) = 404];
   // 无效的执行指令
   COMMAND_INVALID_NOT_FOUND = 202002 [(errors.code) = 400];
   // 请求参数错误
-  REQUEST_PARAMS_ERROR = 202003 [(errors.code) = 400];
+  REQUEST_PARAMS = 202003 [(errors.code) = 400];
 
-  // 请先登录后再操作
-  NOT_LOGIN_ERROR = 203001 [(errors.code) = 401];
+  // 未登录帐号
+  NOT_LOGIN = 203001 [(errors.code) = 401];
   // 没有访问权限
   NOT_VISIT_AUTH = 203002 [(errors.code) = 401];
-
-  // WebSocket 协议升级失败
-  WEBSOCKET_UPGRADER_ERROR = 204001 [(errors.code) = 400];
-
   // 生成TOKEN失败
-  GENERATE_TOKEN_ERROR = 205001 [(errors.code) = 500];
+  GENERATE_TOKEN = 203003 [(errors.code) = 500];
   // 账号不存在
-  ACCOUNT_NOT_FOUND = 205002 [(errors.code) = 400];
+  ACCOUNT_NOT_FOUND = 203004 [(errors.code) = 404];
   // 账号登录错误
-  ACCOUNT_LOGIN_ERROR = 205003 [(errors.code) = 400];
+  ACCOUNT_LOGIN = 203005 [(errors.code) = 400];
   // 帐号已登录
-  ACCOUNT_IS_LOGIN = 203004 [(errors.code) = 400];
+  ACCOUNT_IS_LOGIN = 203006 [(errors.code) = 400];
 
   // 接收者账号不存在
-  TO_ACCOUNT_NOT_FOUND = 206001 [(errors.code) = 400];
+  TO_ACCOUNT_NOT_FOUND = 204001 [(errors.code) = 404];
   // 发送消息类型错误
-  SEND_MESSAGE_TYPE_NOT_FOUND = 206002 [(errors.code) = 400];
+  SEND_MESSAGE_TYPE_NOT_FOUND = 204002 [(errors.code) = 400];
   // 发送消息内容必填
-  SEND_MESSAGE_CONTENT_REQUIRED = 206003 [(errors.code) = 400];
+  SEND_MESSAGE_CONTENT_REQUIRED = 204003 [(errors.code) = 422];
   // 接收者账号不能和发送者账号一致
-  TO_ACCOUNT_AND_FROM_ACCOUNT_SAME = 206004 [(errors.code) = 400];
+  TO_ACCOUNT_AND_FROM_ACCOUNT_SAME = 204004 [(errors.code) = 400];
   // 发送消息失败, 请重试
-  SEND_MESSAGE_ERROR = 206005 [(errors.code) = 400];
+  SEND_MESSAGE = 204005 [(errors.code) = 400];
 }

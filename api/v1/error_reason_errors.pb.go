@@ -12,59 +12,73 @@ import (
 const _ = errors.SupportPackageIsVersion1
 
 // 未知错误
-func IsUnknownError(err error) bool {
+func IsUnknown(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_UNKNOWN_ERROR.String() && e.Code == 500
+	return e.Reason == ErrorReason_UNKNOWN.String() && e.Code == 500
 }
 
 // 未知错误
-func ErrorUnknownError(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, ErrorReason_UNKNOWN_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorUnknown(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_UNKNOWN.String(), fmt.Sprintf(format, args...))
 }
 
 // 服务异常
-func IsServerError(err error) bool {
+func IsServer(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_SERVER_ERROR.String() && e.Code == 500
+	return e.Reason == ErrorReason_SERVER.String() && e.Code == 500
 }
 
 // 服务异常
-func ErrorServerError(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, ErrorReason_SERVER_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorServer(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_SERVER.String(), fmt.Sprintf(format, args...))
 }
 
-// 数据校验失败
-func IsDataValidateError(err error) bool {
+// 服务协议升级失败
+func IsServerUpgrader(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_VALIDATE_ERROR.String() && e.Code == 422
+	return e.Reason == ErrorReason_SERVER_UPGRADER.String() && e.Code == 500
+}
+
+// 服务协议升级失败
+func ErrorServerUpgrader(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_SERVER_UPGRADER.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据校验失败
-func ErrorDataValidateError(format string, args ...interface{}) *errors.Error {
-	return errors.New(422, ErrorReason_DATA_VALIDATE_ERROR.String(), fmt.Sprintf(format, args...))
-}
-
-// 数据查询失败
-func IsDataSelectError(err error) bool {
+func IsDataValidate(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_SELECT_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_VALIDATE.String() && e.Code == 422
+}
+
+// 数据校验失败
+func ErrorDataValidate(format string, args ...interface{}) *errors.Error {
+	return errors.New(422, ErrorReason_DATA_VALIDATE.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据查询失败
-func ErrorDataSelectError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_SELECT_ERROR.String(), fmt.Sprintf(format, args...))
+func IsDataSelect(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_DATA_SELECT.String() && e.Code == 400
+}
+
+// 数据查询失败
+func ErrorDataSelect(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_DATA_SELECT.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据已存在
@@ -87,54 +101,54 @@ func IsDataNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_NOT_FOUND.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_NOT_FOUND.String() && e.Code == 404
 }
 
 // 数据不存在
 func ErrorDataNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_DATA_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // 新增数据失败
-func IsDataAddError(err error) bool {
+func IsDataAdd(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_ADD_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_ADD.String() && e.Code == 500
 }
 
 // 新增数据失败
-func ErrorDataAddError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_ADD_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorDataAdd(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_ADD.String(), fmt.Sprintf(format, args...))
 }
 
 // 更新数据失败
-func IsDataUpdateError(err error) bool {
+func IsDataUpdate(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_UPDATE_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_UPDATE.String() && e.Code == 500
 }
 
 // 更新数据失败
-func ErrorDataUpdateError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_UPDATE_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorDataUpdate(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_UPDATE.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据删除失败
-func IsDataDeleteError(err error) bool {
+func IsDataDelete(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_DELETE_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_DELETE.String() && e.Code == 500
 }
 
 // 数据删除失败
-func ErrorDataDeleteError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_DELETE_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorDataDelete(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_DELETE.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据资源不存在
@@ -143,40 +157,40 @@ func IsDataResourceNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_RESOURCE_NOT_FOUND.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_RESOURCE_NOT_FOUND.String() && e.Code == 404
 }
 
 // 数据资源不存在
 func ErrorDataResourceNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_RESOURCE_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_DATA_RESOURCE_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // 数据属性更新失败
-func IsDataUpdateFieldError(err error) bool {
+func IsDataUpdateField(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_DATA_UPDATE_FIELD_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_DATA_UPDATE_FIELD.String() && e.Code == 500
 }
 
 // 数据属性更新失败
-func ErrorDataUpdateFieldError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_DATA_UPDATE_FIELD_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorDataUpdateField(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_DATA_UPDATE_FIELD.String(), fmt.Sprintf(format, args...))
 }
 
 // 无效ID值
-func IsIdInvalidValueError(err error) bool {
+func IsIdInvalidValue(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_ID_INVALID_VALUE_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_ID_INVALID_VALUE.String() && e.Code == 404
 }
 
 // 无效ID值
-func ErrorIdInvalidValueError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_ID_INVALID_VALUE_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorIdInvalidValue(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_ID_INVALID_VALUE.String(), fmt.Sprintf(format, args...))
 }
 
 // 无效的执行指令
@@ -194,31 +208,31 @@ func ErrorCommandInvalidNotFound(format string, args ...interface{}) *errors.Err
 }
 
 // 请求参数错误
-func IsRequestParamsError(err error) bool {
+func IsRequestParams(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_REQUEST_PARAMS_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_REQUEST_PARAMS.String() && e.Code == 400
 }
 
 // 请求参数错误
-func ErrorRequestParamsError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_REQUEST_PARAMS_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorRequestParams(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_REQUEST_PARAMS.String(), fmt.Sprintf(format, args...))
 }
 
-// 请先登录后再操作
-func IsNotLoginError(err error) bool {
+// 未登录帐号
+func IsNotLogin(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_NOT_LOGIN_ERROR.String() && e.Code == 401
+	return e.Reason == ErrorReason_NOT_LOGIN.String() && e.Code == 401
 }
 
-// 请先登录后再操作
-func ErrorNotLoginError(format string, args ...interface{}) *errors.Error {
-	return errors.New(401, ErrorReason_NOT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
+// 未登录帐号
+func ErrorNotLogin(format string, args ...interface{}) *errors.Error {
+	return errors.New(401, ErrorReason_NOT_LOGIN.String(), fmt.Sprintf(format, args...))
 }
 
 // 没有访问权限
@@ -235,32 +249,18 @@ func ErrorNotVisitAuth(format string, args ...interface{}) *errors.Error {
 	return errors.New(401, ErrorReason_NOT_VISIT_AUTH.String(), fmt.Sprintf(format, args...))
 }
 
-// WebSocket 协议升级失败
-func IsWebsocketUpgraderError(err error) bool {
+// 生成TOKEN失败
+func IsGenerateToken(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_WEBSOCKET_UPGRADER_ERROR.String() && e.Code == 400
-}
-
-// WebSocket 协议升级失败
-func ErrorWebsocketUpgraderError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_WEBSOCKET_UPGRADER_ERROR.String(), fmt.Sprintf(format, args...))
+	return e.Reason == ErrorReason_GENERATE_TOKEN.String() && e.Code == 500
 }
 
 // 生成TOKEN失败
-func IsGenerateTokenError(err error) bool {
-	if err == nil {
-		return false
-	}
-	e := errors.FromError(err)
-	return e.Reason == ErrorReason_GENERATE_TOKEN_ERROR.String() && e.Code == 500
-}
-
-// 生成TOKEN失败
-func ErrorGenerateTokenError(format string, args ...interface{}) *errors.Error {
-	return errors.New(500, ErrorReason_GENERATE_TOKEN_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorGenerateToken(format string, args ...interface{}) *errors.Error {
+	return errors.New(500, ErrorReason_GENERATE_TOKEN.String(), fmt.Sprintf(format, args...))
 }
 
 // 账号不存在
@@ -269,26 +269,26 @@ func IsAccountNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_ACCOUNT_NOT_FOUND.String() && e.Code == 400
+	return e.Reason == ErrorReason_ACCOUNT_NOT_FOUND.String() && e.Code == 404
 }
 
 // 账号不存在
 func ErrorAccountNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_ACCOUNT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_ACCOUNT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // 账号登录错误
-func IsAccountLoginError(err error) bool {
+func IsAccountLogin(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_ACCOUNT_LOGIN_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_ACCOUNT_LOGIN.String() && e.Code == 400
 }
 
 // 账号登录错误
-func ErrorAccountLoginError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_ACCOUNT_LOGIN_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorAccountLogin(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_ACCOUNT_LOGIN.String(), fmt.Sprintf(format, args...))
 }
 
 // 帐号已登录
@@ -311,12 +311,12 @@ func IsToAccountNotFound(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_TO_ACCOUNT_NOT_FOUND.String() && e.Code == 400
+	return e.Reason == ErrorReason_TO_ACCOUNT_NOT_FOUND.String() && e.Code == 404
 }
 
 // 接收者账号不存在
 func ErrorToAccountNotFound(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_TO_ACCOUNT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+	return errors.New(404, ErrorReason_TO_ACCOUNT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
 }
 
 // 发送消息类型错误
@@ -339,12 +339,12 @@ func IsSendMessageContentRequired(err error) bool {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_SEND_MESSAGE_CONTENT_REQUIRED.String() && e.Code == 400
+	return e.Reason == ErrorReason_SEND_MESSAGE_CONTENT_REQUIRED.String() && e.Code == 422
 }
 
 // 发送消息内容必填
 func ErrorSendMessageContentRequired(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_SEND_MESSAGE_CONTENT_REQUIRED.String(), fmt.Sprintf(format, args...))
+	return errors.New(422, ErrorReason_SEND_MESSAGE_CONTENT_REQUIRED.String(), fmt.Sprintf(format, args...))
 }
 
 // 接收者账号不能和发送者账号一致
@@ -362,15 +362,15 @@ func ErrorToAccountAndFromAccountSame(format string, args ...interface{}) *error
 }
 
 // 发送消息失败, 请重试
-func IsSendMessageError(err error) bool {
+func IsSendMessage(err error) bool {
 	if err == nil {
 		return false
 	}
 	e := errors.FromError(err)
-	return e.Reason == ErrorReason_SEND_MESSAGE_ERROR.String() && e.Code == 400
+	return e.Reason == ErrorReason_SEND_MESSAGE.String() && e.Code == 400
 }
 
 // 发送消息失败, 请重试
-func ErrorSendMessageError(format string, args ...interface{}) *errors.Error {
-	return errors.New(400, ErrorReason_SEND_MESSAGE_ERROR.String(), fmt.Sprintf(format, args...))
+func ErrorSendMessage(format string, args ...interface{}) *errors.Error {
+	return errors.New(400, ErrorReason_SEND_MESSAGE.String(), fmt.Sprintf(format, args...))
 }
