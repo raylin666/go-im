@@ -157,9 +157,9 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		accountOnline.DeviceId = data.DeviceId
 		accountOnline.Os = data.Os
 		accountOnline.System = data.System
-		if err := dbQuery.AccountOnline.WithContext(ctx).Create(accountOnline); err != nil {
+		if err := tx.AccountOnline.WithContext(ctx).Create(accountOnline); err != nil {
 			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 写入帐号在线表失败", zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(err))
-			return defined.ErrorAccountLoginError
+			return defined.ErrorDataAddError
 		}
 
 		account.IsOnline = isOnline
@@ -177,7 +177,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 			assignExpr = append(assignExpr, dbQuery.Account.FirstLoginTime.Value(timeNow))
 		}
 
-		if _, updateDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
+		if _, updateDataErr := tx.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
 			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
 			return defined.ErrorDataUpdateError
 		}
