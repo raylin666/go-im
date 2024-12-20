@@ -154,6 +154,21 @@ func (a accountOnlineDo) CheckClientIsOnline(clientAddr string, serverAddr strin
 	return
 }
 
+// FirstByOnlineId WHERE("`id` = @onlineId")
+func (a accountOnlineDo) FirstByOnlineId(onlineId int) (result model.AccountOnline, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, onlineId)
+	generateSQL.WriteString("`id` = ? ")
+
+	var executeSQL *gorm.DB
+
+	executeSQL = a.UnderlyingDB().Where(generateSQL.String(), params...).Take(&result)
+	err = executeSQL.Error
+	return
+}
+
 func (a accountOnlineDo) Debug() *accountOnlineDo {
 	return a.withDO(a.DO.Debug())
 }

@@ -107,7 +107,7 @@ func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*
 
 // Login 登录帐号
 func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	updateLoginRequest := &typeAccount.LoginRequest{
+	loginRequest := &typeAccount.LoginRequest{
 		ClientIp:   req.GetClientIp(),
 		ClientAddr: req.GetClientAddr(),
 		ServerAddr: req.GetServerAddr(),
@@ -116,7 +116,7 @@ func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 		System:     req.GetSystem(),
 	}
 
-	loginResponse, err := s.uc.Login(ctx, req.GetAccountId(), updateLoginRequest)
+	loginResponse, err := s.uc.Login(ctx, req.GetAccountId(), loginRequest)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +134,17 @@ func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 	}
 
 	return resp, nil
+}
+
+// Logout 登出帐号
+func (s *AccountService) Logout(ctx context.Context, req *pb.LogoutRequest) (*emptypb.Empty, error) {
+	clientIp := req.GetClientIp()
+	logoutRequest := &typeAccount.LogoutRequest{
+		OnlineId: int(req.GetOnlineId()),
+		ClientIp: &clientIp,
+	}
+
+	return nil, s.uc.Logout(ctx, req.GetAccountId(), logoutRequest)
 }
 
 // GenerateToken 生成TOKEN

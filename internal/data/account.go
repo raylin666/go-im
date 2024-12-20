@@ -188,3 +188,30 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 
 	return &account, accountOnline, err
 }
+
+// Logout 登出帐号
+func (r *accountRepo) Logout(ctx context.Context, accountId string, data *typeAccount.LogoutRequest) (*model.AccountOnline, error) {
+	var dbQuery = dbrepo.NewDefaultDbQuery(r.data.DbRepo())
+
+	accountOnline, dataExistErr := dbQuery.AccountOnline.WithContext(ctx).FirstByOnlineId(data.OnlineId)
+	if dataExistErr != nil {
+		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
+			return nil, defined.ErrorDataNotFound
+		}
+
+		return nil, defined.ErrorDataSelect
+	}
+
+	if data.ClientIp != nil {
+		accountOnline.LogoutIp = *data.ClientIp
+	}
+
+	timeNow := time.Now()
+	accountOnline.LogoutTime = &timeNow
+	if updateDataErr := dbQuery.AccountOnline.WithContext(ctx).Where(dbQuery.AccountOnline.AccountId.Eq(accountId)).Save(&accountOnline); updateDataErr != nil {
+		r.tools.Logger().UseSQL(ctx).Error("帐号登出失败: 更新在线账号错误", zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
+		return nil, defined.ErrorDataUpdate
+	}
+
+	return &accountOnline, nil
+}

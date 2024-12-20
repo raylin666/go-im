@@ -25,6 +25,7 @@ const (
 	Service_Delete_FullMethodName        = "/v1.account.Service/Delete"
 	Service_GetInfo_FullMethodName       = "/v1.account.Service/GetInfo"
 	Service_Login_FullMethodName         = "/v1.account.Service/Login"
+	Service_Logout_FullMethodName        = "/v1.account.Service/Logout"
 	Service_GenerateToken_FullMethodName = "/v1.account.Service/GenerateToken"
 )
 
@@ -44,6 +45,8 @@ type ServiceClient interface {
 	GetInfo(ctx context.Context, in *GetInfoRequest, opts ...grpc.CallOption) (*GetInfoResponse, error)
 	// 登录帐号
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	// 登出帐号
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	// 生成TOKEN
 	GenerateToken(ctx context.Context, in *GenerateTokenRequest, opts ...grpc.CallOption) (*GenerateTokenResponse, error)
 }
@@ -106,6 +109,16 @@ func (c *serviceClient) Login(ctx context.Context, in *LoginRequest, opts ...grp
 	return out, nil
 }
 
+func (c *serviceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, Service_Logout_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *serviceClient) GenerateToken(ctx context.Context, in *GenerateTokenRequest, opts ...grpc.CallOption) (*GenerateTokenResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GenerateTokenResponse)
@@ -132,6 +145,8 @@ type ServiceServer interface {
 	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 	// 登录帐号
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	// 登出帐号
+	Logout(context.Context, *LogoutRequest) (*emptypb.Empty, error)
 	// 生成TOKEN
 	GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error)
 	mustEmbedUnimplementedServiceServer()
@@ -158,6 +173,9 @@ func (UnimplementedServiceServer) GetInfo(context.Context, *GetInfoRequest) (*Ge
 }
 func (UnimplementedServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedServiceServer) Logout(context.Context, *LogoutRequest) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedServiceServer) GenerateToken(context.Context, *GenerateTokenRequest) (*GenerateTokenResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateToken not implemented")
@@ -273,6 +291,24 @@ func _Service_Login_Handler(srv interface{}, ctx context.Context, dec func(inter
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Service_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Service_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Service_GenerateToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GenerateTokenRequest)
 	if err := dec(in); err != nil {
@@ -317,6 +353,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Login",
 			Handler:    _Service_Login_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _Service_Logout_Handler,
 		},
 		{
 			MethodName: "GenerateToken",

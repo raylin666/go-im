@@ -151,6 +151,46 @@
         ]
       }
     },
+    "/api/account/logout/{account_id}": {
+      "put": {
+        "summary": "登出帐号",
+        "operationId": "Service_Logout",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ServiceLogoutBody"
+            }
+          }
+        ],
+        "tags": [
+          "Service"
+        ]
+      }
+    },
     "/api/account/token/{account_id}": {
       "post": {
         "summary": "生成TOKEN",
@@ -260,6 +300,18 @@
           "format": "byte"
         },
         "system": {
+          "type": "string"
+        }
+      }
+    },
+    "ServiceLogoutBody": {
+      "type": "object",
+      "properties": {
+        "online_id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "client_ip": {
           "type": "string"
         }
       }

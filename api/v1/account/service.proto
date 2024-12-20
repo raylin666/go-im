@@ -50,6 +50,14 @@ service Service {
     };
   }
 
+  // 登出帐号
+  rpc Logout (LogoutRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      put: "/api/account/logout/{account_id}"
+      body: "*"
+    };
+  }
+
   // 生成TOKEN
   rpc GenerateToken (GenerateTokenRequest) returns (GenerateTokenResponse) {
     option (google.api.http) = {
@@ -135,6 +143,12 @@ message LoginResponse {
   int64 first_login_time = 7;
   int64 last_login_time = 8;
   int64 online_id = 9;
+}
+
+message LogoutRequest {
+  string account_id = 1;
+  int64 online_id = 2;
+  optional string client_ip = 3 [(validate.rules).string.ip = true];
 }
 
 message GenerateTokenRequest {

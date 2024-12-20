@@ -25,6 +25,7 @@ const OperationServiceDelete = "/v1.account.Service/Delete"
 const OperationServiceGenerateToken = "/v1.account.Service/GenerateToken"
 const OperationServiceGetInfo = "/v1.account.Service/GetInfo"
 const OperationServiceLogin = "/v1.account.Service/Login"
+const OperationServiceLogout = "/v1.account.Service/Logout"
 const OperationServiceUpdate = "/v1.account.Service/Update"
 
 type ServiceHTTPServer interface {
@@ -38,6 +39,8 @@ type ServiceHTTPServer interface {
 	GetInfo(context.Context, *GetInfoRequest) (*GetInfoResponse, error)
 	// Login 登录帐号
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	// Logout 登出帐号
+	Logout(context.Context, *LogoutRequest) (*emptypb.Empty, error)
 	// Update 更新账号
 	Update(context.Context, *UpdateRequest) (*UpdateResponse, error)
 }
@@ -49,6 +52,7 @@ func RegisterServiceHTTPServer(s *http.Server, srv ServiceHTTPServer) {
 	r.DELETE("/api/account/delete/{account_id}", _Service_Delete0_HTTP_Handler(srv))
 	r.GET("/api/account/info/{account_id}", _Service_GetInfo0_HTTP_Handler(srv))
 	r.PUT("/api/account/login/{account_id}", _Service_Login0_HTTP_Handler(srv))
+	r.PUT("/api/account/logout/{account_id}", _Service_Logout0_HTTP_Handler(srv))
 	r.POST("/api/account/token/{account_id}", _Service_GenerateToken0_HTTP_Handler(srv))
 }
 
@@ -168,6 +172,31 @@ func _Service_Login0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) 
 	}
 }
 
+func _Service_Logout0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in LogoutRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationServiceLogout)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Logout(ctx, req.(*LogoutRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*emptypb.Empty)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _Service_GenerateToken0_HTTP_Handler(srv ServiceHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GenerateTokenRequest
@@ -199,6 +228,7 @@ type ServiceHTTPClient interface {
 	GenerateToken(ctx context.Context, req *GenerateTokenRequest, opts ...http.CallOption) (rsp *GenerateTokenResponse, err error)
 	GetInfo(ctx context.Context, req *GetInfoRequest, opts ...http.CallOption) (rsp *GetInfoResponse, err error)
 	Login(ctx context.Context, req *LoginRequest, opts ...http.CallOption) (rsp *LoginResponse, err error)
+	Logout(ctx context.Context, req *LogoutRequest, opts ...http.CallOption) (rsp *emptypb.Empty, err error)
 	Update(ctx context.Context, req *UpdateRequest, opts ...http.CallOption) (rsp *UpdateResponse, err error)
 }
 
@@ -267,6 +297,19 @@ func (c *ServiceHTTPClientImpl) Login(ctx context.Context, in *LoginRequest, opt
 	pattern := "/api/account/login/{account_id}"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationServiceLogin))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ServiceHTTPClientImpl) Logout(ctx context.Context, in *LogoutRequest, opts ...http.CallOption) (*emptypb.Empty, error) {
+	var out emptypb.Empty
+	pattern := "/api/account/logout/{account_id}"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationServiceLogout))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {

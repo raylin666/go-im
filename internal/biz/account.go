@@ -19,6 +19,7 @@ type AccountRepo interface {
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
 	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
 	Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, *model.AccountOnline, error)
+	Logout(ctx context.Context, accountId string, data *typeAccount.LogoutRequest) (*model.AccountOnline, error)
 }
 
 type AccountUsecase struct {
@@ -120,6 +121,12 @@ func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *type
 	}
 
 	return resp, nil
+}
+
+// Logout 登出帐号
+func (uc *AccountUsecase) Logout(ctx context.Context, accountId string, req *typeAccount.LogoutRequest) error {
+	_, err := uc.repo.Logout(ctx, accountId, req)
+	return err
 }
 
 // GenerateToken 生成TOKEN

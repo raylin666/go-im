@@ -85,6 +85,28 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.account.LoginResponse'
+    /api/account/logout/{accountId}:
+        put:
+            tags:
+                - Service
+            description: 登出帐号
+            operationId: Service_Logout
+            parameters:
+                - name: accountId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.account.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
     /api/account/token/{accountId}:
         post:
             tags:
@@ -258,6 +280,15 @@ components:
                 lastLoginTime:
                     type: string
                 onlineId:
+                    type: string
+        v1.account.LogoutRequest:
+            type: object
+            properties:
+                accountId:
+                    type: string
+                onlineId:
+                    type: string
+                clientIp:
                     type: string
         v1.account.UpdateRequest:
             type: object

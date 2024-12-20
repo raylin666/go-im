@@ -72,6 +72,11 @@ type LoginResponse struct {
 	OnlineId       int        `json:"online_id"`
 }
 
+type LogoutRequest struct {
+	OnlineId int     `json:"online_id"`
+	ClientIp *string `json:"client_ip"`
+}
+
 type GenerateTokenResponse struct {
 	AccountId   string `json:"account_id"`
 	Token       string `json:"token"`
