@@ -3,6 +3,7 @@ package websocket
 import (
 	"github.com/gorilla/websocket"
 	"mt/internal/app"
+	"mt/internal/grpc"
 	"mt/pkg/logger"
 	"sync"
 )
@@ -23,6 +24,7 @@ type ClientManagerInterface interface {
 
 // ClientManager 客户端连接管理
 type ClientManager struct {
+	GrpcClient   *grpc.GrpcClient
 	Tools        *app.Tools
 	Clients      map[*Client]bool     // 全部客户端连接资源
 	ClientsLock  sync.RWMutex         // 客户端链接读写锁
@@ -34,8 +36,9 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(tools *app.Tools) (manager *ClientManager) {
+func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *ClientManager) {
 	manager = &ClientManager{
+		GrpcClient: grpcClient,
 		Tools:      tools,
 		Clients:    make(map[*Client]bool),
 		Accounts:   make(map[string][]*Client),
@@ -286,6 +289,9 @@ func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Cli
 
 	// 将客户端连接从在线帐号中移除
 	manager.deleteAccount(client)
+
+	// TODO 登出帐号
+
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理
