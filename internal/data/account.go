@@ -12,6 +12,7 @@ import (
 	typeAccount "mt/internal/constant/types/account"
 	"mt/internal/repositories/dbrepo"
 	"mt/internal/repositories/dbrepo/model"
+	"mt/internal/repositories/dbrepo/query"
 	"mt/pkg/repositories"
 	"time"
 )
@@ -142,42 +143,48 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		isOnline    int8 = 1
 		lastLoginIp      = data.ClientIp
 
+		account       = originAccount
 		accountOnline = new(model.AccountOnline)
 	)
 
-	accountOnline.AccountId = accountId
-	accountOnline.LoginTime = timeNow
-	accountOnline.LoginIp = data.ClientIp
-	accountOnline.ClientAddr = data.ClientAddr
-	accountOnline.ServerAddr = data.ServerAddr
-	accountOnline.DeviceId = data.DeviceId
-	accountOnline.Os = data.Os
-	accountOnline.System = data.System
-	if err := dbQuery.AccountOnline.WithContext(ctx).Create(accountOnline); err != nil {
-		r.tools.Logger().UseSQL(ctx).Error("登录账号写入在线表失败", zap.Any("account", originAccount), zap.Any("account_online", accountOnline), zap.Error(err))
-		return nil, nil, defined.ErrorAccountLoginError
-	}
+	err := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).Transaction(func(tx *query.Query) error {
+		// 返回任何错误都会回滚事务
+		accountOnline.AccountId = accountId
+		accountOnline.LoginTime = timeNow
+		accountOnline.LoginIp = data.ClientIp
+		accountOnline.ClientAddr = data.ClientAddr
+		accountOnline.ServerAddr = data.ServerAddr
+		accountOnline.DeviceId = data.DeviceId
+		accountOnline.Os = data.Os
+		accountOnline.System = data.System
+		if err := dbQuery.AccountOnline.WithContext(ctx).Create(accountOnline); err != nil {
+			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 写入帐号在线表失败", zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(err))
+			return defined.ErrorAccountLoginError
+		}
 
-	account := originAccount
-	account.IsOnline = isOnline
-	account.LastLoginTime = &timeNow
-	account.LastLoginIp = lastLoginIp
-	account.UpdatedAt = timeNow
-	assignExpr := []field.AssignExpr{
-		dbQuery.Account.IsOnline.Value(isOnline),
-		dbQuery.Account.LastLoginTime.Value(timeNow),
-		dbQuery.Account.LastLoginIp.Value(lastLoginIp),
-		dbQuery.Account.UpdatedAt.Value(timeNow),
-	}
-	if originAccount.FirstLoginTime == nil {
-		account.FirstLoginTime = &timeNow
-		assignExpr = append(assignExpr, dbQuery.Account.FirstLoginTime.Value(timeNow))
-	}
+		account.IsOnline = isOnline
+		account.LastLoginTime = &timeNow
+		account.LastLoginIp = lastLoginIp
+		account.UpdatedAt = timeNow
+		assignExpr := []field.AssignExpr{
+			dbQuery.Account.IsOnline.Value(isOnline),
+			dbQuery.Account.LastLoginTime.Value(timeNow),
+			dbQuery.Account.LastLoginIp.Value(lastLoginIp),
+			dbQuery.Account.UpdatedAt.Value(timeNow),
+		}
+		if originAccount.FirstLoginTime == nil {
+			account.FirstLoginTime = &timeNow
+			assignExpr = append(assignExpr, dbQuery.Account.FirstLoginTime.Value(timeNow))
+		}
 
-	if _, updateDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
-		r.tools.Logger().UseSQL(ctx).Error("更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
-		return nil, nil, defined.ErrorDataUpdateError
-	}
+		if _, updateDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
+			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
+			return defined.ErrorDataUpdateError
+		}
 
-	return &account, accountOnline, nil
+		// 返回 nil 提交事务
+		return nil
+	})
+
+	return &account, accountOnline, err
 }
