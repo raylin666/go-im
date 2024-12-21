@@ -24,8 +24,6 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		)
 
 		query = r.URL.Query()
-
-		clientIp = utils.ClientIP(r)
 	)
 
 	// TODO 登录身份验证
@@ -68,7 +66,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	// TODO 登录帐号
 	account, err := h.grpcClient.Account.Login(ctx, &accountPb.LoginRequest{
 		AccountId:  jwtClaims.ID,
-		ClientIp:   clientIp,
+		ClientIp:   utils.ClientIP(r),
 		ClientAddr: conn.LocalAddr().String(),
 		ServerAddr: conn.RemoteAddr().String(),
 		DeviceId:   r.Header.Get("device_id"),
@@ -88,5 +86,16 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	client := h.wsClientManager.CreateClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, int(account.OnlineId), account.IsAdmin), conn)
 
 	// TODO 监听客户端连接消息读写及事件处理
-	h.wsClientManager.ClientRegister(client)
+	h.wsClientManager.ClientRegister(client, func(client *websocket.Client) {
+		// TODO 解绑客户端连接
+		h.wsClientManager.ClientUnRegister(client)
+
+		// TODO 登出帐号
+		var clientIp = utils.ClientIP(r)
+		h.grpcClient.Account.Logout(ctx, &accountPb.LogoutRequest{
+			AccountId: jwtClaims.ID,
+			OnlineId:  account.OnlineId,
+			ClientIp:  &clientIp,
+		})
+	})
 }

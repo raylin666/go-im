@@ -17,7 +17,7 @@ type ClientManagerInterface interface {
 	// 创建客户端连接
 	CreateClient(account *Account, conn *websocket.Conn) (client *Client)
 	// 建立客户端连接处理通道
-	ClientRegister(client *Client)
+	ClientRegister(client *Client, deferWriteFunc func(client *Client))
 	// 断开客户端连接处理通道
 	ClientUnRegister(client *Client)
 }
@@ -230,16 +230,14 @@ func (manager *ClientManager) CreateClient(account *Account, conn *websocket.Con
 }
 
 // ClientRegister 建立客户端连接处理通道
-func (manager *ClientManager) ClientRegister(client *Client) {
-	//TODO implement me
-
-	// 监听客户端消息, 不断读出客户端发送的消息数据包
+func (manager *ClientManager) ClientRegister(client *Client, deferWriteFunc func(client *Client)) {
+	// TODO 监听客户端消息, 不断读出客户端发送的消息数据包
 	go client.Read()
 
-	// 监听服务端消息, 不断写入服务端发送的消息数据包
+	// TODO 监听服务端消息, 不断写入服务端发送的消息数据包
 	go func() {
-		// 解绑客户端连接
-		defer manager.ClientUnRegister(client)
+		// TODO 断开服务端事件处理, 例如清理断开客户端、登出帐号等
+		defer deferWriteFunc(client)
 
 		client.Write()
 	}()
@@ -289,9 +287,6 @@ func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Cli
 
 	// 将客户端连接从在线帐号中移除
 	manager.deleteAccount(client)
-
-	// TODO 登出帐号
-
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理
