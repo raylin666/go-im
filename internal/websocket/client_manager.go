@@ -1,11 +1,16 @@
 package websocket
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
+	accountPb "mt/api/v1/account"
 	"mt/internal/app"
 	"mt/internal/grpc"
+	"mt/internal/lib"
 	"mt/pkg/logger"
+	"mt/pkg/utils"
 	"sync"
+	"time"
 )
 
 var _ ClientManagerInterface = (*ClientManager)(nil)
@@ -15,9 +20,9 @@ type ClientManagerInterface interface {
 	Logger() *logger.Logger
 
 	// 创建客户端连接
-	CreateClient(account *Account, conn *websocket.Conn) (client *Client)
+	CreateClient(ctx context.Context, account *Account, conn *websocket.Conn) (client *Client)
 	// 建立客户端连接处理通道
-	ClientRegister(client *Client, deferWriteFunc func(client *Client))
+	ClientRegister(client *Client)
 	// 断开客户端连接处理通道
 	ClientUnRegister(client *Client)
 }
@@ -47,8 +52,11 @@ func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *C
 		Broadcast:  make(chan []byte, 1000),
 	}
 
-	// 注册事件监听处理器
+	// TODO 注册事件监听处理器
 	go manager.RegisterEventListenerHandler()
+
+	// TODO 定时循环客户端连接, 清理无心跳客户端连接
+	go manager.CronMonitorClientsHeartbeat()
 
 	return
 }
@@ -221,23 +229,23 @@ func (manager *ClientManager) Logger() *logger.Logger {
 }
 
 // CreateClient 创建客户端连接
-func (manager *ClientManager) CreateClient(account *Account, conn *websocket.Conn) (client *Client) {
+func (manager *ClientManager) CreateClient(ctx context.Context, account *Account, conn *websocket.Conn) (client *Client) {
 	//TODO implement me
 
-	client = NewClient(manager, account, conn)
+	client = NewClient(ctx, manager, account, conn)
 
 	return
 }
 
 // ClientRegister 建立客户端连接处理通道
-func (manager *ClientManager) ClientRegister(client *Client, deferWriteFunc func(client *Client)) {
+func (manager *ClientManager) ClientRegister(client *Client) {
 	// TODO 监听客户端消息, 不断读出客户端发送的消息数据包
 	go client.Read()
 
 	// TODO 监听服务端消息, 不断写入服务端发送的消息数据包
 	go func() {
-		// TODO 断开服务端事件处理, 例如清理断开客户端、登出帐号等
-		defer deferWriteFunc(client)
+		// TODO 断开服务端事件处理
+		defer manager.ClientUnRegister(client)
 
 		client.Write()
 	}()
@@ -250,6 +258,23 @@ func (manager *ClientManager) ClientUnRegister(client *Client) {
 	//TODO implement me
 
 	manager.UnRegister <- client
+}
+
+// CronMonitorClientsHeartbeat 定时器监听客户端心跳
+func (manager *ClientManager) CronMonitorClientsHeartbeat() {
+	ticker := time.NewTicker(30 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		var timeNow = time.Now()
+		for c := range manager.getClients() {
+			if !c.IsHeartbeatTimeout(timeNow) {
+				continue
+			}
+
+			manager.ClientUnRegister(c)
+		}
+	}
 }
 
 // RegisterEventListenerHandler 注册事件监听处理器
@@ -282,11 +307,21 @@ func (manager *ClientManager) eventListenerHandlerToClientRegister(client *Clien
 
 // eventListenerHandlerToClientUnRegister 断开客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Client) {
+	client.Conn.Close()
+
 	// 将客户端连接从管理器中删除
 	manager.deleteClient(client)
 
 	// 将客户端连接从在线帐号中移除
 	manager.deleteAccount(client)
+
+	// TODO 登出帐号
+	clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
+	manager.GrpcClient.Account.Logout(client.Ctx, &accountPb.LogoutRequest{
+		AccountId: client.Account.ID,
+		OnlineId:  int64(client.Account.OnlineId),
+		ClientIp:  &clientIp,
+	})
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理

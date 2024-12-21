@@ -83,19 +83,8 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接完成: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
 
 	// TODO 创建客户端连接, 完成帐号连接信息存储
-	client := h.wsClientManager.CreateClient(websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, int(account.OnlineId), account.IsAdmin), conn)
+	client := h.wsClientManager.CreateClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, int(account.OnlineId), account.IsAdmin), conn)
 
 	// TODO 监听客户端连接消息读写及事件处理
-	h.wsClientManager.ClientRegister(client, func(client *websocket.Client) {
-		// TODO 解绑客户端连接
-		h.wsClientManager.ClientUnRegister(client)
-
-		// TODO 登出帐号
-		var clientIp = utils.ClientIP(r)
-		h.grpcClient.Account.Logout(ctx, &accountPb.LogoutRequest{
-			AccountId: jwtClaims.ID,
-			OnlineId:  account.OnlineId,
-			ClientIp:  &clientIp,
-		})
-	})
+	h.wsClientManager.ClientRegister(client)
 }

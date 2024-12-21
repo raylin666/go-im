@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"context"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 	"mt/pkg/logger"
@@ -15,6 +16,7 @@ const (
 
 // Client 客户端连接
 type Client struct {
+	Ctx           context.Context
 	Manager       ClientManagerInterface
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
@@ -24,9 +26,10 @@ type Client struct {
 	Account       *Account        // 账号信息
 }
 
-func NewClient(manager ClientManagerInterface, account *Account, conn *websocket.Conn) (client *Client) {
+func NewClient(ctx context.Context, manager ClientManagerInterface, account *Account, conn *websocket.Conn) (client *Client) {
 	var currentTime = time.Now()
 	client = &Client{
+		Ctx:           ctx,
 		Manager:       manager,
 		Addr:          conn.RemoteAddr().String(),
 		Conn:          conn,
