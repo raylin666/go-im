@@ -313,6 +313,10 @@
         },
         "client_ip": {
           "type": "string"
+        },
+        "state": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

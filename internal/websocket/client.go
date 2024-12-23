@@ -87,6 +87,10 @@ func (c *Client) Read() {
 		// c.Conn.ReadMessage 该方法会阻塞等待, 直到收到消息才能继续往下执行
 		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				loggerFields = append(loggerFields, zap.String("close_desc", "socket 连接已被关闭"))
+			}
+
 			loggerFields = append(loggerFields, zap.Error(err))
 			c.logger().Error("读取客户端消息失败", loggerFields...)
 

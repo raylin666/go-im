@@ -75,6 +75,7 @@ type LoginResponse struct {
 type LogoutRequest struct {
 	OnlineId int     `json:"online_id"`
 	ClientIp *string `json:"client_ip"`
+	State    int8    `json:"state"`
 }
 
 type GenerateTokenResponse struct {

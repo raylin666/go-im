@@ -206,8 +206,14 @@ func (r *accountRepo) Logout(ctx context.Context, accountId string, data *typeAc
 		accountOnline.LogoutIp = *data.ClientIp
 	}
 
+	var state int8 = model.AccountOnlineLoginStateNormal
+	if data.State > 0 {
+		state = data.State
+	}
+
 	timeNow := time.Now()
 	accountOnline.LogoutTime = &timeNow
+	accountOnline.LogoutState = state
 	if updateDataErr := dbQuery.AccountOnline.WithContext(ctx).Where(dbQuery.AccountOnline.AccountId.Eq(accountId)).Save(&accountOnline); updateDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("帐号登出失败: 更新在线账号错误", zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
 		return nil, defined.ErrorDataUpdate

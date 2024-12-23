@@ -1171,6 +1171,21 @@ func (m *LogoutRequest) validate(all bool) error {
 
 	}
 
+	if m.State != nil {
+
+		if _, ok := _LogoutRequest_State_InLookup[m.GetState()]; !ok {
+			err := LogoutRequestValidationError{
+				field:  "State",
+				reason: "value must be in list [0 1 2]",
+			}
+			if !all {
+				return err
+			}
+			errors = append(errors, err)
+		}
+
+	}
+
 	if len(errors) > 0 {
 		return LogoutRequestMultiError(errors)
 	}
@@ -1248,6 +1263,12 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = LogoutRequestValidationError{}
+
+var _LogoutRequest_State_InLookup = map[int32]struct{}{
+	0: {},
+	1: {},
+	2: {},
+}
 
 // Validate checks the field values on GenerateTokenRequest with the rules
 // defined in the proto definition for this message. If any rules are

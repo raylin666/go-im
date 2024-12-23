@@ -34,6 +34,7 @@ func newAccountOnline(db *gorm.DB, opts ...gen.DOOption) accountOnline {
 	_accountOnline.LogoutTime = field.NewTime(tableName, "logout_time")
 	_accountOnline.LoginIp = field.NewString(tableName, "login_ip")
 	_accountOnline.LogoutIp = field.NewString(tableName, "logout_ip")
+	_accountOnline.LogoutState = field.NewInt8(tableName, "logout_state")
 	_accountOnline.ClientAddr = field.NewString(tableName, "client_addr")
 	_accountOnline.ServerAddr = field.NewString(tableName, "server_addr")
 	_accountOnline.DeviceId = field.NewString(tableName, "device_id")
@@ -48,18 +49,19 @@ func newAccountOnline(db *gorm.DB, opts ...gen.DOOption) accountOnline {
 type accountOnline struct {
 	accountOnlineDo accountOnlineDo
 
-	ALL        field.Asterisk
-	ID         field.Int
-	AccountId  field.String
-	LoginTime  field.Time
-	LogoutTime field.Time
-	LoginIp    field.String
-	LogoutIp   field.String
-	ClientAddr field.String
-	ServerAddr field.String
-	DeviceId   field.String
-	Os         field.String
-	System     field.String
+	ALL         field.Asterisk
+	ID          field.Int
+	AccountId   field.String
+	LoginTime   field.Time
+	LogoutTime  field.Time
+	LoginIp     field.String
+	LogoutIp    field.String
+	LogoutState field.Int8
+	ClientAddr  field.String
+	ServerAddr  field.String
+	DeviceId    field.String
+	Os          field.String
+	System      field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -82,6 +84,7 @@ func (a *accountOnline) updateTableName(table string) *accountOnline {
 	a.LogoutTime = field.NewTime(table, "logout_time")
 	a.LoginIp = field.NewString(table, "login_ip")
 	a.LogoutIp = field.NewString(table, "logout_ip")
+	a.LogoutState = field.NewInt8(table, "logout_state")
 	a.ClientAddr = field.NewString(table, "client_addr")
 	a.ServerAddr = field.NewString(table, "server_addr")
 	a.DeviceId = field.NewString(table, "device_id")
@@ -111,13 +114,14 @@ func (a *accountOnline) GetFieldByName(fieldName string) (field.OrderExpr, bool)
 }
 
 func (a *accountOnline) fillFieldMap() {
-	a.fieldMap = make(map[string]field.Expr, 11)
+	a.fieldMap = make(map[string]field.Expr, 12)
 	a.fieldMap["id"] = a.ID
 	a.fieldMap["account_id"] = a.AccountId
 	a.fieldMap["login_time"] = a.LoginTime
 	a.fieldMap["logout_time"] = a.LogoutTime
 	a.fieldMap["login_ip"] = a.LoginIp
 	a.fieldMap["logout_ip"] = a.LogoutIp
+	a.fieldMap["logout_state"] = a.LogoutState
 	a.fieldMap["client_addr"] = a.ClientAddr
 	a.fieldMap["server_addr"] = a.ServerAddr
 	a.fieldMap["device_id"] = a.DeviceId

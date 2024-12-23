@@ -142,6 +142,7 @@ func (s *AccountService) Logout(ctx context.Context, req *pb.LogoutRequest) (*em
 	logoutRequest := &typeAccount.LogoutRequest{
 		OnlineId: int(req.GetOnlineId()),
 		ClientIp: &clientIp,
+		State:    int8(req.GetState()),
 	}
 
 	return nil, s.uc.Logout(ctx, req.GetAccountId(), logoutRequest)

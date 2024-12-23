@@ -35,7 +35,7 @@ func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err er
 
 	err = client.connect()
 
-	return client, cleanup, err
+	return
 }
 
 func (client *GrpcClient) connect() error {

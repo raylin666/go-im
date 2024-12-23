@@ -7,6 +7,7 @@ import (
 	"mt/internal/app"
 	"mt/internal/grpc"
 	"mt/internal/lib"
+	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/logger"
 	"mt/pkg/utils"
 	"sync"
@@ -41,7 +42,7 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *ClientManager) {
+func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *ClientManager, cleanup func()) {
 	manager = &ClientManager{
 		GrpcClient: grpcClient,
 		Tools:      tools,
@@ -57,6 +58,15 @@ func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *C
 
 	// TODO 定时循环客户端连接, 清理无心跳客户端连接
 	go manager.CronMonitorClientsHeartbeat()
+
+	cleanup = func() {
+		// TODO 关闭所有客户端连接, 登出帐号
+		for c := range manager.getClients() {
+			c.Account.WithLogoutState(model.AccountOnlineLoginStateServer)
+
+			manager.ClientUnRegister(c)
+		}
+	}
 
 	return
 }
@@ -245,7 +255,11 @@ func (manager *ClientManager) ClientRegister(client *Client) {
 	// TODO 监听服务端消息, 不断写入服务端发送的消息数据包
 	go func() {
 		// TODO 断开服务端事件处理
-		defer manager.ClientUnRegister(client)
+		defer func() {
+			client.Account.WithLogoutState(model.AccountOnlineLoginStateNormal)
+
+			manager.ClientUnRegister(client)
+		}()
 
 		client.Write()
 	}()
@@ -271,6 +285,8 @@ func (manager *ClientManager) CronMonitorClientsHeartbeat() {
 			if !c.IsHeartbeatTimeout(timeNow) {
 				continue
 			}
+
+			c.Account.WithLogoutState(model.AccountOnlineLoginStateTimeout)
 
 			manager.ClientUnRegister(c)
 		}
@@ -317,10 +333,12 @@ func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Cli
 
 	// TODO 登出帐号
 	clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
+	logoutState := int32(client.Account.LogoutState)
 	manager.GrpcClient.Account.Logout(client.Ctx, &accountPb.LogoutRequest{
 		AccountId: client.Account.ID,
 		OnlineId:  int64(client.Account.OnlineId),
 		ClientIp:  &clientIp,
+		State:     &logoutState,
 	})
 }
 

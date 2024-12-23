@@ -290,6 +290,9 @@ components:
                     type: string
                 clientIp:
                     type: string
+                state:
+                    type: integer
+                    format: int32
         v1.account.UpdateRequest:
             type: object
             properties:
