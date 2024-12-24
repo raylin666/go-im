@@ -1,4 +1,4 @@
-package dbrepo
+package ks
 
 import (
 	"gorm.io/gorm"
