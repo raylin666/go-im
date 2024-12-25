@@ -11,18 +11,24 @@ import (
 	"mt/pkg/logger"
 )
 
-type GrpcClient struct {
+var _ GrpcClient = (*Client)(nil)
+
+type GrpcClient interface {
+	Account() accountPb.ServiceClient
+}
+
+type Client struct {
 	ctx         context.Context
 	environment system.Environment
 	logger      *logger.Logger
 
 	connects []*grpc.ClientConn
 
-	Account accountPb.ServiceClient
+	accountClient accountPb.ServiceClient
 }
 
-func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err error) {
-	client = &GrpcClient{
+func NewGrpcClient(tools *app.Tools) (grpcClient GrpcClient, cleanup func(), err error) {
+	var client = &Client{
 		ctx:         context.TODO(),
 		environment: tools.Environment(),
 		logger:      tools.Logger(),
@@ -35,10 +41,10 @@ func NewGrpcClient(tools *app.Tools) (client *GrpcClient, cleanup func(), err er
 
 	err = client.connect()
 
-	return
+	return client, cleanup, err
 }
 
-func (client *GrpcClient) connect() error {
+func (client *Client) connect() error {
 	// 帐号服务客户端
 	accountEndpoint := client.getAccountEndpoint()
 	accountClientConn, err := dial(client.ctx, accountEndpoint, client.logger)
@@ -47,20 +53,20 @@ func (client *GrpcClient) connect() error {
 		return err
 	}
 	client.connects = append(client.connects, accountClientConn)
-	client.Account = accountPb.NewServiceClient(accountClientConn)
+	client.accountClient = accountPb.NewServiceClient(accountClientConn)
 	client.logger.UseGrpc(client.ctx).Info(fmt.Sprintf("The account service client `%s` connected successfully.", accountEndpoint))
 
 	return nil
 }
 
-func (client *GrpcClient) close() {
+func (client *Client) close() {
 	for _, conn := range client.connects {
 		conn.Close()
 	}
 }
 
 // getAccountEndpoint 获取帐号服务地址
-func (client *GrpcClient) getAccountEndpoint() string {
+func (client *Client) getAccountEndpoint() string {
 	if client.environment.IsProd() {
 		return ProdAccountGrpcClientEndpoint
 	}
@@ -74,4 +80,10 @@ func (client *GrpcClient) getAccountEndpoint() string {
 	}
 
 	return DevAccountGrpcClientEndpoint
+}
+
+func (client *Client) Account() accountPb.ServiceClient {
+	//TODO implement me
+
+	return client.accountClient
 }

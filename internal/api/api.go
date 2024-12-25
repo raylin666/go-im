@@ -6,8 +6,8 @@ import (
 	"mt/config"
 	"mt/internal/app"
 	"mt/internal/grpc"
+	"mt/internal/repositories"
 	"mt/internal/websocket"
-	"mt/pkg/repositories"
 )
 
 // ProviderSet is api.handler providers.
@@ -15,10 +15,9 @@ var ProviderSet = wire.NewSet(NewHandler)
 
 type Handler struct {
 	r               *mux.Router
-	dbRepo          repositories.DbRepo
-	redisRepo       repositories.RedisRepo
-	grpcClient      *grpc.GrpcClient
-	wsClientManager *websocket.ClientManager
+	dataRepo        repositories.DataRepo
+	grpcClient      grpc.GrpcClient
+	wsClientManager websocket.WebsocketClientManager
 	tools           *app.Tools
 	config          *config.Bootstrap
 	Prefix          string
@@ -28,12 +27,11 @@ func NewHandler(
 	config *config.Bootstrap,
 	tools *app.Tools,
 	dataRepo repositories.DataRepo,
-	grpcClient *grpc.GrpcClient,
-	wsClientManager *websocket.ClientManager) *Handler {
+	grpcClient grpc.GrpcClient,
+	wsClientManager websocket.WebsocketClientManager) *Handler {
 	return &Handler{
 		r:               mux.NewRouter(),
-		dbRepo:          dataRepo.DbRepo(),
-		redisRepo:       dataRepo.RedisRepo(),
+		dataRepo:        dataRepo,
 		grpcClient:      grpcClient,
 		wsClientManager: wsClientManager,
 		tools:           tools,

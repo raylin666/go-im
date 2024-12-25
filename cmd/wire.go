@@ -14,6 +14,7 @@ import (
 	"mt/internal/biz"
 	"mt/internal/data"
 	"mt/internal/grpc"
+	"mt/internal/repositories"
 	"mt/internal/server"
 	"mt/internal/service"
 	"mt/internal/websocket"
@@ -24,6 +25,7 @@ func wireApp(*config.Bootstrap, *config.Server, *config.Data, *app.Tools) (*krat
 	panic(wire.Build(
 		server.ProviderSet,
 		data.ProviderSet,
+		repositories.ProviderSet,
 		biz.ProviderSet,
 		service.ProviderSet,
 		api.ProviderSet,

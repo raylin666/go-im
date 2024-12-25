@@ -17,7 +17,7 @@ const (
 // Client 客户端连接
 type Client struct {
 	Ctx           context.Context
-	Manager       ClientManagerInterface
+	Manager       WebsocketClientManager
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
 	Send          chan []byte     // 待发送的数据
@@ -26,7 +26,7 @@ type Client struct {
 	Account       *Account        // 账号信息
 }
 
-func NewClient(ctx context.Context, manager ClientManagerInterface, account *Account, conn *websocket.Conn) (client *Client) {
+func NewClient(ctx context.Context, manager WebsocketClientManager, account *Account, conn *websocket.Conn) (client *Client) {
 	var currentTime = time.Now()
 	client = &Client{
 		Ctx:           ctx,

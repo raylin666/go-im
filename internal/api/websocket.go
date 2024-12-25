@@ -64,7 +64,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 登录帐号
-	account, err := h.grpcClient.Account.Login(ctx, &accountPb.LoginRequest{
+	account, err := h.grpcClient.Account().Login(ctx, &accountPb.LoginRequest{
 		AccountId:  jwtClaims.ID,
 		ClientIp:   utils.ClientIP(r),
 		ClientAddr: conn.LocalAddr().String(),

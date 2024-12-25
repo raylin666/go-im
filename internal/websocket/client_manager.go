@@ -14,9 +14,9 @@ import (
 	"time"
 )
 
-var _ ClientManagerInterface = (*ClientManager)(nil)
+var _ WebsocketClientManager = (*ClientManager)(nil)
 
-type ClientManagerInterface interface {
+type WebsocketClientManager interface {
 	// 日志库
 	Logger() *logger.Logger
 
@@ -30,7 +30,7 @@ type ClientManagerInterface interface {
 
 // ClientManager 客户端连接管理
 type ClientManager struct {
-	GrpcClient   *grpc.GrpcClient
+	GrpcClient   grpc.GrpcClient
 	Tools        *app.Tools
 	Clients      map[*Client]bool     // 全部客户端连接资源
 	ClientsLock  sync.RWMutex         // 客户端链接读写锁
@@ -42,8 +42,8 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *ClientManager, cleanup func()) {
-	manager = &ClientManager{
+func NewClientManager(grpcClient grpc.GrpcClient, tools *app.Tools) (manager WebsocketClientManager, cleanup func()) {
+	var clientManager = &ClientManager{
 		GrpcClient: grpcClient,
 		Tools:      tools,
 		Clients:    make(map[*Client]bool),
@@ -54,21 +54,21 @@ func NewClientManager(grpcClient *grpc.GrpcClient, tools *app.Tools) (manager *C
 	}
 
 	// TODO 注册事件监听处理器
-	go manager.RegisterEventListenerHandler()
+	go clientManager.RegisterEventListenerHandler()
 
 	// TODO 定时循环客户端连接, 清理无心跳客户端连接
-	go manager.CronMonitorClientsHeartbeat()
+	go clientManager.CronMonitorClientsHeartbeat()
 
 	cleanup = func() {
 		// TODO 关闭所有客户端连接, 登出帐号
-		for c := range manager.getClients() {
+		for c := range clientManager.getClients() {
 			c.Account.WithLogoutState(model.AccountOnlineLoginStateServer)
 
 			manager.ClientUnRegister(c)
 		}
 	}
 
-	return
+	return clientManager, cleanup
 }
 
 // addClient 将客户端连接加入至管理器
@@ -334,7 +334,7 @@ func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Cli
 	// TODO 登出帐号
 	clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
 	logoutState := int32(client.Account.LogoutState)
-	manager.GrpcClient.Account.Logout(client.Ctx, &accountPb.LogoutRequest{
+	manager.GrpcClient.Account().Logout(client.Ctx, &accountPb.LogoutRequest{
 		AccountId: client.Account.ID,
 		OnlineId:  int64(client.Account.OnlineId),
 		ClientIp:  &clientIp,

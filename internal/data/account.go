@@ -10,10 +10,9 @@ import (
 	"mt/internal/biz"
 	"mt/internal/constant/defined"
 	typeAccount "mt/internal/constant/types/account"
-	"mt/internal/repositories/dbrepo"
+	"mt/internal/repositories"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/internal/repositories/dbrepo/query"
-	"mt/pkg/repositories"
 	"time"
 )
 
@@ -44,7 +43,7 @@ func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateReques
 
 	account.CreatedAt = time.Now()
 
-	dbQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo())
+	dbQuery := r.data.DefaultDbQuery()
 	if _, dataExistErr := dbQuery.Account.WithContext(ctx).Where().FirstByAccountId(account.AccountId); !errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 		return nil, defined.ErrorDataAlreadyExists
 	}
@@ -58,7 +57,7 @@ func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateReques
 
 // Update 更新账号
 func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error) {
-	dbQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo())
+	dbQuery := r.data.DefaultDbQuery()
 	account, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
@@ -87,7 +86,7 @@ func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAc
 
 // Delete 删除账号
 func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Account, error) {
-	dbQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo())
+	dbQuery := r.data.DefaultDbQuery()
 	account, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
 		return nil, defined.ErrorDataNotFound
@@ -102,7 +101,7 @@ func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Acco
 
 // GetInfo 获取账号信息
 func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Account, error) {
-	dbQuery := dbrepo.NewDefaultDbQuery(r.data.DbRepo())
+	dbQuery := r.data.DefaultDbQuery()
 	account, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
@@ -117,8 +116,7 @@ func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Acc
 
 // Login 登录帐号
 func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, *model.AccountOnline, error) {
-	var dbQuery = dbrepo.NewDefaultDbQuery(r.data.DbRepo())
-
+	var dbQuery = r.data.DefaultDbQuery()
 	originAccount, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
@@ -147,7 +145,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		accountOnline = new(model.AccountOnline)
 	)
 
-	err := dbrepo.NewDefaultDbQuery(r.data.DbRepo()).Transaction(func(tx *query.Query) error {
+	err := dbQuery.Transaction(func(tx *query.Query) error {
 		// 返回任何错误都会回滚事务
 		accountOnline.AccountId = accountId
 		accountOnline.LoginTime = timeNow
@@ -191,8 +189,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 
 // Logout 登出帐号
 func (r *accountRepo) Logout(ctx context.Context, accountId string, data *typeAccount.LogoutRequest) (*model.AccountOnline, error) {
-	var dbQuery = dbrepo.NewDefaultDbQuery(r.data.DbRepo())
-
+	var dbQuery = r.data.DefaultDbQuery()
 	accountOnline, dataExistErr := dbQuery.AccountOnline.WithContext(ctx).FirstByOnlineId(data.OnlineId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
