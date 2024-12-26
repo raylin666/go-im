@@ -28,15 +28,11 @@ import (
 
 // wireApp init kratos application.
 func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configData *config.Data, tools *app.Tools) (*kratos.App, func(), error) {
-	dataRepo, cleanup, err := data.NewData(configData, tools)
-	if err != nil {
-		return nil, nil, err
-	}
+	dataRepo, cleanup := repositories.NewRepositories(configData, tools)
 	heartbeatRepo := data.NewHeartbeatRepo(dataRepo, tools)
 	heartbeatUsecase := biz.NewHeartbeatUsecase(heartbeatRepo, tools)
 	heartbeatService := service.NewHeartbeatService(heartbeatUsecase)
-	repositoriesDataRepo := repositories.NewRepositories(dataRepo)
-	accountRepo := data.NewAccountRepo(repositoriesDataRepo, tools)
+	accountRepo := data.NewAccountRepo(dataRepo, tools)
 	accountUsecase := biz.NewAccountUsecase(accountRepo, tools)
 	accountService := service.NewAccountService(accountUsecase, tools)
 	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
@@ -46,7 +42,7 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 		return nil, nil, err
 	}
 	websocketClientManager, cleanup3 := websocket.NewClientManager(grpcClient, tools)
-	handler := api.NewHandler(bootstrap, tools, repositoriesDataRepo, grpcClient, websocketClientManager)
+	handler := api.NewHandler(bootstrap, tools, dataRepo, grpcClient, websocketClientManager)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
