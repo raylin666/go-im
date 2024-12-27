@@ -24,8 +24,7 @@ func NewHTTPServer(
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
 	tools *app.Tools,
-	apiHandler *api.Handler,
-) *http.Server {
+	apiHandler *api.Handler) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),

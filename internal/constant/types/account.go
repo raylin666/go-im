@@ -1,17 +1,15 @@
-package account
+package types
 
-import (
-	"time"
-)
+import "time"
 
-type CreateRequest struct {
+type AccountCreateRequest struct {
 	AccountId string `json:"account_id"`
 	Nickname  string `json:"nickname"`
 	Avatar    string `json:"avatar"`
 	IsAdmin   bool   `json:"is_admin"`
 }
 
-type CreateResponse struct {
+type AccountCreateResponse struct {
 	AccountId string    `json:"account_id"`
 	Nickname  string    `json:"nickname"`
 	Avatar    string    `json:"avatar"`
@@ -19,13 +17,13 @@ type CreateResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type UpdateRequest struct {
+type AccountUpdateRequest struct {
 	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar"`
 	IsAdmin  bool   `json:"is_admin"`
 }
 
-type UpdateResponse struct {
+type AccountUpdateResponse struct {
 	AccountId string    `json:"account_id"`
 	Nickname  string    `json:"nickname"`
 	Avatar    string    `json:"avatar"`
@@ -33,11 +31,11 @@ type UpdateResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type DeleteResponse struct {
+type AccountDeleteResponse struct {
 	AccountId string `json:"account_id"`
 }
 
-type GetInfoResponse struct {
+type AccountGetInfoResponse struct {
 	AccountId      string     `json:"account_id"`
 	Nickname       string     `json:"nickname"`
 	Avatar         string     `json:"avatar"`
@@ -51,7 +49,7 @@ type GetInfoResponse struct {
 	DeletedAt      *time.Time `json:"deleted_at"`
 }
 
-type LoginRequest struct {
+type AccountLoginRequest struct {
 	ClientIp   string `json:"client_ip"`
 	ClientAddr string `json:"client_addr"`
 	ServerAddr string `json:"server_addr"`
@@ -60,7 +58,7 @@ type LoginRequest struct {
 	System     string `json:"system"`
 }
 
-type LoginResponse struct {
+type AccountLoginResponse struct {
 	AccountId      string     `json:"account_id"`
 	Nickname       string     `json:"nickname"`
 	Avatar         string     `json:"avatar"`
@@ -72,13 +70,13 @@ type LoginResponse struct {
 	OnlineId       int        `json:"online_id"`
 }
 
-type LogoutRequest struct {
+type AccountLogoutRequest struct {
 	OnlineId int     `json:"online_id"`
 	ClientIp *string `json:"client_ip"`
 	State    int8    `json:"state"`
 }
 
-type GenerateTokenResponse struct {
+type AccountGenerateTokenResponse struct {
 	AccountId   string `json:"account_id"`
 	Token       string `json:"token"`
 	TokenExpire int64  `json:"token_expire"`

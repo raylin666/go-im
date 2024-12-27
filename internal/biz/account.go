@@ -3,9 +3,9 @@ package biz
 import (
 	"context"
 	"github.com/raylin666/go-utils/auth"
+	"mt/errors"
 	"mt/internal/app"
-	"mt/internal/constant/defined"
-	typeAccount "mt/internal/constant/types/account"
+	"mt/internal/constant/types"
 	"mt/internal/repositories/dbrepo/model"
 	"time"
 )
@@ -14,12 +14,12 @@ type Account struct {
 }
 
 type AccountRepo interface {
-	Create(ctx context.Context, data *typeAccount.CreateRequest) (*model.Account, error)
-	Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error)
+	Create(ctx context.Context, data *types.AccountCreateRequest) (*model.Account, error)
+	Update(ctx context.Context, accountId string, data *types.AccountUpdateRequest) (*model.Account, error)
 	Delete(ctx context.Context, accountId string) (*model.Account, error)
 	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
-	Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, *model.AccountOnline, error)
-	Logout(ctx context.Context, accountId string, data *typeAccount.LogoutRequest) (*model.AccountOnline, error)
+	Login(ctx context.Context, accountId string, data *types.AccountLoginRequest) (*model.Account, *model.AccountOnline, error)
+	Logout(ctx context.Context, accountId string, data *types.AccountLogoutRequest) (*model.AccountOnline, error)
 }
 
 type AccountUsecase struct {
@@ -32,13 +32,13 @@ func NewAccountUsecase(repo AccountRepo, tools *app.Tools) *AccountUsecase {
 }
 
 // Create 创建账号
-func (uc *AccountUsecase) Create(ctx context.Context, req *typeAccount.CreateRequest) (*typeAccount.CreateResponse, error) {
+func (uc *AccountUsecase) Create(ctx context.Context, req *types.AccountCreateRequest) (*types.AccountCreateResponse, error) {
 	account, err := uc.repo.Create(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &typeAccount.CreateResponse{
+	resp := &types.AccountCreateResponse{
 		AccountId: account.AccountId,
 		Nickname:  account.Nickname,
 		Avatar:    account.Avatar,
@@ -50,13 +50,13 @@ func (uc *AccountUsecase) Create(ctx context.Context, req *typeAccount.CreateReq
 }
 
 // Update 更新账号
-func (uc *AccountUsecase) Update(ctx context.Context, accountId string, req *typeAccount.UpdateRequest) (*typeAccount.UpdateResponse, error) {
+func (uc *AccountUsecase) Update(ctx context.Context, accountId string, req *types.AccountUpdateRequest) (*types.AccountUpdateResponse, error) {
 	account, err := uc.repo.Update(ctx, accountId, req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &typeAccount.UpdateResponse{
+	resp := &types.AccountUpdateResponse{
 		AccountId: account.AccountId,
 		Nickname:  account.Nickname,
 		Avatar:    account.Avatar,
@@ -68,23 +68,23 @@ func (uc *AccountUsecase) Update(ctx context.Context, accountId string, req *typ
 }
 
 // Delete 删除账号
-func (uc *AccountUsecase) Delete(ctx context.Context, accountId string) (*typeAccount.DeleteResponse, error) {
+func (uc *AccountUsecase) Delete(ctx context.Context, accountId string) (*types.AccountDeleteResponse, error) {
 	account, err := uc.repo.Delete(ctx, accountId)
 	if err != nil {
 		return nil, err
 	}
 
-	return &typeAccount.DeleteResponse{AccountId: account.AccountId}, nil
+	return &types.AccountDeleteResponse{AccountId: account.AccountId}, nil
 }
 
 // GetInfo 获取账号信息
-func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeAccount.GetInfoResponse, error) {
+func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*types.AccountGetInfoResponse, error) {
 	account, err := uc.repo.GetInfo(ctx, accountId)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &typeAccount.GetInfoResponse{
+	resp := &types.AccountGetInfoResponse{
 		AccountId:      account.AccountId,
 		Nickname:       account.Nickname,
 		Avatar:         account.Avatar,
@@ -102,13 +102,13 @@ func (uc *AccountUsecase) GetInfo(ctx context.Context, accountId string) (*typeA
 }
 
 // Login 登录帐号
-func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *typeAccount.LoginRequest) (*typeAccount.LoginResponse, error) {
+func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *types.AccountLoginRequest) (*types.AccountLoginResponse, error) {
 	account, accountOnline, err := uc.repo.Login(ctx, accountId, req)
 	if err != nil {
 		return nil, err
 	}
 
-	resp := &typeAccount.LoginResponse{
+	resp := &types.AccountLoginResponse{
 		AccountId:      account.AccountId,
 		Nickname:       account.Nickname,
 		Avatar:         account.Avatar,
@@ -124,15 +124,15 @@ func (uc *AccountUsecase) Login(ctx context.Context, accountId string, req *type
 }
 
 // Logout 登出帐号
-func (uc *AccountUsecase) Logout(ctx context.Context, accountId string, req *typeAccount.LogoutRequest) error {
+func (uc *AccountUsecase) Logout(ctx context.Context, accountId string, req *types.AccountLogoutRequest) error {
 	_, err := uc.repo.Logout(ctx, accountId, req)
 	return err
 }
 
 // GenerateToken 生成TOKEN
-func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, ttl int64) (*typeAccount.GenerateTokenResponse, error) {
+func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, ttl int64) (*types.AccountGenerateTokenResponse, error) {
 	if accountId == "" {
-		return nil, defined.ErrorRequestParams
+		return nil, errors.New().RequestParams()
 	}
 
 	// 默认Token为1天过期
@@ -142,10 +142,10 @@ func (uc *AccountUsecase) GenerateToken(ctx context.Context, accountId string, t
 
 	token, err := uc.tools.JWT().GenerateToken(accountId, time.Duration(ttl)*time.Second, auth.JWTClaimsOptions{})
 	if err != nil {
-		return nil, defined.ErrorGenerateToken
+		return nil, errors.New().GenerateToken()
 	}
 
-	resp := &typeAccount.GenerateTokenResponse{
+	resp := &types.AccountGenerateTokenResponse{
 		AccountId:   accountId,
 		Token:       token,
 		TokenExpire: ttl,

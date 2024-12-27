@@ -2,14 +2,13 @@ package data
 
 import (
 	"context"
-	"errors"
 	"go.uber.org/zap"
 	"gorm.io/gen/field"
 	"gorm.io/gorm"
+	"mt/errors"
 	"mt/internal/app"
 	"mt/internal/biz"
-	"mt/internal/constant/defined"
-	typeAccount "mt/internal/constant/types/account"
+	"mt/internal/constant/types"
 	"mt/internal/repositories"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/internal/repositories/dbrepo/query"
@@ -29,7 +28,7 @@ func NewAccountRepo(repo repositories.DataRepo, tools *app.Tools) biz.AccountRep
 }
 
 // Create 创建账号
-func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateRequest) (*model.Account, error) {
+func (r *accountRepo) Create(ctx context.Context, data *types.AccountCreateRequest) (*model.Account, error) {
 	account := &model.Account{
 		AccountId: data.AccountId,
 		Nickname:  data.Nickname,
@@ -45,26 +44,26 @@ func (r *accountRepo) Create(ctx context.Context, data *typeAccount.CreateReques
 
 	dbQuery := r.data.DefaultDbQuery()
 	if _, dataExistErr := dbQuery.Account.WithContext(ctx).Where().FirstByAccountId(account.AccountId); !errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-		return nil, defined.ErrorDataAlreadyExists
+		return nil, errors.New().DataAlreadyExists()
 	}
 	if createDataErr := dbQuery.Account.WithContext(ctx).Create(account); createDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("创建账号错误", zap.Any("account", account), zap.Error(createDataErr))
-		return nil, defined.ErrorDataAdd
+		return nil, errors.New(errors.WithMessage(createDataErr.Error())).DataAdd()
 	}
 
 	return account, nil
 }
 
 // Update 更新账号
-func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAccount.UpdateRequest) (*model.Account, error) {
+func (r *accountRepo) Update(ctx context.Context, accountId string, data *types.AccountUpdateRequest) (*model.Account, error) {
 	dbQuery := r.data.DefaultDbQuery()
 	account, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-			return nil, defined.ErrorDataNotFound
+			return nil, errors.New().DataNotFound()
 		}
 
-		return nil, defined.ErrorDataSelect
+		return nil, errors.New(errors.WithMessage(dataExistErr.Error())).DataSelect()
 	}
 
 	originAccount := account
@@ -78,7 +77,7 @@ func (r *accountRepo) Update(ctx context.Context, accountId string, data *typeAc
 
 	if updateDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(accountId)).Save(&account); updateDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("更新账号错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Error(updateDataErr))
-		return nil, defined.ErrorDataUpdate
+		return nil, errors.New(errors.WithMessage(updateDataErr.Error())).DataUpdate()
 	}
 
 	return &account, nil
@@ -89,11 +88,11 @@ func (r *accountRepo) Delete(ctx context.Context, accountId string) (*model.Acco
 	dbQuery := r.data.DefaultDbQuery()
 	account, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-		return nil, defined.ErrorDataNotFound
+		return nil, errors.New().DataNotFound()
 	}
 	if result, deleteDataErr := dbQuery.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(accountId)).Delete(&account); deleteDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("删除账号错误", zap.Any("account_id", accountId), zap.Any("result", result), zap.Error(deleteDataErr))
-		return nil, defined.ErrorDataDelete
+		return nil, errors.New(errors.WithMessage(deleteDataErr.Error())).DataDelete()
 	}
 
 	return &account, nil
@@ -105,25 +104,25 @@ func (r *accountRepo) GetInfo(ctx context.Context, accountId string) (*model.Acc
 	account, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-			return nil, defined.ErrorDataNotFound
+			return nil, errors.New().DataNotFound()
 		}
 
-		return nil, defined.ErrorDataSelect
+		return nil, errors.New(errors.WithMessage(dataExistErr.Error())).DataSelect()
 	}
 
 	return &account, nil
 }
 
 // Login 登录帐号
-func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAccount.LoginRequest) (*model.Account, *model.AccountOnline, error) {
+func (r *accountRepo) Login(ctx context.Context, accountId string, data *types.AccountLoginRequest) (*model.Account, *model.AccountOnline, error) {
 	var dbQuery = r.data.DefaultDbQuery()
 	originAccount, dataExistErr := dbQuery.Account.WithContext(ctx).FirstByAccountId(accountId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-			return nil, nil, defined.ErrorAccountNotFound
+			return nil, nil, errors.New().AccountNotFound()
 		}
 
-		return nil, nil, defined.ErrorDataSelect
+		return nil, nil, errors.New(errors.WithMessage(dataExistErr.Error())).DataSelect()
 	}
 
 	// 校验同客户端是否已登录
@@ -131,7 +130,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		if existsResult, existsResultOk := checkClientAccountOnlineResult["ok"]; existsResultOk {
 			existsValue, existsValueOk := existsResult.(int64)
 			if existsValueOk && existsValue > 0 {
-				return nil, nil, defined.ErrorAccountIsLogin
+				return nil, nil, errors.New().AccountIsLogin()
 			}
 		}
 	}
@@ -157,7 +156,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 		accountOnline.System = data.System
 		if err := tx.AccountOnline.WithContext(ctx).Create(accountOnline); err != nil {
 			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 写入帐号在线表失败", zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(err))
-			return defined.ErrorDataAdd
+			return errors.New(errors.WithMessage(err.Error())).DataAdd()
 		}
 
 		account.IsOnline = isOnline
@@ -177,7 +176,7 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 
 		if _, updateDataErr := tx.Account.WithContext(ctx).Where(dbQuery.Account.AccountId.Eq(originAccount.AccountId)).UpdateSimple(assignExpr...); updateDataErr != nil {
 			r.tools.Logger().UseSQL(ctx).Error("帐号登录失败: 更新账号登录信息错误", zap.Any("origin_account", originAccount), zap.Any("account", account), zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
-			return defined.ErrorDataUpdate
+			return errors.New(errors.WithMessage(updateDataErr.Error())).DataUpdate()
 		}
 
 		// 返回 nil 提交事务
@@ -188,15 +187,15 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *typeAcc
 }
 
 // Logout 登出帐号
-func (r *accountRepo) Logout(ctx context.Context, accountId string, data *typeAccount.LogoutRequest) (*model.AccountOnline, error) {
+func (r *accountRepo) Logout(ctx context.Context, accountId string, data *types.AccountLogoutRequest) (*model.AccountOnline, error) {
 	var dbQuery = r.data.DefaultDbQuery()
 	accountOnline, dataExistErr := dbQuery.AccountOnline.WithContext(ctx).FirstByOnlineId(data.OnlineId)
 	if dataExistErr != nil {
 		if errors.Is(dataExistErr, gorm.ErrRecordNotFound) {
-			return nil, defined.ErrorDataNotFound
+			return nil, errors.New().DataNotFound()
 		}
 
-		return nil, defined.ErrorDataSelect
+		return nil, errors.New(errors.WithMessage(dataExistErr.Error())).DataSelect()
 	}
 
 	if data.ClientIp != nil {
@@ -213,7 +212,7 @@ func (r *accountRepo) Logout(ctx context.Context, accountId string, data *typeAc
 	accountOnline.LogoutState = state
 	if updateDataErr := dbQuery.AccountOnline.WithContext(ctx).Where(dbQuery.AccountOnline.AccountId.Eq(accountId)).Save(&accountOnline); updateDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("帐号登出失败: 更新在线账号错误", zap.Any("account_online", accountOnline), zap.Error(updateDataErr))
-		return nil, defined.ErrorDataUpdate
+		return nil, errors.New(errors.WithMessage(updateDataErr.Error())).DataUpdate()
 	}
 
 	return &accountOnline, nil

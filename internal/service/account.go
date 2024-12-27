@@ -6,7 +6,7 @@ import (
 	pb "mt/api/v1/account"
 	"mt/internal/app"
 	"mt/internal/biz"
-	typeAccount "mt/internal/constant/types/account"
+	"mt/internal/constant/types"
 	"time"
 )
 
@@ -24,7 +24,7 @@ func NewAccountService(uc *biz.AccountUsecase, tools *app.Tools) *AccountService
 
 // Create 创建账号
 func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb.CreateResponse, error) {
-	createRequest := &typeAccount.CreateRequest{
+	createRequest := &types.AccountCreateRequest{
 		AccountId: req.GetAccountId(),
 		Nickname:  req.GetNickname(),
 		Avatar:    req.GetAvatar(),
@@ -49,7 +49,7 @@ func (s *AccountService) Create(ctx context.Context, req *pb.CreateRequest) (*pb
 
 // Update 更新账号
 func (s *AccountService) Update(ctx context.Context, req *pb.UpdateRequest) (*pb.UpdateResponse, error) {
-	updateRequest := &typeAccount.UpdateRequest{
+	updateRequest := &types.AccountUpdateRequest{
 		Nickname: req.GetNickname(),
 		Avatar:   req.GetAvatar(),
 		IsAdmin:  req.GetIsAdmin(),
@@ -107,7 +107,7 @@ func (s *AccountService) GetInfo(ctx context.Context, req *pb.GetInfoRequest) (*
 
 // Login 登录帐号
 func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	loginRequest := &typeAccount.LoginRequest{
+	loginRequest := &types.AccountLoginRequest{
 		ClientIp:   req.GetClientIp(),
 		ClientAddr: req.GetClientAddr(),
 		ServerAddr: req.GetServerAddr(),
@@ -139,7 +139,7 @@ func (s *AccountService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.L
 // Logout 登出帐号
 func (s *AccountService) Logout(ctx context.Context, req *pb.LogoutRequest) (*emptypb.Empty, error) {
 	clientIp := req.GetClientIp()
-	logoutRequest := &typeAccount.LogoutRequest{
+	logoutRequest := &types.AccountLogoutRequest{
 		OnlineId: int(req.GetOnlineId()),
 		ClientIp: &clientIp,
 		State:    int8(req.GetState()),

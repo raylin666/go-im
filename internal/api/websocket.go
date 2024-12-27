@@ -8,7 +8,7 @@ import (
 	gorillaWebsocket "github.com/gorilla/websocket"
 	"go.uber.org/zap"
 	accountPb "mt/api/v1/account"
-	"mt/internal/constant/defined"
+	"mt/errors"
 	"mt/internal/lib"
 	"mt/internal/websocket"
 	"mt/pkg/logger"
@@ -29,7 +29,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	// TODO 登录身份验证
 	accountToken := query.Get("account_token")
 	if accountToken == "" {
-		e := defined.ErrorNotVisitAuth
+		e := errors.New().NotVisitAuth()
 		http.Error(w, e.GetMessage(), int(e.GetCode()))
 		return
 	}
@@ -37,7 +37,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	// TODO 解析TOKEN
 	jwtClaims, err := h.tools.JWT().ParseToken(accountToken)
 	if err != nil {
-		e := defined.ErrorNotLogin
+		e := errors.New().NotLogin()
 		http.Error(w, e.GetMessage(), int(e.GetCode()))
 		return
 	}
@@ -57,7 +57,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 			// TODO 升级失败处理
 		}))
 	if err != nil {
-		var e = defined.ErrorServerUpgrader
+		var e = errors.New().ServerUpgrader()
 		http.Error(w, e.GetMessage(), int(e.GetCode()))
 		h.tools.Logger().UseWebSocket(ctx).Error(fmt.Sprintf("WebSocket 建立连接失败: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account_id", jwtClaims.ID), zap.Error(err))
 		return
@@ -75,7 +75,7 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		conn.WriteMessage(gorillaWebsocket.TextMessage, []byte(fmt.Sprintf("%s: %s", defined.ErrorAccountLogin.GetMessage(), err.Error())))
+		conn.WriteMessage(gorillaWebsocket.TextMessage, []byte(fmt.Sprintf("%s: %s", errors.New().AccountLogin().GetMessage(), err.Error())))
 		conn.Close()
 		return
 	}
