@@ -7,6 +7,7 @@ import (
 	"mt/internal/app"
 	"mt/internal/grpc"
 	"mt/internal/lib"
+	"mt/internal/repositories"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/logger"
 	"mt/pkg/utils"
@@ -30,6 +31,7 @@ type WebsocketClientManager interface {
 
 // ClientManager 客户端连接管理
 type ClientManager struct {
+	DataRepo     repositories.DataRepo
 	GrpcClient   grpc.GrpcClient
 	Tools        *app.Tools
 	Clients      map[*Client]bool     // 全部客户端连接资源
@@ -42,8 +44,9 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(grpcClient grpc.GrpcClient, tools *app.Tools) (manager WebsocketClientManager, cleanup func()) {
+func NewClientManager(dataRepo repositories.DataRepo, grpcClient grpc.GrpcClient, tools *app.Tools) (manager WebsocketClientManager, cleanup func()) {
 	var clientManager = &ClientManager{
+		DataRepo:   dataRepo,
 		GrpcClient: grpcClient,
 		Tools:      tools,
 		Clients:    make(map[*Client]bool),
@@ -60,15 +63,42 @@ func NewClientManager(grpcClient grpc.GrpcClient, tools *app.Tools) (manager Web
 	go clientManager.CronMonitorClientsHeartbeat()
 
 	cleanup = func() {
-		// TODO 关闭所有客户端连接, 登出帐号
-		for c := range clientManager.getClients() {
-			c.Account.WithLogoutState(model.AccountOnlineLoginStateServer)
+		// TODO 关闭所有客户端连接, 设置客户端离线
+		var logout = func(client *Client) {
+			ctx := context.TODO()
+			dbQuery := clientManager.DataRepo.DefaultDbQuery()
+			accountOnline, err := dbQuery.AccountOnline.WithContext(ctx).FirstByOnlineId(client.Account.OnlineId)
+			if err != nil {
+				// 查询失败不处理
+				return
+			}
 
-			manager.ClientUnRegister(c)
+			timeNow := time.Now()
+			accountOnline.LogoutTime = &timeNow
+			accountOnline.LogoutState = model.AccountOnlineLoginStateServer
+			dbQuery.AccountOnline.WithContext(ctx).Where(dbQuery.AccountOnline.AccountId.Eq(client.Account.ID)).Save(&accountOnline)
+		}
+
+		for c := range clientManager.getClients() {
+			clientManager.clientUnRegister(c, logout)
 		}
 	}
 
 	return clientManager, cleanup
+}
+
+// clientUnRegister 移除客户端连接
+func (manager *ClientManager) clientUnRegister(client *Client, logout func(client *Client)) {
+	client.Conn.Close()
+
+	// 将客户端连接从管理器中删除
+	manager.deleteClient(client)
+
+	// 将客户端连接从在线帐号中移除
+	manager.deleteAccount(client)
+
+	// 登出帐号
+	logout(client)
 }
 
 // addClient 将客户端连接加入至管理器
@@ -323,23 +353,19 @@ func (manager *ClientManager) eventListenerHandlerToClientRegister(client *Clien
 
 // eventListenerHandlerToClientUnRegister 断开客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Client) {
-	client.Conn.Close()
-
-	// 将客户端连接从管理器中删除
-	manager.deleteClient(client)
-
-	// 将客户端连接从在线帐号中移除
-	manager.deleteAccount(client)
-
 	// TODO 登出帐号
-	clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
-	logoutState := int32(client.Account.LogoutState)
-	manager.GrpcClient.Account().Logout(client.Ctx, &accountPb.LogoutRequest{
-		AccountId: client.Account.ID,
-		OnlineId:  int64(client.Account.OnlineId),
-		ClientIp:  &clientIp,
-		State:     &logoutState,
-	})
+	var logout = func(client *Client) {
+		clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
+		logoutState := int32(client.Account.LogoutState)
+		manager.GrpcClient.Account().Logout(client.Ctx, &accountPb.LogoutRequest{
+			AccountId: client.Account.ID,
+			OnlineId:  int64(client.Account.OnlineId),
+			ClientIp:  &clientIp,
+			State:     &logoutState,
+		})
+	}
+
+	manager.clientUnRegister(client, logout)
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理
