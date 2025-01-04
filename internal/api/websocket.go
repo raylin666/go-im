@@ -7,8 +7,8 @@ import (
 	"github.com/google/uuid"
 	gorillaWebsocket "github.com/gorilla/websocket"
 	"go.uber.org/zap"
-	accountPb "mt/api/v1/account"
 	"mt/errors"
+	"mt/internal/constant/types"
 	"mt/internal/lib"
 	"mt/internal/websocket"
 	"mt/pkg/logger"
@@ -64,13 +64,12 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// TODO 登录帐号
-	account, err := h.grpcClient.Account().Login(ctx, &accountPb.LoginRequest{
-		AccountId:  jwtClaims.ID,
+	account, accountOnline, err := h.dataLogicRepo.Account.Login(ctx, jwtClaims.ID, &types.AccountLoginRequest{
 		ClientIp:   utils.ClientIP(r),
 		ClientAddr: conn.LocalAddr().String(),
 		ServerAddr: conn.RemoteAddr().String(),
 		DeviceId:   r.Header.Get("device_id"),
-		Os:         []byte(r.Header.Get("os")),
+		Os:         r.Header.Get("os"),
 		System:     r.Header.Get("system"),
 	})
 
@@ -80,10 +79,10 @@ func (h *Handler) WebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接完成: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account))
+	h.tools.Logger().UseWebSocket(ctx).Info(fmt.Sprintf("WebSocket 建立连接完成: %s", conn.RemoteAddr().String()), zap.String("account_token", accountToken), zap.Any("account", account), zap.Any("account_online", accountOnline))
 
 	// TODO 创建客户端连接, 完成帐号连接信息存储
-	client := h.wsClientManager.CreateClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, int(account.OnlineId), account.IsAdmin), conn)
+	client := h.wsClientManager.CreateClient(ctx, websocket.NewAccount(account.AccountId, account.Nickname, account.Avatar, accountOnline.ID, account.IsAdmin == 1), conn)
 
 	// TODO 监听客户端连接消息读写及事件处理
 	h.wsClientManager.ClientRegister(client)

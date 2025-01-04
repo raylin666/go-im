@@ -3,11 +3,11 @@ package websocket
 import (
 	"context"
 	"github.com/gorilla/websocket"
-	accountPb "mt/api/v1/account"
 	"mt/internal/app"
+	"mt/internal/constant/types"
+	"mt/internal/data"
 	"mt/internal/grpc"
 	"mt/internal/lib"
-	"mt/internal/repositories"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/logger"
 	"mt/pkg/utils"
@@ -31,7 +31,10 @@ type WebsocketClientManager interface {
 
 // ClientManager 客户端连接管理
 type ClientManager struct {
-	DataRepo     repositories.DataRepo
+	DataLogicRepo struct {
+		Account data.AccountRepo
+	}
+
 	GrpcClient   grpc.GrpcClient
 	Tools        *app.Tools
 	Clients      map[*Client]bool     // 全部客户端连接资源
@@ -44,9 +47,8 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(dataRepo repositories.DataRepo, grpcClient grpc.GrpcClient, tools *app.Tools) (manager WebsocketClientManager, cleanup func()) {
+func NewClientManager(accountRepo data.AccountRepo, grpcClient grpc.GrpcClient, tools *app.Tools) (manager WebsocketClientManager, cleanup func()) {
 	var clientManager = &ClientManager{
-		DataRepo:   dataRepo,
 		GrpcClient: grpcClient,
 		Tools:      tools,
 		Clients:    make(map[*Client]bool),
@@ -56,6 +58,8 @@ func NewClientManager(dataRepo repositories.DataRepo, grpcClient grpc.GrpcClient
 		Broadcast:  make(chan []byte, 1000),
 	}
 
+	clientManager.DataLogicRepo.Account = accountRepo
+
 	// TODO 注册事件监听处理器
 	go clientManager.RegisterEventListenerHandler()
 
@@ -64,41 +68,16 @@ func NewClientManager(dataRepo repositories.DataRepo, grpcClient grpc.GrpcClient
 
 	cleanup = func() {
 		// TODO 关闭所有客户端连接, 设置客户端离线
-		var logout = func(client *Client) {
-			ctx := context.TODO()
-			dbQuery := clientManager.DataRepo.DefaultDbQuery()
-			accountOnline, err := dbQuery.AccountOnline.WithContext(ctx).FirstByOnlineId(client.Account.OnlineId)
-			if err != nil {
-				// 查询失败不处理
-				return
-			}
-
-			timeNow := time.Now()
-			accountOnline.LogoutTime = &timeNow
-			accountOnline.LogoutState = model.AccountOnlineLoginStateServer
-			dbQuery.AccountOnline.WithContext(ctx).Where(dbQuery.AccountOnline.AccountId.Eq(client.Account.ID)).Save(&accountOnline)
-		}
-
 		for c := range clientManager.getClients() {
-			clientManager.clientUnRegister(c, logout)
+			c.Account.WithLogoutState(model.AccountOnlineLoginStateServer)
+
+			// 注意: 此处不能直接调用 clientManager.ClientUnRegister 方法
+			//      因为该方法是将客户端连接塞进通道, 异步监听处理退出操作, 这就导致在执行 cleanup 清理时可能会先执行资源关闭再执行通道逻辑处理, 造成无法完成通道逻辑处理(因为资源已被关闭了)
+			clientManager.eventListenerHandlerToClientUnRegister(c)
 		}
 	}
 
 	return clientManager, cleanup
-}
-
-// clientUnRegister 移除客户端连接
-func (manager *ClientManager) clientUnRegister(client *Client, logout func(client *Client)) {
-	client.Conn.Close()
-
-	// 将客户端连接从管理器中删除
-	manager.deleteClient(client)
-
-	// 将客户端连接从在线帐号中移除
-	manager.deleteAccount(client)
-
-	// 登出帐号
-	logout(client)
 }
 
 // addClient 将客户端连接加入至管理器
@@ -353,19 +332,28 @@ func (manager *ClientManager) eventListenerHandlerToClientRegister(client *Clien
 
 // eventListenerHandlerToClientUnRegister 断开客户端连接处理
 func (manager *ClientManager) eventListenerHandlerToClientUnRegister(client *Client) {
-	// TODO 登出帐号
-	var logout = func(client *Client) {
-		clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
-		logoutState := int32(client.Account.LogoutState)
-		manager.GrpcClient.Account().Logout(client.Ctx, &accountPb.LogoutRequest{
-			AccountId: client.Account.ID,
-			OnlineId:  int64(client.Account.OnlineId),
-			ClientIp:  &clientIp,
-			State:     &logoutState,
-		})
+	// 关闭客户端连接后会触发关闭读取客户端事件, 回调到 <-manager.UnRegister 通道, 避免二次执行该方法。
+	// 例如 CronMonitorClientsHeartbeat 方法中判断客户端超时时,调用了一次该方法, 当该方法执行 client.Conn.Close 后, 会触发关闭读取客户端事件进行二次执行
+	// 例如服务退出时会触发 cleanup 资源清理, 也是会出现相同的问题
+	if manager.hasClient(client) == false {
+		return
 	}
 
-	manager.clientUnRegister(client, logout)
+	client.Conn.Close()
+
+	// 将客户端连接从管理器中删除
+	manager.deleteClient(client)
+
+	// 将客户端连接从在线帐号中移除
+	manager.deleteAccount(client)
+
+	// TODO 登出帐号
+	clientIp := utils.ClientIP(lib.GetContextHttpRequest(client.Ctx))
+	manager.DataLogicRepo.Account.Logout(client.Ctx, client.Account.ID, &types.AccountLogoutRequest{
+		OnlineId: client.Account.OnlineId,
+		ClientIp: &clientIp,
+		State:    client.Account.LogoutState,
+	})
 }
 
 // eventListenerHandlerToMessageBroadcast 广播消息处理

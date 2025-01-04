@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm"
 	"mt/errors"
 	"mt/internal/app"
-	"mt/internal/biz"
 	"mt/internal/constant/types"
 	"mt/internal/repositories"
 	"mt/internal/repositories/dbrepo/model"
@@ -15,12 +14,21 @@ import (
 	"time"
 )
 
+type AccountRepo interface {
+	Create(ctx context.Context, data *types.AccountCreateRequest) (*model.Account, error)
+	Update(ctx context.Context, accountId string, data *types.AccountUpdateRequest) (*model.Account, error)
+	Delete(ctx context.Context, accountId string) (*model.Account, error)
+	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
+	Login(ctx context.Context, accountId string, data *types.AccountLoginRequest) (*model.Account, *model.AccountOnline, error)
+	Logout(ctx context.Context, accountId string, data *types.AccountLogoutRequest) (*model.AccountOnline, error)
+}
+
 type accountRepo struct {
 	data  repositories.DataRepo
 	tools *app.Tools
 }
 
-func NewAccountRepo(repo repositories.DataRepo, tools *app.Tools) biz.AccountRepo {
+func NewAccountRepo(repo repositories.DataRepo, tools *app.Tools) AccountRepo {
 	return &accountRepo{
 		data:  repo,
 		tools: tools,

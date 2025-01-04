@@ -6,28 +6,16 @@ import (
 	"mt/errors"
 	"mt/internal/app"
 	"mt/internal/constant/types"
-	"mt/internal/repositories/dbrepo/model"
+	"mt/internal/data"
 	"time"
 )
 
-type Account struct {
-}
-
-type AccountRepo interface {
-	Create(ctx context.Context, data *types.AccountCreateRequest) (*model.Account, error)
-	Update(ctx context.Context, accountId string, data *types.AccountUpdateRequest) (*model.Account, error)
-	Delete(ctx context.Context, accountId string) (*model.Account, error)
-	GetInfo(ctx context.Context, accountId string) (*model.Account, error)
-	Login(ctx context.Context, accountId string, data *types.AccountLoginRequest) (*model.Account, *model.AccountOnline, error)
-	Logout(ctx context.Context, accountId string, data *types.AccountLogoutRequest) (*model.AccountOnline, error)
-}
-
 type AccountUsecase struct {
-	repo  AccountRepo
+	repo  data.AccountRepo
 	tools *app.Tools
 }
 
-func NewAccountUsecase(repo AccountRepo, tools *app.Tools) *AccountUsecase {
+func NewAccountUsecase(repo data.AccountRepo, tools *app.Tools) *AccountUsecase {
 	return &AccountUsecase{repo: repo, tools: tools}
 }
 

@@ -5,8 +5,8 @@ import (
 	"github.com/gorilla/mux"
 	"mt/config"
 	"mt/internal/app"
+	"mt/internal/data"
 	"mt/internal/grpc"
-	"mt/internal/repositories"
 	"mt/internal/websocket"
 )
 
@@ -15,29 +15,35 @@ var ProviderSet = wire.NewSet(NewHandler)
 
 type Handler struct {
 	r               *mux.Router
-	dataRepo        repositories.DataRepo
 	grpcClient      grpc.GrpcClient
 	wsClientManager websocket.WebsocketClientManager
 	tools           *app.Tools
 	config          *config.Bootstrap
 	Prefix          string
+
+	// 数据逻辑仓库
+	dataLogicRepo struct {
+		Account data.AccountRepo
+	}
 }
 
 func NewHandler(
 	config *config.Bootstrap,
 	tools *app.Tools,
-	dataRepo repositories.DataRepo,
 	grpcClient grpc.GrpcClient,
-	wsClientManager websocket.WebsocketClientManager) *Handler {
-	return &Handler{
+	wsClientManager websocket.WebsocketClientManager,
+	accountRepo data.AccountRepo) *Handler {
+	var handler = &Handler{
 		r:               mux.NewRouter(),
-		dataRepo:        dataRepo,
 		grpcClient:      grpcClient,
 		wsClientManager: wsClientManager,
 		tools:           tools,
 		config:          config,
 		Prefix:          "/app/",
 	}
+
+	handler.dataLogicRepo.Account = accountRepo
+	return handler
 }
 
 func (h *Handler) Router() *mux.Router {
