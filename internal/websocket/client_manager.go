@@ -8,7 +8,6 @@ import (
 	"mt/internal/data"
 	"mt/internal/grpc"
 	"mt/internal/lib"
-	"mt/internal/message_events"
 	"mt/internal/repositories/dbrepo/model"
 	"mt/pkg/utils"
 	"sync"
@@ -19,7 +18,7 @@ var _ WSClientManager = (*ClientManager)(nil)
 
 type WSClientManager interface {
 	// MessageEvent 消息事件
-	MessageEvent() websocket_events.MessageEvent
+	MessageEvent() MessageEvent
 
 	// CreateClient 创建客户端连接
 	CreateClient(ctx context.Context, account *Account, conn *websocket.Conn) (client *Client)
@@ -37,22 +36,18 @@ type ClientManager struct {
 
 	GrpcClient     grpc.GrpcClient
 	Tools          *app.Tools
-	Clients        map[*Client]bool              // 全部客户端连接资源
-	ClientsLock    sync.RWMutex                  // 客户端链接读写锁
-	Accounts       map[string][]*Client          // 全部账号
-	AccountsLock   sync.RWMutex                  // 账号读写锁
-	Register       chan *Client                  // 建立客户端连接处理通道
-	UnRegister     chan *Client                  // 断开客户端连接处理通道
-	Broadcast      chan []byte                   // 广播消息-向全部成员发送数据
-	WsMessageEvent websocket_events.MessageEvent // 消息事件
+	Clients        map[*Client]bool     // 全部客户端连接资源
+	ClientsLock    sync.RWMutex         // 客户端链接读写锁
+	Accounts       map[string][]*Client // 全部账号
+	AccountsLock   sync.RWMutex         // 账号读写锁
+	Register       chan *Client         // 建立客户端连接处理通道
+	UnRegister     chan *Client         // 断开客户端连接处理通道
+	Broadcast      chan []byte          // 广播消息-向全部成员发送数据
+	WsMessageEvent MessageEvent         // 消息事件
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(
-	accountRepo data.AccountRepo,
-	grpcClient grpc.GrpcClient,
-	messageEvent websocket_events.MessageEvent,
-	tools *app.Tools) (manager WSClientManager, cleanup func()) {
+func NewClientManager(accountRepo data.AccountRepo, grpcClient grpc.GrpcClient, tools *app.Tools) (manager WSClientManager, cleanup func()) {
 	var clientManager = &ClientManager{
 		GrpcClient:     grpcClient,
 		Tools:          tools,
@@ -61,7 +56,7 @@ func NewClientManager(
 		Register:       make(chan *Client, 1000),
 		UnRegister:     make(chan *Client, 1000),
 		Broadcast:      make(chan []byte, 1000),
-		WsMessageEvent: messageEvent,
+		WsMessageEvent: NewMessageEvent(),
 	}
 
 	clientManager.DataLogicRepo.Account = accountRepo
@@ -86,7 +81,7 @@ func NewClientManager(
 	return clientManager, cleanup
 }
 
-func (manager *ClientManager) MessageEvent() websocket_events.MessageEvent {
+func (manager *ClientManager) MessageEvent() MessageEvent {
 	//TODO implement me
 
 	return manager.WsMessageEvent

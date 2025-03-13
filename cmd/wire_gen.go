@@ -14,7 +14,6 @@ import (
 	"mt/internal/biz"
 	"mt/internal/data"
 	"mt/internal/grpc"
-	"mt/internal/message_events"
 	"mt/internal/repositories"
 	"mt/internal/server"
 	"mt/internal/service"
@@ -42,8 +41,7 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 		cleanup()
 		return nil, nil, err
 	}
-	messageEvent := websocket_events.NewMessageEvent()
-	wsClientManager, cleanup3 := websocket.NewClientManager(accountRepo, grpcClient, messageEvent, tools)
+	wsClientManager, cleanup3 := websocket.NewClientManager(accountRepo, grpcClient, tools)
 	handler := api.NewHandler(bootstrap, tools, grpcClient, wsClientManager, accountRepo)
 	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)

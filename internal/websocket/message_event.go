@@ -1,15 +1,10 @@
-package websocket_events
+package websocket
 
 import (
 	"context"
-	"github.com/google/wire"
-	"mt/internal/websocket"
 	"strings"
 	"sync"
 )
-
-// ProviderSet is messageEvents providers.
-var ProviderSet = wire.NewSet(NewMessageEvent)
 
 const (
 	MessageEventPing       = "ping"
@@ -17,7 +12,7 @@ const (
 	MessageEventC2CMessage = "c2c_message"
 )
 
-type MessageEventDisposeFunc func(ctx context.Context, client *websocket.Client, seq string, message []byte) (code uint32, msg string, data interface{})
+type MessageEventDisposeFunc func(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{})
 
 type MessageEvent interface {
 	// HasClientSupport 判断是否客户端请求所支持的消息事件, 不在指定的消息事件客户端无法调用
@@ -26,11 +21,11 @@ type MessageEvent interface {
 	GetDisposeFunc(event string) (MessageEventDisposeFunc, bool)
 
 	// Ping 心跳检测
-	Ping(ctx context.Context, client *websocket.Client, seq string, message []byte) (code uint32, msg string, data interface{})
+	Ping(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{})
 	// Bind 客户端和账号信息绑定
-	Bind(ctx context.Context, client *websocket.Client, seq string, message []byte) (code uint32, msg string, data interface{})
+	Bind(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{})
 	// C2CMessage 发送C2C消息
-	C2CMessage(ctx context.Context, client *websocket.Client, seq string, message []byte) (code uint32, msg string, data interface{})
+	C2CMessage(ctx context.Context, client *Client, seq string, message []byte) (code uint32, msg string, data interface{})
 }
 
 type messageEvent struct {
