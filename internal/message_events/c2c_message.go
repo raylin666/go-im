@@ -1,4 +1,4 @@
-package event
+package websocket_events
 
 import (
 	"context"

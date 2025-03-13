@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/raylin666/go-utils/db/gorm"
-	gorm_db "gorm.io/gorm"
-	gorm_logger "gorm.io/gorm/logger"
+	gormDb "gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 	"mt/config"
 	"mt/pkg/logger"
 	"time"
@@ -69,16 +69,16 @@ func (db *db) Close() error {
 }
 
 // WithLogger DB 日志
-func (db *db) WithLogger() gorm_logger.Interface {
+func (db *db) WithLogger() gormLogger.Interface {
 	return NewLogger(
 		db.logger,
-		WithLoggerLevel(gorm_logger.Info),
+		WithLoggerLevel(gormLogger.Info),
 		WithLoggerSlowThreshold(time.Second*1),
 		WithLoggerIgnoreRecordNotFoundError(true))
 }
 
 // BeforePluginHandler DB 插件前置方法
-func (db *db) BeforePluginHandler(rdb *gorm_db.DB) {}
+func (db *db) BeforePluginHandler(rdb *gormDb.DB) {}
 
 // AfterPluginHandler DB 插件后置方法
-func (db *db) AfterPluginHandler(rdb *gorm_db.DB, sql string, ts time.Time) {}
+func (db *db) AfterPluginHandler(rdb *gormDb.DB, sql string, ts time.Time) {}

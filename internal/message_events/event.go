@@ -1,11 +1,15 @@
-package event
+package websocket_events
 
 import (
 	"context"
+	"github.com/google/wire"
 	"mt/internal/websocket"
 	"strings"
 	"sync"
 )
+
+// ProviderSet is messageEvents providers.
+var ProviderSet = wire.NewSet(NewMessageEvent)
 
 const (
 	MessageEventPing       = "ping"
@@ -21,9 +25,6 @@ type MessageEvent interface {
 	// GetDisposeFunc 获取消息事件的处理函数
 	GetDisposeFunc(event string) (MessageEventDisposeFunc, bool)
 
-	/**
-	消息事件
-	*/
 	// Ping 心跳检测
 	Ping(ctx context.Context, client *websocket.Client, seq string, message []byte) (code uint32, msg string, data interface{})
 	// Bind 客户端和账号信息绑定
@@ -76,7 +77,7 @@ func (event *messageEvent) HasClientSupport(name string) bool {
 	return false
 }
 
-// DisposeFuncs 获取所有消息事件的处理函数
+// GetDisposeFunc 获取所有消息事件的处理函数
 func (event *messageEvent) GetDisposeFunc(name string) (MessageEventDisposeFunc, bool) {
 	//TODO implement me
 

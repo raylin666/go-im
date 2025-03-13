@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	utils_redis "github.com/raylin666/go-utils/cache/redis"
+	utilsRedis "github.com/raylin666/go-utils/cache/redis"
 	"mt/config"
 	"time"
 )
@@ -12,17 +12,17 @@ import (
 var _ Redis = (*redis)(nil)
 
 type Redis interface {
-	Get() utils_redis.Client
+	Get() utilsRedis.Client
 	Close() error
 }
 
 type redis struct {
-	client utils_redis.Client
+	client utilsRedis.Client
 }
 
 func NewRedis(name string, config *config.RedisItem) (Redis, error) {
 	var rds = new(redis)
-	opts := new(utils_redis.Options)
+	opts := new(utilsRedis.Options)
 	opts.Addr = fmt.Sprintf("%s:%d", config.Addr, config.Port)
 	opts.Network = config.Network
 	opts.Username = config.Username
@@ -42,7 +42,7 @@ func NewRedis(name string, config *config.RedisItem) (Redis, error) {
 	opts.PoolSize = int(config.PoolSize)
 	opts.PoolTimeout = time.Duration(config.PoolTimeout)
 
-	client, err := utils_redis.NewClient(context.TODO(), opts)
+	client, err := utilsRedis.NewClient(context.TODO(), opts)
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("new redis to %s client err", name))
 	}
@@ -52,7 +52,7 @@ func NewRedis(name string, config *config.RedisItem) (Redis, error) {
 	return rds, nil
 }
 
-func (rds *redis) Get() utils_redis.Client {
+func (rds *redis) Get() utilsRedis.Client {
 	return rds.client
 }
 

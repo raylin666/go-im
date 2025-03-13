@@ -14,6 +14,7 @@ import (
 	"mt/internal/biz"
 	"mt/internal/data"
 	"mt/internal/grpc"
+	websocket_events "mt/internal/message_events"
 	"mt/internal/repositories"
 	"mt/internal/server"
 	"mt/internal/service"
@@ -31,5 +32,6 @@ func wireApp(*config.Bootstrap, *config.Server, *config.Data, *app.Tools) (*krat
 		api.ProviderSet,
 		grpc.ProviderSet,
 		websocket.ProviderSet,
+		websocket_events.ProviderSet,
 		newApp))
 }

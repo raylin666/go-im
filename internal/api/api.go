@@ -16,7 +16,7 @@ var ProviderSet = wire.NewSet(NewHandler)
 type Handler struct {
 	r               *mux.Router
 	grpcClient      grpc.GrpcClient
-	wsClientManager websocket.WebsocketClientManager
+	wsClientManager websocket.WSClientManager
 	tools           *app.Tools
 	config          *config.Bootstrap
 	Prefix          string
@@ -31,7 +31,7 @@ func NewHandler(
 	config *config.Bootstrap,
 	tools *app.Tools,
 	grpcClient grpc.GrpcClient,
-	wsClientManager websocket.WebsocketClientManager,
+	wsClientManager websocket.WSClientManager,
 	accountRepo data.AccountRepo) *Handler {
 	var handler = &Handler{
 		r:               mux.NewRouter(),

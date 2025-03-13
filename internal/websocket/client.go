@@ -20,7 +20,7 @@ const (
 // Client 客户端连接
 type Client struct {
 	Ctx           context.Context
-	Manager       WebsocketClientManager
+	Manager       WSClientManager
 	Logger        *logger.Logger
 	Addr          string          // 客户端地址
 	Conn          *websocket.Conn // 连接实例对象
@@ -32,7 +32,7 @@ type Client struct {
 
 func NewClient(
 	ctx context.Context,
-	manager WebsocketClientManager,
+	manager WSClientManager,
 	account *Account,
 	conn *websocket.Conn,
 	logger *logger.Logger) (client *Client) {
@@ -203,7 +203,7 @@ func (c *Client) ParseMessageHandler(message []byte) {
 		responseSend    bool
 	)
 
-	loggerFields = append(loggerFields, zap.String("message_seq", seq), zap.String("message_event", event), zap.String("message_data", string(requestData)))
+	loggerFields = append(loggerFields, zap.String("message_seq", seq), zap.String("message_events", event), zap.String("message_data", string(requestData)))
 	c.Logger.Info("消息解析数据包完成", loggerFields...)
 
 	// 采用 MAP 处理事件
