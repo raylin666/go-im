@@ -15,5 +15,5 @@ func (event *messageEvent) Ping(ctx context.Context, client *Client, seq string,
 	// 发送 PONE 回包
 	messages = append(messages, Message{Event: MessageEventPing, Data: "PONE"})
 
-	return messages
+	return
 }
