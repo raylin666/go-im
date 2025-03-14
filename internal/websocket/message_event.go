@@ -12,13 +12,6 @@ const (
 	MessageEventC2CMessage = "c2c_message"
 )
 
-type Message struct {
-	Event string
-	Code  uint32
-	Msg   string
-	Data  interface{}
-}
-
 type MessageEventDisposeFunc func(ctx context.Context, client *Client, seq string, message []byte) []Message
 
 type MessageEvent interface {

@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 	"mt/pkg/logger"
+	"net/http"
 	"runtime/debug"
 	"time"
 )
@@ -221,6 +222,12 @@ func (c *Client) ParseMessageHandler(message []byte, isClient bool) {
 	if len(responseMessages) > 0 {
 		lenLoggerFields := len(loggerFields)
 		for _, responseMessage := range responseMessages {
+			// 设置默认响应状态码及响应描述
+			if responseMessage.Code == 0 {
+				responseMessage.Code = http.StatusOK
+				responseMessage.Msg = http.StatusText(int(responseMessage.Code))
+			}
+
 			tmpLoggerFields := make([]zap.Field, lenLoggerFields)
 			copy(tmpLoggerFields, loggerFields)
 			tmpLoggerFields = append(tmpLoggerFields,

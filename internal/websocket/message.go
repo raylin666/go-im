@@ -2,6 +2,14 @@ package websocket
 
 import "encoding/json"
 
+// Message 消息回包数据格式
+type Message struct {
+	Event string      // 消息事件
+	Code  uint32      // 响应状态码
+	Msg   string      // 响应描述
+	Data  interface{} // JSON 数据包
+}
+
 // MessageRequest 消息请求数据格式
 type MessageRequest struct {
 	Seq   string      `json:"seq"`            // 消息唯一标识ID, 用于标识服务端回复的是哪条信息(可能有多个回复), 需客户端保证消息ID的唯一性
