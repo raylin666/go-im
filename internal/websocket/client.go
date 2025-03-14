@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
-	"mt/errors"
 	"mt/pkg/logger"
 	"runtime/debug"
 	"time"
@@ -108,8 +107,8 @@ func (c *Client) Read() {
 		loggerFields = append(loggerFields, zap.String("message", string(message)))
 		c.Logger.Info("读取客户端消息成功", loggerFields...)
 
-		// 消息解析处理
-		c.ParseMessageHandler(message)
+		// 客户端发送消息解析处理
+		c.ParseMessageHandler(message, true)
 	}
 }
 
@@ -151,8 +150,8 @@ func (c *Client) Write() {
 	}
 }
 
-// ParseMessageHandler 消息解析处理 (对数据包进行合法校验、解析、事件消息分发及消息发送处理)
-func (c *Client) ParseMessageHandler(message []byte) {
+// ParseMessageHandler 消息解析处理 (对数据包进行合法校验、解析、消息事件分发及消息发送处理)
+func (c *Client) ParseMessageHandler(message []byte, isClient bool) {
 	var loggerFields = []zap.Field{
 		zap.String("address", c.Addr),
 		zap.Any("account", c.Account),
@@ -161,10 +160,15 @@ func (c *Client) ParseMessageHandler(message []byte) {
 		zap.String("message", string(message)),
 	}
 
+	msgTitle := "发送消息事件"
+	if isClient {
+		msgTitle = "客户端" + msgTitle
+	}
+
 	defer func() {
 		if r := recover(); r != nil {
 			loggerFields = append(loggerFields, zap.Any("recover", r))
-			c.Logger.Error("消息解析处理异常", loggerFields...)
+			c.Logger.Error(fmt.Sprintf("%s解析处理异常", msgTitle), loggerFields...)
 		}
 	}()
 
@@ -173,10 +177,10 @@ func (c *Client) ParseMessageHandler(message []byte) {
 	err := json.Unmarshal(message, request)
 	if err != nil {
 		loggerFields = append(loggerFields, zap.Error(err))
-		c.Logger.Error("消息解析数据包合法性校验失败 json.Unmarshal", loggerFields...)
+		c.Logger.Error(fmt.Sprintf("%s解析数据包合法性校验失败 json.Unmarshal", msgTitle), loggerFields...)
 
 		// 返回错误给客户端
-		c.WriteMessage([]byte("发送消息数据包协议格式错误"))
+		c.WriteMessage([]byte(fmt.Sprintf("%s数据包协议格式错误", msgTitle)))
 
 		return
 	}
@@ -184,80 +188,64 @@ func (c *Client) ParseMessageHandler(message []byte) {
 	requestData, err := json.Marshal(request.Data)
 	if err != nil {
 		loggerFields = append(loggerFields, zap.Error(err))
-		c.Logger.Error("消息解析数据包错误 json.Marshal", loggerFields...)
+		c.Logger.Error(fmt.Sprintf("%s解析数据包错误 json.Marshal", msgTitle), loggerFields...)
 
 		// 返回错误给客户端
-		c.WriteMessage([]byte("发送消息具体协议数据包格式错误"))
+		c.WriteMessage([]byte(fmt.Sprintf("%s具体协议数据包格式错误", msgTitle)))
 
 		return
 	}
+
+	// 判断是否客户端请求所支持的消息事件, 不在指定的消息事件客户端无法调用
+	if hasEvent := c.Manager.MessageEvent().HasClientSupport(request.Event); !hasEvent {
+		// 返回错误给客户端
+		c.WriteMessage([]byte(fmt.Sprintf("%s协议不存在", msgTitle)))
+
+		return
+	}
+
+	// 判断消息事件是否存在
+	disposeFunc, ok := c.Manager.MessageEvent().GetDisposeFunc(request.Event)
+	if !ok {
+		// 返回错误给客户端
+		c.WriteMessage([]byte(fmt.Sprintf("服务端消息事件处理: `%s` 事件不存在!", request.Event)))
+
+		return
+	}
+
+	loggerFields = append(loggerFields, zap.String("message_seq", request.Seq), zap.String("message_event", request.Event), zap.String("message_data", string(requestData)))
 
 	// TODO 将处理完成的数据包返回给客户端
-	var (
-		seq   = request.Seq
-		event = request.Event
+	responseMessages := disposeFunc(c.Ctx, c, request.Seq, requestData)
+	// responseMessages 为空时不需要回包, 程序逻辑处理后即完成
+	if len(responseMessages) > 0 {
+		lenLoggerFields := len(loggerFields)
+		for _, responseMessage := range responseMessages {
+			tmpLoggerFields := make([]zap.Field, lenLoggerFields)
+			copy(tmpLoggerFields, loggerFields)
+			tmpLoggerFields = append(tmpLoggerFields,
+				zap.String("response_event", responseMessage.Event),
+				zap.Uint32("response_code", responseMessage.Code),
+				zap.String("response_message", responseMessage.Msg),
+				zap.Any("response_data", responseMessage.Data),
+			)
 
-		responseCode    uint32
-		responseMessage string
-		responseData    interface{}
-		responseSend    bool
-	)
+			ok, err = c.WriteAgreementEventMessage(responseMessage.Event, request.Seq, responseMessage.Code, responseMessage.Msg, responseMessage.Data)
+			if err != nil {
+				tmpLoggerFields = append(tmpLoggerFields, zap.Error(err))
+				c.Logger.Error("服务端消息事件发送失败: 消息回包处理数据错误 json.Marshal", tmpLoggerFields...)
+				continue
+			}
 
-	loggerFields = append(loggerFields, zap.String("message_seq", seq), zap.String("message_events", event), zap.String("message_data", string(requestData)))
-	c.Logger.Info("消息解析数据包完成", loggerFields...)
-
-	// 采用 MAP 处理事件
-	disposeFunc, ok := c.Manager.MessageEvent().GetDisposeFunc(event)
-	if !ok {
-		errMessage := fmt.Sprintf("事件消息处理: `%s` 事件不存在!", event)
-		notEventErr := errors.New().CommandInvalidNotFound()
-		responseCode = uint32(notEventErr.GetCode())
-		responseMessage = notEventErr.GetMessage()
-		c.Logger.Warn(errMessage, loggerFields...)
-		// 返回错误给客户端
-		c.WriteMessage([]byte(errMessage))
-
-		return
+			c.Logger.Info("服务端消息事件发送成功: 消息回包处理完成", tmpLoggerFields...)
+		}
 	}
 
-	responseCode, responseMessage, responseData = disposeFunc(c.Ctx, c, seq, requestData)
-	// 判断该消息事件是否需要推送给客户端
-	if responseSend == false {
-
-		return
-	}
-
-	ok, err = c.WriteAgreementEventMessage(event, seq, responseCode, responseMessage, responseData)
-	if err != nil {
-		loggerFields = append(loggerFields,
-			zap.Uint32("response_code", responseCode),
-			zap.String("response_message", responseMessage),
-			zap.Any("response_data", responseData),
-			zap.Bool("response_send", responseSend),
-			zap.Error(err))
-		c.Logger.Error("事件消息处理响应数据错误 json.Marshal", loggerFields...)
-
-		return
-	}
-
-	responseDataJson, _ := json.Marshal(responseData)
-	loggerFields = append(loggerFields, zap.String("message", string(responseDataJson)))
-
-	if !ok {
-		c.Logger.Error("事件消息发送失败", loggerFields...)
-		return
-	}
-
-	c.Logger.Info("事件消息发送成功", loggerFields...)
+	c.Logger.Info(fmt.Sprintf("%s处理成功, 服务端消息回包已完成", msgTitle), loggerFields...)
 }
 
 // WriteAgreementEventMessage 写入待发送协议消息到通道 (和客户端协商好的协议格式封装)
 func (c *Client) WriteAgreementEventMessage(event string, seq string, code uint32, message string, data interface{}) (ok bool, err error) {
-	// 事件不存在的消息不推送给客户端
-	if hasEvent := c.Manager.MessageEvent().HasClientSupport(event); !hasEvent {
-		return false, errors.New().SendMessageTypeNotFound()
-	}
-
 	response := NewMessageResponse(seq, event, code, message, data)
 	headByte, err := json.Marshal(response)
 	if err != nil {
@@ -284,7 +272,7 @@ func (c *Client) WriteMessage(message []byte) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			loggerFields = append(loggerFields, zap.String("stack", string(debug.Stack())), zap.Any("recover", r))
-			c.Logger.Error("消息发送异常", loggerFields...)
+			c.Logger.Error("服务端消息事件发送异常", loggerFields...)
 		}
 	}()
 
