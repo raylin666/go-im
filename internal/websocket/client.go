@@ -181,7 +181,8 @@ func (c *Client) ParseMessageHandler(message []byte, isClient bool) {
 		c.Logger.Error(fmt.Sprintf("%s解析数据包合法性校验失败 json.Unmarshal", msgTitle), loggerFields...)
 
 		// 返回错误给客户端
-		c.WriteMessage([]byte(fmt.Sprintf("%s数据包协议格式错误", msgTitle)))
+		code := http.StatusUnprocessableEntity
+		c.WriteAgreementEventMessage("", "", uint32(code), http.StatusText(code), fmt.Sprintf("%s数据包协议格式错误", msgTitle))
 
 		return
 	}
@@ -192,7 +193,8 @@ func (c *Client) ParseMessageHandler(message []byte, isClient bool) {
 		c.Logger.Error(fmt.Sprintf("%s解析数据包错误 json.Marshal", msgTitle), loggerFields...)
 
 		// 返回错误给客户端
-		c.WriteMessage([]byte(fmt.Sprintf("%s具体协议数据包格式错误", msgTitle)))
+		code := http.StatusUnprocessableEntity
+		c.WriteAgreementEventMessage(request.Event, request.Seq, uint32(code), http.StatusText(code), fmt.Sprintf("%s具体协议数据包格式错误", msgTitle))
 
 		return
 	}
@@ -200,7 +202,8 @@ func (c *Client) ParseMessageHandler(message []byte, isClient bool) {
 	// 判断是否客户端请求所支持的消息事件, 不在指定的消息事件客户端无法调用
 	if hasEvent := c.Manager.MessageEvent().HasClientSupport(request.Event); !hasEvent {
 		// 返回错误给客户端
-		c.WriteMessage([]byte(fmt.Sprintf("%s协议不存在", msgTitle)))
+		code := http.StatusNotFound
+		c.WriteAgreementEventMessage(request.Event, request.Seq, uint32(code), http.StatusText(code), fmt.Sprintf("%s协议不存在", msgTitle))
 
 		return
 	}
@@ -209,7 +212,8 @@ func (c *Client) ParseMessageHandler(message []byte, isClient bool) {
 	disposeFunc, ok := c.Manager.MessageEvent().GetDisposeFunc(request.Event)
 	if !ok {
 		// 返回错误给客户端
-		c.WriteMessage([]byte(fmt.Sprintf("服务端消息事件处理: `%s` 事件不存在!", request.Event)))
+		code := http.StatusInternalServerError
+		c.WriteAgreementEventMessage(request.Event, request.Seq, uint32(code), http.StatusText(code), fmt.Sprintf("服务端消息事件处理: `%s` 事件不存在!", request.Event))
 
 		return
 	}
