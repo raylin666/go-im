@@ -157,7 +157,7 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.account.UpdateResponse'
-    /heartbeat:
+    /api/heartbeat:
         get:
             tags:
                 - Heartbeat

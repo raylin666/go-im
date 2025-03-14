@@ -14,7 +14,7 @@ service Heartbeat {
   // Heartbeat detection
   rpc PONE (google.protobuf.Empty) returns (PONEResponse) {
     option (google.api.http) = {
-      get: "/heartbeat"
+      get: "/api/heartbeat"
     };
   }
 }
