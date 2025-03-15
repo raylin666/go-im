@@ -3,6 +3,9 @@ package websocket
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"mt/errors"
+	"mt/internal/constant/types"
 	"net/http"
 )
 
@@ -26,11 +29,13 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		return
 	}
 
-	if request.ToAccount == "" {
+	err = event.DataLogicRepo.Message.SendC2CMessage(ctx, &types.MessageSendC2CMessageRequest{
+		Seq:       seq,
+		ToAccount: request.ToAccount,
+		Message:   fmt.Sprintf("%v", request.Message),
+	})
 
-	}
-
-	// TODO 处理发送给接收者消息
+	fmt.Println(errors.ParseErrorMessage(err))
 
 	return
 }

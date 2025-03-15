@@ -4,7 +4,69 @@ import (
 	"fmt"
 	"github.com/go-kratos/kratos/v2/errors"
 	pb "mt/api/v1"
+	"regexp"
+	"strconv"
+	"strings"
 )
+
+// ErrorMessage 获取错误信息
+func ErrorMessage(err *errors.Error) (code uint32, message string) {
+	code = uint32(err.Code)
+	message = err.Message
+	return
+}
+
+type ErrorMessageDetails struct {
+	Code     int
+	Reason   string
+	Message  string
+	Metadata map[string]string
+	Cause    string
+}
+
+// ParseErrorMessage 解析错误信息字符串, 例如前置将 errors.Error 转换成了原生的 error, 此时需要再转换回 errors.Error
+func ParseErrorMessage(err error) (*ErrorMessageDetails, error) {
+	re := regexp.MustCompile(`error: code = (\d+) reason = (\w+) message = (.*?) metadata = (\w+\[.*?\]) cause = (<nil>|\w+)`)
+	matches := re.FindStringSubmatch(err.Error())
+	if len(matches) < 6 {
+		return nil, fmt.Errorf("invalid error string format")
+	}
+
+	// 提取 Code
+	code, err := strconv.Atoi(matches[1])
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse code: %v", err)
+	}
+
+	// 提取 Reason
+	reason := matches[2]
+
+	// 提取 Message
+	message := strings.TrimSpace(matches[3])
+
+	// 提取 Metadata
+	metadata := make(map[string]string)
+	if matches[4] != "map[]" {
+		// 有内容，进一步解析
+		// 例如：metadataStr = "map[key1:value1 key2:value2]"
+		metadataRe := regexp.MustCompile(`(\w+):(\w+)`)
+		metadataMatches := metadataRe.FindAllStringSubmatch(matches[4], -1)
+		for _, match := range metadataMatches {
+			metadata[match[1]] = match[2]
+		}
+	}
+
+	// 提取 Cause
+	cause := matches[5]
+
+	return &ErrorMessageDetails{
+		Code:     code,
+		Reason:   reason,
+		Message:  message,
+		Metadata: metadata,
+		Cause:    cause,
+	}, nil
+}
 
 type Option func(opt *option)
 

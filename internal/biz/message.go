@@ -5,15 +5,17 @@ import (
 	"mt/internal/app"
 	"mt/internal/constant/types"
 	"mt/internal/data"
+	"mt/internal/websocket"
 )
 
 type MessageUsecase struct {
-	repo  data.MessageRepo
-	tools *app.Tools
+	repo            data.MessageRepo
+	wsClientManager websocket.WSClientManager
+	tools           *app.Tools
 }
 
-func NewMessageUsecase(repo data.MessageRepo, tools *app.Tools) *MessageUsecase {
-	return &MessageUsecase{repo: repo, tools: tools}
+func NewMessageUsecase(repo data.MessageRepo, wsClientManager websocket.WSClientManager, tools *app.Tools) *MessageUsecase {
+	return &MessageUsecase{repo: repo, wsClientManager: wsClientManager, tools: tools}
 }
 
 // SendC2CMessage 发送 C2C 消息

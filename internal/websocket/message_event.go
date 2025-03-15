@@ -31,10 +31,12 @@ type MessageEvent interface {
 type messageEvent struct {
 	disposeFuncs    map[string]MessageEventDisposeFunc
 	disposeFuncLock sync.RWMutex
+	// 数据逻辑仓库
+	DataLogicRepo DataLogicRepo
 }
 
-func NewMessageEvent() MessageEvent {
-	var event = new(messageEvent)
+func NewMessageEvent(dataLogicRepo DataLogicRepo) MessageEvent {
+	var event = &messageEvent{DataLogicRepo: dataLogicRepo}
 
 	event.registerDisposeFunc()
 

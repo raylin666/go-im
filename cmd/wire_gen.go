@@ -35,15 +35,18 @@ func wireApp(bootstrap *config.Bootstrap, configServer *config.Server, configDat
 	accountRepo := data.NewAccountRepo(dataRepo, tools)
 	accountUsecase := biz.NewAccountUsecase(accountRepo, tools)
 	accountService := service.NewAccountService(accountUsecase, tools)
-	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, tools)
+	messageRepo := data.NewMessageRepo(dataRepo, tools)
 	grpcClient, cleanup2, err := grpc.NewGrpcClient(tools)
 	if err != nil {
 		cleanup()
 		return nil, nil, err
 	}
-	wsClientManager, cleanup3 := websocket.NewClientManager(accountRepo, grpcClient, tools)
+	wsClientManager, cleanup3 := websocket.NewClientManager(accountRepo, messageRepo, grpcClient, tools)
+	messageUsecase := biz.NewMessageUsecase(messageRepo, wsClientManager, tools)
+	messageService := service.NewMessageService(messageUsecase, tools)
+	grpcServer := server.NewGRPCServer(configServer, heartbeatService, accountService, messageService, tools)
 	handler := api.NewHandler(bootstrap, tools, grpcClient, wsClientManager, accountRepo)
-	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, tools, handler)
+	httpServer := server.NewHTTPServer(configServer, heartbeatService, accountService, messageService, tools, handler)
 	kratosApp := newApp(tools, grpcServer, httpServer)
 	return kratosApp, func() {
 		cleanup3()

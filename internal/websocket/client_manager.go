@@ -28,11 +28,16 @@ type WSClientManager interface {
 	ClientUnRegister(client *Client)
 }
 
+// DataLogicRepo 数据逻辑仓库
+type DataLogicRepo struct {
+	Account data.AccountRepo
+	Message data.MessageRepo
+}
+
 // ClientManager 客户端连接管理
 type ClientManager struct {
-	DataLogicRepo struct {
-		Account data.AccountRepo
-	}
+	// 数据逻辑仓库
+	DataLogicRepo
 
 	GrpcClient     grpc.GrpcClient
 	Tools          *app.Tools
@@ -47,19 +52,27 @@ type ClientManager struct {
 }
 
 // NewClientManager 初始化客户端连接管理
-func NewClientManager(accountRepo data.AccountRepo, grpcClient grpc.GrpcClient, tools *app.Tools) (manager WSClientManager, cleanup func()) {
+func NewClientManager(
+	accountRepo data.AccountRepo,
+	messageRepo data.MessageRepo,
+	grpcClient grpc.GrpcClient,
+	tools *app.Tools) (manager WSClientManager, cleanup func()) {
 	var clientManager = &ClientManager{
-		GrpcClient:     grpcClient,
-		Tools:          tools,
-		Clients:        make(map[*Client]bool),
-		Accounts:       make(map[string][]*Client),
-		Register:       make(chan *Client, 1000),
-		UnRegister:     make(chan *Client, 1000),
-		Broadcast:      make(chan []byte, 1000),
-		WsMessageEvent: NewMessageEvent(),
+		GrpcClient: grpcClient,
+		Tools:      tools,
+		Clients:    make(map[*Client]bool),
+		Accounts:   make(map[string][]*Client),
+		Register:   make(chan *Client, 1000),
+		UnRegister: make(chan *Client, 1000),
+		Broadcast:  make(chan []byte, 1000),
 	}
 
+	// TODO 注册数据逻辑仓库
 	clientManager.DataLogicRepo.Account = accountRepo
+	clientManager.DataLogicRepo.Message = messageRepo
+
+	// TODO 注册消息事件
+	clientManager.WsMessageEvent = NewMessageEvent(clientManager.DataLogicRepo)
 
 	// TODO 注册事件监听处理器
 	go clientManager.RegisterEventListenerHandler()
