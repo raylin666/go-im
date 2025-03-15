@@ -5,4 +5,4 @@ import (
 )
 
 // ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewHeartbeatRepo, NewAccountRepo)
+var ProviderSet = wire.NewSet(NewHeartbeatRepo, NewAccountRepo, NewMessageRepo)

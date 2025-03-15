@@ -7,6 +7,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport/http"
 	"mt/api/v1"
 	accountPb "mt/api/v1/account"
+	messagePb "mt/api/v1/message"
 	"mt/config"
 	"mt/internal/api"
 	"mt/internal/app"
@@ -23,6 +24,7 @@ func NewHTTPServer(
 	c *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
+	message *service.MessageService,
 	tools *app.Tools,
 	apiHandler *api.Handler) *http.Server {
 	var opts = []http.ServerOption{
@@ -53,6 +55,7 @@ func NewHTTPServer(
 
 	v1.RegisterHeartbeatHTTPServer(srv, heartbeat)
 	accountPb.RegisterServiceHTTPServer(srv, account)
+	messagePb.RegisterServiceHTTPServer(srv, message)
 
 	return srv
 }

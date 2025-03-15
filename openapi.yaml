@@ -170,6 +170,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/v1.PONEResponse'
+    /api/message/send_c2c_message:
+        post:
+            tags:
+                - Service
+            description: 发送 C2C 消息
+            operationId: Service_SendC2CMessage
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/v1.message.SendC2CMessageRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/v1.message.SendC2CMessageResponse'
 components:
     schemas:
         v1.PONEResponse:
@@ -317,8 +336,22 @@ components:
                     type: boolean
                 createdAt:
                     type: string
+        v1.message.SendC2CMessageRequest:
+            type: object
+            properties:
+                seq:
+                    type: string
+                toAccount:
+                    type: string
+                message:
+                    type: string
+        v1.message.SendC2CMessageResponse:
+            type: object
+            properties: {}
 tags:
     - name: Heartbeat
       description: The Heartbeat service definition.
+    - name: Service
+      description: The Service service definition.
     - name: Service
       description: The Service service definition.

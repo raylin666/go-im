@@ -26,6 +26,10 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		return
 	}
 
+	if request.ToAccount == "" {
+
+	}
+
 	// TODO 处理发送给接收者消息
 
 	return

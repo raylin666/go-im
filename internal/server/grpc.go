@@ -14,6 +14,7 @@ import (
 	"mt/internal/service"
 
 	accountPb "mt/api/v1/account"
+	messagePb "mt/api/v1/message"
 )
 
 // NewGRPCServer new a gRPC server.
@@ -21,6 +22,7 @@ func NewGRPCServer(
 	c *config.Server,
 	heartbeat *service.HeartbeatService,
 	account *service.AccountService,
+	message *service.MessageService,
 	tools *app.Tools) *grpc.Server {
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -46,6 +48,7 @@ func NewGRPCServer(
 
 	v1.RegisterHeartbeatServer(srv, heartbeat)
 	accountPb.RegisterServiceServer(srv, account)
+	messagePb.RegisterServiceServer(srv, message)
 
 	return srv
 }

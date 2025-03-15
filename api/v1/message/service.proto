@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package v1.message;
+
+import "google/api/annotations.proto";
+
+option go_package = "api/v1/message;message";
+
+// kratos proto client api/v1/message/service.proto
+
+// The Service service definition.
+service Service {
+  // 发送 C2C 消息
+  rpc SendC2CMessage (SendC2CMessageRequest) returns (SendC2CMessageResponse) {
+    option (google.api.http) = {
+      post: "/api/message/send_c2c_message"
+      body: "*"
+    };
+  }
+}
+
+message SendC2CMessageRequest {
+  string seq = 1;
+  string to_account = 2;
+  string message = 3;
+}
+
+message SendC2CMessageResponse {
+}
