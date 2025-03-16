@@ -4,7 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"mt/errors"
+	kratosErr "github.com/go-kratos/kratos/v2/errors"
+	v1 "mt/api/v1"
 	"mt/internal/constant/types"
 	"net/http"
 )
@@ -20,22 +21,35 @@ type C2CMessageRequest struct {
 func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq string, message []byte) (messages []Message) {
 	//TODO implement me
 
+	var errTitle = "C2C消息事件"
+
 	// TODO 数据包合法性校验/解析消息数据包
 	request := &C2CMessageRequest{}
 	err := json.Unmarshal(message, request)
 	if err != nil {
 		code := http.StatusUnprocessableEntity
-		messages = append(messages, Message{Event: MessageEventC2CMessage, Code: uint32(code), Msg: http.StatusText(code), Data: "C2C消息事件数据包协议格式错误"})
+		messages = append(messages, Message{Event: MessageEventC2CMessage, Code: uint32(code), Msg: http.StatusText(code), Data: fmt.Sprintf("%s数据包协议格式错误", errTitle)})
 		return
 	}
 
+	// TODO 调用发送 C2C 消息
 	err = event.DataLogicRepo.Message.SendC2CMessage(ctx, &types.MessageSendC2CMessageRequest{
 		Seq:       seq,
 		ToAccount: request.ToAccount,
 		Message:   fmt.Sprintf("%v", request.Message),
 	})
 
-	fmt.Println(errors.ParseErrorMessage(err))
+	if err != nil {
+		errDetail := kratosErr.FromError(err)
+		code := errDetail.Code
+		errData := fmt.Sprintf("%s处理错误", errTitle)
+		if v1.IsToAccountNotFound(errDetail) {
+			errData = errData + ":" + "接收者账号不存在"
+		}
+
+		messages = append(messages, Message{Event: MessageEventC2CMessage, Code: uint32(code), Msg: http.StatusText(int(code)), Data: errData})
+		return
+	}
 
 	return
 }
