@@ -44,7 +44,7 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		code := errDetail.Code
 		errData := fmt.Sprintf("%s处理错误", errTitle)
 		if v1.IsToAccountNotFound(errDetail) {
-			errData = errData + ":" + "接收者账号不存在"
+			errData = errData + ":" + errDetail.Message
 		}
 
 		messages = append(messages, Message{Event: MessageEventC2CMessage, Code: uint32(code), Msg: http.StatusText(int(code)), Data: errData})
