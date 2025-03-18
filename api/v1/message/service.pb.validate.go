@@ -59,6 +59,8 @@ func (m *SendC2CMessageRequest) validate(all bool) error {
 
 	// no validation rules for Seq
 
+	// no validation rules for FromAccount
+
 	// no validation rules for ToAccount
 
 	// no validation rules for Message

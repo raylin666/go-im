@@ -23,9 +23,10 @@ func NewMessageService(uc *biz.MessageUsecase, tools *app.Tools) *MessageService
 // SendC2CMessage 发送 C2C 消息
 func (s *MessageService) SendC2CMessage(ctx context.Context, req *pb.SendC2CMessageRequest) (*pb.SendC2CMessageResponse, error) {
 	sendC2CMessageRequest := &types.MessageSendC2CMessageRequest{
-		Seq:       req.GetSeq(),
-		ToAccount: req.GetToAccount(),
-		Message:   req.GetMessage(),
+		Seq:         req.GetSeq(),
+		FromAccount: req.GetFromAccount(),
+		ToAccount:   req.GetToAccount(),
+		Message:     req.GetMessage(),
 	}
 
 	_, err := s.uc.SendC2CMessage(ctx, sendC2CMessageRequest)

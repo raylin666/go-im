@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	kratosErr "github.com/go-kratos/kratos/v2/errors"
-	v1 "mt/api/v1"
 	"mt/internal/constant/types"
 	"net/http"
 )
@@ -43,7 +42,7 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		errDetail := kratosErr.FromError(err)
 		code := errDetail.Code
 		errData := fmt.Sprintf("%s处理错误", errTitle)
-		if v1.IsToAccountNotFound(errDetail) {
+		if errDetail.Message != "" {
 			errData = errData + ":" + errDetail.Message
 		}
 

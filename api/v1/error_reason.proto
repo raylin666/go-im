@@ -57,14 +57,16 @@ enum ErrorReason {
   // 帐号已登录
   ACCOUNT_IS_LOGIN = 203006 [(errors.code) = 400];
 
+  // 发送者账号不存在
+  FROM_ACCOUNT_NOT_FOUND = 204001 [(errors.code) = 404];
   // 接收者账号不存在
-  TO_ACCOUNT_NOT_FOUND = 204001 [(errors.code) = 404];
+  TO_ACCOUNT_NOT_FOUND = 204002 [(errors.code) = 404];
   // 发送消息类型错误
-  SEND_MESSAGE_TYPE_NOT_FOUND = 204002 [(errors.code) = 400];
+  SEND_MESSAGE_TYPE_NOT_FOUND = 204003 [(errors.code) = 400];
   // 发送消息内容必填
-  SEND_MESSAGE_CONTENT_REQUIRED = 204003 [(errors.code) = 422];
+  SEND_MESSAGE_CONTENT_REQUIRED = 204004 [(errors.code) = 422];
   // 接收者账号不能和发送者账号一致
-  TO_ACCOUNT_AND_FROM_ACCOUNT_SAME = 204004 [(errors.code) = 400];
+  TO_ACCOUNT_AND_FROM_ACCOUNT_SAME = 204005 [(errors.code) = 400];
   // 发送消息失败, 请重试
-  SEND_MESSAGE = 204005 [(errors.code) = 400];
+  SEND_MESSAGE = 204006 [(errors.code) = 400];
 }

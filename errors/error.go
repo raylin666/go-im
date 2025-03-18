@@ -184,6 +184,10 @@ func (err *Error) AccountIsLogin(args ...interface{}) *errors.Error {
 	return pb.ErrorAccountIsLogin(errFormat("帐号已登录", err.format), args...)
 }
 
+func (err *Error) FromAccountNotFound(args ...interface{}) *errors.Error {
+	return pb.ErrorFromAccountNotFound(errFormat("发送者账号不存在", err.format), args...)
+}
+
 func (err *Error) ToAccountNotFound(args ...interface{}) *errors.Error {
 	return pb.ErrorToAccountNotFound(errFormat("接收者账号不存在", err.format), args...)
 }

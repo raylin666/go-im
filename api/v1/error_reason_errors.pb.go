@@ -305,6 +305,20 @@ func ErrorAccountIsLogin(format string, args ...interface{}) *errors.Error {
 	return errors.New(400, ErrorReason_ACCOUNT_IS_LOGIN.String(), fmt.Sprintf(format, args...))
 }
 
+// 发送者账号不存在
+func IsFromAccountNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	e := errors.FromError(err)
+	return e.Reason == ErrorReason_FROM_ACCOUNT_NOT_FOUND.String() && e.Code == 404
+}
+
+// 发送者账号不存在
+func ErrorFromAccountNotFound(format string, args ...interface{}) *errors.Error {
+	return errors.New(404, ErrorReason_FROM_ACCOUNT_NOT_FOUND.String(), fmt.Sprintf(format, args...))
+}
+
 // 接收者账号不存在
 func IsToAccountNotFound(err error) bool {
 	if err == nil {

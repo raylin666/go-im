@@ -57,6 +57,9 @@
         "seq": {
           "type": "string"
         },
+        "from_account": {
+          "type": "string"
+        },
         "to_account": {
           "type": "string"
         },

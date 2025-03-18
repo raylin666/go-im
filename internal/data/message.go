@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"fmt"
 	"mt/errors"
 	"mt/internal/app"
 	"mt/internal/constant/types"
@@ -31,11 +30,23 @@ func (r *messageRepo) SendC2CMessage(ctx context.Context, data *types.MessageSen
 		return errors.New().SendMessageContentRequired()
 	}
 
+	if data.FromAccount == "" {
+		return errors.New().FromAccountNotFound()
+	}
+
 	if data.ToAccount == "" {
 		return errors.New().ToAccountNotFound()
 	}
 
-	fmt.Println(data)
+	dbQuery := r.data.DefaultDbQuery()
+	formAccountResult, dataExistErr := dbQuery.Account.WithContext(ctx).ExistsByAccountId(data.FromAccount)
+	if dataExistErr != nil || formAccountResult["ok"] == 0 {
+		return errors.New().FromAccountNotFound()
+	}
+	toAccountResult, dataExistErr := dbQuery.Account.WithContext(ctx).ExistsByAccountId(data.ToAccount)
+	if dataExistErr != nil || toAccountResult["ok"] == 0 {
+		return errors.New().ToAccountNotFound()
+	}
 
 	return nil
 }
