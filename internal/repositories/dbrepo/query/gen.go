@@ -16,39 +16,49 @@ import (
 )
 
 var (
-	Q             = new(Query)
-	Account       *account
-	AccountOnline *accountOnline
+	Q                 = new(Query)
+	Account           *account
+	AccountOnline     *accountOnline
+	C2CMessage        *c2CMessage
+	C2COfflineMessage *c2COfflineMessage
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
 	Account = &Q.Account
 	AccountOnline = &Q.AccountOnline
+	C2CMessage = &Q.C2CMessage
+	C2COfflineMessage = &Q.C2COfflineMessage
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:            db,
-		Account:       newAccount(db, opts...),
-		AccountOnline: newAccountOnline(db, opts...),
+		db:                db,
+		Account:           newAccount(db, opts...),
+		AccountOnline:     newAccountOnline(db, opts...),
+		C2CMessage:        newC2CMessage(db, opts...),
+		C2COfflineMessage: newC2COfflineMessage(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Account       account
-	AccountOnline accountOnline
+	Account           account
+	AccountOnline     accountOnline
+	C2CMessage        c2CMessage
+	C2COfflineMessage c2COfflineMessage
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:            db,
-		Account:       q.Account.clone(db),
-		AccountOnline: q.AccountOnline.clone(db),
+		db:                db,
+		Account:           q.Account.clone(db),
+		AccountOnline:     q.AccountOnline.clone(db),
+		C2CMessage:        q.C2CMessage.clone(db),
+		C2COfflineMessage: q.C2COfflineMessage.clone(db),
 	}
 }
 
@@ -62,21 +72,27 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:            db,
-		Account:       q.Account.replaceDB(db),
-		AccountOnline: q.AccountOnline.replaceDB(db),
+		db:                db,
+		Account:           q.Account.replaceDB(db),
+		AccountOnline:     q.AccountOnline.replaceDB(db),
+		C2CMessage:        q.C2CMessage.replaceDB(db),
+		C2COfflineMessage: q.C2COfflineMessage.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Account       *accountDo
-	AccountOnline *accountOnlineDo
+	Account           *accountDo
+	AccountOnline     *accountOnlineDo
+	C2CMessage        *c2CMessageDo
+	C2COfflineMessage *c2COfflineMessageDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Account:       q.Account.WithContext(ctx),
-		AccountOnline: q.AccountOnline.WithContext(ctx),
+		Account:           q.Account.WithContext(ctx),
+		AccountOnline:     q.AccountOnline.WithContext(ctx),
+		C2CMessage:        q.C2CMessage.WithContext(ctx),
+		C2COfflineMessage: q.C2COfflineMessage.WithContext(ctx),
 	}
 }
 
