@@ -16,6 +16,23 @@ type C2CMessageRequest struct {
 	Message string `json:"message"`
 }
 
+type C2CMessageResponse struct {
+	// 发送者账号ID
+	FromAccount string `json:"from"`
+	// 发送者昵称
+	FromNickname string `json:"from_nickname"`
+	// 发送者头像
+	FromAvatar string `json:"from_avatar"`
+	// 接收者账号ID
+	ToAccount string `json:"to"`
+	// 接收者昵称
+	ToNickname string `json:"to_nickname"`
+	// 接收者头像
+	ToAvatar string `json:"to_avatar"`
+	// 消息内容
+	Message string `json:"message"`
+}
+
 // C2CMessage 发送C2C消息
 func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq string, message []byte) (messages []Message) {
 	//TODO implement me
@@ -32,7 +49,7 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 	}
 
 	// TODO 调用发送 C2C 消息
-	_, _, err = event.DataLogicRepo.Message.SendC2CMessage(ctx, &types.MessageSendC2CMessageRequest{
+	dataLogicResult := event.DataLogicRepo.Message.SendC2CMessage(ctx, &types.MessageSendC2CMessageRequest{
 		Seq:         seq,
 		FromAccount: client.Account.ID,
 		ToAccount:   request.ToAccount,
@@ -50,6 +67,20 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		messages = append(messages, Message{Event: MessageEventC2CMessage, Code: uint32(code), Msg: http.StatusText(int(code)), Data: errData})
 		return
 	}
+
+	// TODO 消息回包给发送者
+	fromData := C2CMessageResponse{
+		FromAccount:  dataLogicResult.FromAccount.AccountId,
+		FromNickname: dataLogicResult.FromAccount.Nickname,
+		FromAvatar:   dataLogicResult.FromAccount.Avatar,
+		ToAccount:    dataLogicResult.ToAccount.AccountId,
+		ToNickname:   dataLogicResult.ToAccount.Nickname,
+		ToAvatar:     dataLogicResult.ToAccount.Avatar,
+		Message:      dataLogicResult.Message,
+	}
+	messages = append(messages, Message{Event: MessageEventC2CMessage, Data: fromData})
+
+	// TODO 消息发送给接收者
 
 	return
 }

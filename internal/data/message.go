@@ -13,7 +13,7 @@ import (
 )
 
 type MessageRepo interface {
-	SendC2CMessage(ctx context.Context, data *types.MessageSendC2CMessageRequest) (*model.C2CMessage, *model.C2COfflineMessage, error)
+	SendC2CMessage(ctx context.Context, data *types.MessageSendC2CMessageRequest) types.MessageSendC2CMessageDataResult
 }
 
 type messageRepo struct {
@@ -29,31 +29,39 @@ func NewMessageRepo(repo repositories.DataRepo, tools *app.Tools) MessageRepo {
 }
 
 // SendC2CMessage 发送 C2C 消息
-func (r *messageRepo) SendC2CMessage(ctx context.Context, data *types.MessageSendC2CMessageRequest) (*model.C2CMessage, *model.C2COfflineMessage, error) {
+func (r *messageRepo) SendC2CMessage(ctx context.Context, data *types.MessageSendC2CMessageRequest) types.MessageSendC2CMessageDataResult {
+	var dataResult types.MessageSendC2CMessageDataResult
+
 	if data.Message == "" {
-		return nil, nil, errors.New().SendMessageContentRequired()
+		dataResult.Error = errors.New().SendMessageContentRequired()
+		return dataResult
 	}
 
 	if data.FromAccount == "" {
-		return nil, nil, errors.New().FromAccountNotFound()
+		dataResult.Error = errors.New().FromAccountNotFound()
+		return dataResult
 	}
 
 	if data.ToAccount == "" {
-		return nil, nil, errors.New().ToAccountNotFound()
+		dataResult.Error = errors.New().ToAccountNotFound()
+		return dataResult
 	}
 
 	if data.FromAccount == data.ToAccount {
-		return nil, nil, errors.New().ToAccountAndFromAccountSame()
+		dataResult.Error = errors.New().ToAccountAndFromAccountSame()
+		return dataResult
 	}
 
 	dbQuery := r.data.DefaultDbQuery()
-	formAccountResult, dataExistErr := dbQuery.Account.WithContext(ctx).ExistsByAccountId(data.FromAccount)
-	if dataExistErr != nil || formAccountResult["ok"] == 0 {
-		return nil, nil, errors.New().FromAccountNotFound()
+	formAccountResult, err := dbQuery.Account.WithContext(ctx).FirstByAccountId(data.FromAccount)
+	if err != nil || formAccountResult.AccountId == "" {
+		dataResult.Error = errors.New().FromAccountNotFound()
+		return dataResult
 	}
-	toAccountResult, dataExistErr := dbQuery.Account.WithContext(ctx).ExistsByAccountId(data.ToAccount)
-	if dataExistErr != nil || toAccountResult["ok"] == 0 {
-		return nil, nil, errors.New().ToAccountNotFound()
+	toAccountResult, err := dbQuery.Account.WithContext(ctx).FirstByAccountId(data.ToAccount)
+	if err != nil || toAccountResult.AccountId == "" {
+		dataResult.Error = errors.New().ToAccountNotFound()
+		return dataResult
 	}
 
 	var c2cMessage = &model.C2CMessage{
@@ -68,14 +76,16 @@ func (r *messageRepo) SendC2CMessage(ctx context.Context, data *types.MessageSen
 	// TODO 保存消息记录
 	if createDataErr := dbQuery.C2CMessage.WithContext(ctx).Create(c2cMessage); createDataErr != nil {
 		r.tools.Logger().UseSQL(ctx).Error("C2C消息记录错误", zap.Any("c2c_message", c2cMessage), zap.Error(createDataErr))
-		return nil, nil, errors.New(errors.WithMessage(createDataErr.Error())).DataAdd()
+		dataResult.Error = errors.New(errors.WithMessage(createDataErr.Error())).DataAdd()
+		return dataResult
 	}
 
 	// TODO 离线消息记录
 	c2cOfflineMessage, err := dbQuery.C2COfflineMessage.WithContext(ctx).FirstByAccount(data.FromAccount, data.ToAccount)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		r.tools.Logger().UseSQL(ctx).Error("C2C离线消息记录查询错误", zap.String("from_account", data.FromAccount), zap.String("to_account", data.ToAccount), zap.Error(err))
-		return nil, nil, errors.New().Server()
+		dataResult.Error = errors.New().Server()
+		return dataResult
 	}
 
 	if (err != nil && errors.Is(err, gorm.ErrRecordNotFound)) || c2cOfflineMessage.ID <= 0 {
@@ -83,12 +93,17 @@ func (r *messageRepo) SendC2CMessage(ctx context.Context, data *types.MessageSen
 		c2cOfflineMessage = model.C2COfflineMessage{FromAccount: data.FromAccount, ToAccount: data.ToAccount}
 		if err = dbQuery.C2COfflineMessage.WithContext(ctx).Create(&c2cOfflineMessage); err != nil {
 			r.tools.Logger().UseSQL(ctx).Error("C2C离线消息记录错误", zap.Any("c2c_offline_message", c2cOfflineMessage), zap.Error(err))
-			return nil, nil, errors.New().Server()
+			dataResult.Error = errors.New().Server()
+			return dataResult
 		}
 	}
 
 	accountOnlineResult, err := dbQuery.AccountOnline.WithContext(ctx).IsOnline(data.ToAccount)
-	if err == nil && accountOnlineResult["ok"].(int64) == 0 {
+
+	// 对端账号是否在线
+	dataResult.ToAccountOnline = accountOnlineResult["ok"].(int64) == 1
+
+	if err == nil && !dataResult.ToAccountOnline {
 		// 对端离线
 		dbQuery.C2COfflineMessage.WithContext(ctx).Where(
 			dbQuery.C2COfflineMessage.FromAccount.Eq(data.FromAccount),
@@ -99,5 +114,10 @@ func (r *messageRepo) SendC2CMessage(ctx context.Context, data *types.MessageSen
 		)
 	}
 
-	return c2cMessage, &c2cOfflineMessage, nil
+	dataResult.Message = data.Message
+	dataResult.C2CMessage = c2cMessage
+	dataResult.C2COfflineMessage = &c2cOfflineMessage
+	dataResult.FromAccount = &formAccountResult
+	dataResult.ToAccount = &toAccountResult
+	return dataResult
 }
