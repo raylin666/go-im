@@ -68,8 +68,7 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		return
 	}
 
-	// TODO 消息回包给发送者
-	fromData := C2CMessageResponse{
+	messageData := C2CMessageResponse{
 		FromAccount:  dataLogicResult.FromAccount.AccountId,
 		FromNickname: dataLogicResult.FromAccount.Nickname,
 		FromAvatar:   dataLogicResult.FromAccount.Avatar,
@@ -78,7 +77,9 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		ToAvatar:     dataLogicResult.ToAccount.Avatar,
 		Message:      dataLogicResult.Message,
 	}
-	messages = append(messages, Message{Event: MessageEventC2CMessage, Data: fromData})
+
+	// TODO 消息回包给发送者
+	messages = append(messages, Message{Event: MessageEventC2CMessage, Data: messageData})
 
 	// TODO 消息发送给接收者
 
