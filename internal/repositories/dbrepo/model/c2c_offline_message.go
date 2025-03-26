@@ -8,3 +8,7 @@ type C2COfflineMessage struct {
 	MessageId   int    `gorm:"column:message_id;default:0;comment:消息ID 当无离线消息时为0" json:"message_id"`
 	UnreadNum   int    `gorm:"column:unread_num;default:0;comment:未读消息数量" json:"unread_num"`
 }
+
+func (*C2COfflineMessage) TableName() string {
+	return "c2c_offline_message"
+}

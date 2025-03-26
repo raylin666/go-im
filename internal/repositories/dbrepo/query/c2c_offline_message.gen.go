@@ -125,14 +125,14 @@ func (c c2COfflineMessage) replaceDB(db *gorm.DB) c2COfflineMessage {
 
 type c2COfflineMessageDo struct{ gen.DO }
 
-// FirstByAccount where("`from_account`=@fromAccount and to_account`=@toAccount")
+// FirstByAccount where("`from_account`=@fromAccount and `to_account`=@toAccount")
 func (c c2COfflineMessageDo) FirstByAccount(fromAccount string, toAccount string) (result model.C2COfflineMessage, err error) {
 	var params []interface{}
 
 	var generateSQL strings.Builder
 	params = append(params, fromAccount)
 	params = append(params, toAccount)
-	generateSQL.WriteString("`from_account`=? and to_account`=? ")
+	generateSQL.WriteString("`from_account`=? and `to_account`=? ")
 
 	var executeSQL *gorm.DB
 

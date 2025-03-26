@@ -33,7 +33,6 @@ func newC2CMessage(db *gorm.DB, opts ...gen.DOOption) c2CMessage {
 	_c2CMessage.DeletedAt = field.NewField(tableName, "deleted_at")
 	_c2CMessage.FromAccount = field.NewString(tableName, "from_account")
 	_c2CMessage.ToAccount = field.NewString(tableName, "to_account")
-	_c2CMessage.MsgType = field.NewInt8(tableName, "msg_type")
 	_c2CMessage.Data = field.NewString(tableName, "data")
 	_c2CMessage.Status = field.NewInt8(tableName, "status")
 	_c2CMessage.IsRevoke = field.NewInt8(tableName, "is_revoke")
@@ -57,7 +56,6 @@ type c2CMessage struct {
 	DeletedAt     field.Field
 	FromAccount   field.String
 	ToAccount     field.String
-	MsgType       field.Int8
 	Data          field.String
 	Status        field.Int8
 	IsRevoke      field.Int8
@@ -87,7 +85,6 @@ func (c *c2CMessage) updateTableName(table string) *c2CMessage {
 	c.DeletedAt = field.NewField(table, "deleted_at")
 	c.FromAccount = field.NewString(table, "from_account")
 	c.ToAccount = field.NewString(table, "to_account")
-	c.MsgType = field.NewInt8(table, "msg_type")
 	c.Data = field.NewString(table, "data")
 	c.Status = field.NewInt8(table, "status")
 	c.IsRevoke = field.NewInt8(table, "is_revoke")
@@ -119,14 +116,13 @@ func (c *c2CMessage) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (c *c2CMessage) fillFieldMap() {
-	c.fieldMap = make(map[string]field.Expr, 14)
+	c.fieldMap = make(map[string]field.Expr, 13)
 	c.fieldMap["id"] = c.ID
 	c.fieldMap["created_at"] = c.CreatedAt
 	c.fieldMap["updated_at"] = c.UpdatedAt
 	c.fieldMap["deleted_at"] = c.DeletedAt
 	c.fieldMap["from_account"] = c.FromAccount
 	c.fieldMap["to_account"] = c.ToAccount
-	c.fieldMap["msg_type"] = c.MsgType
 	c.fieldMap["data"] = c.Data
 	c.fieldMap["status"] = c.Status
 	c.fieldMap["is_revoke"] = c.IsRevoke

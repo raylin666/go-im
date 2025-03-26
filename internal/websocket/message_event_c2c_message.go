@@ -13,7 +13,7 @@ type C2CMessageRequest struct {
 	// 接收者账号ID
 	ToAccount string `json:"to"`
 	// 消息内容
-	Message interface{} `json:"message"`
+	Message string `json:"message"`
 }
 
 // C2CMessage 发送C2C消息
@@ -32,10 +32,11 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 	}
 
 	// TODO 调用发送 C2C 消息
-	err = event.DataLogicRepo.Message.SendC2CMessage(ctx, &types.MessageSendC2CMessageRequest{
-		Seq:       seq,
-		ToAccount: request.ToAccount,
-		Message:   fmt.Sprintf("%v", request.Message),
+	_, _, err = event.DataLogicRepo.Message.SendC2CMessage(ctx, &types.MessageSendC2CMessageRequest{
+		Seq:         seq,
+		FromAccount: client.Account.ID,
+		ToAccount:   request.ToAccount,
+		Message:     request.Message,
 	})
 
 	if err != nil {
@@ -43,7 +44,7 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 		code := errDetail.Code
 		errData := fmt.Sprintf("%s处理错误", errTitle)
 		if errDetail.Message != "" {
-			errData = errData + ":" + errDetail.Message
+			errData = errData + " - " + errDetail.Message
 		}
 
 		messages = append(messages, Message{Event: MessageEventC2CMessage, Code: uint32(code), Msg: http.StatusText(int(code)), Data: errData})

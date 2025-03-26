@@ -20,7 +20,7 @@ func NewMessageUsecase(repo data.MessageRepo, wsClientManager websocket.WSClient
 
 // SendC2CMessage 发送 C2C 消息
 func (uc *MessageUsecase) SendC2CMessage(ctx context.Context, req *types.MessageSendC2CMessageRequest) (*types.MessageSendC2CMessageResponse, error) {
-	err := uc.repo.SendC2CMessage(ctx, req)
+	_, _, err := uc.repo.SendC2CMessage(ctx, req)
 	if err != nil {
 		return nil, err
 	}

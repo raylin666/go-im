@@ -134,8 +134,8 @@ func (r *accountRepo) Login(ctx context.Context, accountId string, data *types.A
 	}
 
 	// 校验同客户端是否已登录
-	if checkClientAccountOnlineResult, err := dbQuery.AccountOnline.WithContext(ctx).CheckClientIsOnline(data.ClientAddr, data.ServerAddr); err == nil {
-		if existsResult, existsResultOk := checkClientAccountOnlineResult["ok"]; existsResultOk {
+	if clientAccountOnlineResult, err := dbQuery.AccountOnline.WithContext(ctx).ClientIsOnline(data.ClientAddr, data.ServerAddr); err == nil {
+		if existsResult, existsResultOk := clientAccountOnlineResult["ok"]; existsResultOk {
 			existsValue, existsValueOk := existsResult.(int64)
 			if existsValueOk && existsValue > 0 {
 				return nil, nil, errors.New().AccountIsLogin()

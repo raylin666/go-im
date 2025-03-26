@@ -108,6 +108,9 @@ func (c *Client) Read() {
 		loggerFields = append(loggerFields, zap.String("message", string(message)))
 		c.Logger.Info("读取客户端消息成功", loggerFields...)
 
+		// 更新客户端连接心跳
+		c.Heartbeat(time.Now())
+
 		// 客户端发送消息解析处理
 		c.ParseMessageHandler(message, true)
 	}
