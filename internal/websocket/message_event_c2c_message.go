@@ -82,6 +82,9 @@ func (event *messageEvent) C2CMessage(ctx context.Context, client *Client, seq s
 	messages = append(messages, Message{Event: MessageEventC2CMessage, Data: messageData})
 
 	// TODO 消息发送给接收者
+	if dataLogicResult.ToAccountOnline {
+		
+	}
 
 	return
 }
